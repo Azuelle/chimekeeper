@@ -1,0 +1,101 @@
+[
+  { "id": "_meta", "name": "暗流涌动", "author": "The Pandemonium Institute" },
+  {
+    "id": "washerwoman",
+    "name": "洗衣妇",
+    "team": "townsfolk",
+    "edition": "tb",
+    "ability": "在你的首个夜晚，你会得知两名玩家中的一名是某个特定的镇民角色。",
+    "firstNight": 33,
+    "firstNightReminder": "指向两名玩家，展示其镇民角色标记。",
+    "otherNight": 0,
+    "reminders": ["镇民", "错误"],
+    "setup": false
+  },
+  {
+    "id": "librarian",
+    "name": "图书管理员",
+    "team": "townsfolk",
+    "edition": "tb",
+    "ability": "在你的首个夜晚，你会得知两名玩家中的一名是某个特定的外来者角色。（或者得知没有外来者在场）",
+    "firstNight": 34,
+    "firstNightReminder": "指向两名玩家，展示其外来者角色标记；或摇头表示无外来者。",
+    "otherNight": 0,
+    "reminders": ["外来者", "错误"],
+    "setup": false
+  },
+  {
+    "id": "monk",
+    "name": "僧侣",
+    "team": "townsfolk",
+    "edition": "tb",
+    "ability": "每个夜晚*，选择一名玩家（除你以外）：恶魔的能力当晚不会杀死该玩家。",
+    "firstNight": 0,
+    "otherNight": 12,
+    "otherNightReminder": "僧侣选择一名玩家：该玩家被保护。",
+    "reminders": ["被保护"],
+    "setup": false
+  },
+  {
+    "id": "fortune_teller",
+    "name": "占卜师",
+    "team": "townsfolk",
+    "edition": "tb",
+    "ability": "每个夜晚，选择两名玩家：你会得知他们之中是否有恶魔。有一名善良玩家会被你的能力误判为恶魔。",
+    "firstNight": 37,
+    "firstNightReminder": "占卜师选择两名玩家。点头=其中有恶魔（或红线），摇头=没有。",
+    "otherNight": 38,
+    "otherNightReminder": "占卜师选择两名玩家。点头=其中有恶魔（或红线），摇头=没有。",
+    "reminders": ["红线"],
+    "setup": false
+  },
+  {
+    "id": "butler",
+    "name": "管家",
+    "team": "outsider",
+    "edition": "tb",
+    "ability": "每个夜晚，选择一名玩家（除你以外）：明天只有当其投票时你才能投票。",
+    "firstNight": 39,
+    "firstNightReminder": "管家选择一名玩家作为主人。",
+    "otherNight": 39,
+    "otherNightReminder": "管家选择一名玩家作为主人。",
+    "reminders": ["主人"],
+    "setup": false
+  },
+  {
+    "id": "poisoner",
+    "name": "投毒者",
+    "team": "minion",
+    "edition": "tb",
+    "ability": "每个夜晚，选择一名玩家：该玩家当晚和明天白天中毒。",
+    "firstNight": 17,
+    "firstNightReminder": "投毒者选择一名玩家：该玩家中毒。",
+    "otherNight": 7,
+    "otherNightReminder": "投毒者选择一名玩家：该玩家中毒。",
+    "reminders": ["中毒"],
+    "setup": false
+  },
+  {
+    "id": "imp",
+    "name": "小恶魔",
+    "team": "demon",
+    "edition": "tb",
+    "ability": "每个夜晚*，选择一名玩家：该玩家死亡。如果你自杀，一名爪牙会成为小恶魔。",
+    "firstNight": 0,
+    "otherNight": 24,
+    "otherNightReminder": "小恶魔选择一名玩家：该玩家死亡。",
+    "reminders": ["死亡"],
+    "setup": false
+  },
+  {
+    "id": "baron",
+    "name": "男爵",
+    "team": "minion",
+    "edition": "tb",
+    "ability": "场上会有额外的外来者。[+2 外来者]",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": true
+  }
+]

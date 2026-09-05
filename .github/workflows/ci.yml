@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npx vitest run
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  # 文档同步强制检查：改了 types/stores 却没碰 docs/ 则 fail
+  docs-guard:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check docs sync
+        run: |
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "$CHANGED"
+          NEEDS_DOCS=$(echo "$CHANGED" | grep -E '^src/(types|stores)/' || true)
+          TOUCHED_DOCS=$(echo "$CHANGED" | grep -E '^docs/' || true)
+          if [ -n "$NEEDS_DOCS" ] && [ -z "$TOUCHED_DOCS" ]; then
+            echo "::error::改动了 src/types 或 src/stores，但 docs/ 无任何更新。请同步文档（见 AGENTS.md）。"
+            exit 1
+          fi

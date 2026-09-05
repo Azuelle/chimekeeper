@@ -1,0 +1,8 @@
+node_modules/
+dist/
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+playwright-report/
+test-results/
+*.local
+.DS_Store

@@ -1,0 +1,46 @@
+{
+  "app": {
+    "title": "染·魔典",
+    "communityNotice": "非官方社区创作 · 与 The Pandemonium Institute 无关"
+  },
+  "scriptImport": {
+    "title": "导入剧本",
+    "fromFile": "上传 JSON 文件",
+    "fromClipboard": "粘贴 JSON 文本",
+    "error": {
+      "invalidJson": "无法解析：这不是合法的 JSON 文本",
+      "notArray": "剧本格式错误：顶层应为数组",
+      "invalidRole": "第 {{index}} 项不是合法的角色定义",
+      "unknownTeam": "角色「{{role}}」的阵营「{{team}}」无法识别",
+      "noRoles": "剧本中没有角色"
+    },
+    "warning": {
+      "customMetaField": "剧本包含自定义字段「{{field}}」，已保留但不会被使用"
+    }
+  },
+  "setup": {
+    "playerCount": "玩家人数",
+    "assignRoles": "随机抽取角色",
+    "demonBluffs": "恶魔伪装",
+    "errorPoolTooSmall": "剧本角色池不足以支撑 {{count}} 人局"
+  },
+  "nightOrder": {
+    "firstNight": "首夜",
+    "otherNight": "第 {{round}} 夜",
+    "wakePlayer": "唤醒",
+    "done": "完成"
+  },
+  "day": {
+    "nominate": "提名",
+    "vote": "投票",
+    "votesNeeded": "通过需要 {{count}} 票",
+    "execute": "处决",
+    "died": "死亡",
+    "survived": "未死亡"
+  },
+  "recap": {
+    "export": "导出复盘",
+    "copyMarkdown": "复制 Markdown",
+    "download": "下载文件"
+  }
+}

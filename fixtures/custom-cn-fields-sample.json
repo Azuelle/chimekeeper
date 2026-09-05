@@ -1,0 +1,41 @@
+[
+  {
+    "id": "_meta",
+    "name": "测试剧本-含自定义字段",
+    "author": "某国内剧本作者",
+    "logo": "https://example.com/logo.png",
+    "almanac": "https://example.com/almanac",
+    "bootlegger": ["本剧本中，小恶魔可以被提名两次"]
+  },
+  {
+    "id": "washerwoman",
+    "name": "洗衣妇",
+    "team": "townsfolk",
+    "firstNight": 33,
+    "firstNightReminder": "指向两名玩家，展示其镇民角色标记。",
+    "otherNight": 0,
+    "alt_night_order": true
+  },
+  {
+    "id": "monk",
+    "name": "僧侣",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 12,
+    "otherNightReminder": "僧侣选择一名玩家：该玩家被保护。"
+  },
+  {
+    "id": "imp",
+    "name": "小恶魔",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 24,
+    "otherNightReminder": "小恶魔选择一名玩家：该玩家死亡。"
+  },
+  {
+    "id": "jinx",
+    "jinx": [
+      { "id": "monk", "target": "imp", "reason": "测试相克规则" }
+    ]
+  }
+]

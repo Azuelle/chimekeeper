@@ -1,0 +1,61 @@
+# DATA-MODEL — 数据模型（唯一真相源）
+
+> ⚠ 本文件与 `src/types/` 保持同步。**修改 `src/types/` 前必须先更新本文件**（AGENTS.md 规则，CI docs-guard 强制检查）。
+> 类型定义的权威可编译版本在 `src/types/`，本文件负责解释语义、约束与理由。
+
+## 1. 剧本（Script）— `src/types/script.ts`
+
+剧本 JSON 遵循 bra1n/townsquare 格式（社区事实标准），解析层宽松兼容（ADR-003）。
+
+```
+Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
+```
+
+- **ScriptMeta**：`id: "_meta"`，含 name/author；国内工具的 logo、almanac、bootlegger 等自定义字段透传并记 warning
+- **Role**：核心字段 `id / name / team / firstNight / otherNight`；`firstNightReminder / otherNightReminder` 是夜晚面板（F-04）的提示词来源；`reminders` 是提示 token 的来源；`setup: true` 标记影响阵营构成的角色（如 Baron）
+- **ScriptJinxes**：`id: "jinx"` 的相克规则列表
+- 解析产物 `Script` = 规范化 roles + jinxes + **warnings**（导入时展示给说书人）
+
+## 2. 对局（Game）— `src/types/game.ts`
+
+- **Seat.seatNumber 是全场主键**：复盘事件、玩家统计全部以编号为锚（国内编号文化，核心设计决策）
+- 玩家昵称可选——纯编号局是合法状态
+- **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
+- phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
+- demonBluffs：3 个不在场善良角色 id
+
+## 3. 事件日志（Event Log）— `src/types/events.ts`
+
+复盘与统计的地基。**事件类型是封闭枚举，新增类型需要 ADR**。
+
+| 类型 | 何时产生 | 关键 payload |
+|---|---|---|
+| `night_action` | 夜晚面板打勾某角色行动 | roleId, info? |
+| `death` | 夜晚结算/任意时间死亡登记 | cause?, announced |
+| `nomination` | 白天提名 | nominatorSeat, nominatedSeat |
+| `vote` | 投票计票 | votesFor, votesNeeded, passed |
+| `execution` | 处决 | died（弄臣等 false） |
+| `revival` | 复活（教授等） | — |
+| `role_change` | 角色变化（哲学家/pit-hag） | fromRoleId, toRoleId |
+| `note` | 说书人自由备注 | text |
+| `phase_change` | 阶段切换（自动） | — |
+| `game_end` | 结局登记 | winningTeam, reason? |
+
+设计约束：
+- 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
+- `seatNumbers: number[]` 引用涉及座位
+- 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
+- **v2 玩家统计（F-15）的兼容性承诺**：事件粒度足以支撑"某玩家拿过哪些角色/胜率/同队关系"的聚合，座位编号与角色 id 不可从 payload 中移除
+
+## 4. 持久化 schema（Dexie / IndexedDB）
+
+- 表 `games`：Game 对象，主键 id，索引 updatedAt
+- 表 `events`：GameEvent，主键 id，索引 [gameId+round]
+- 表 `scripts`：收藏/历史的剧本（v1.5 F-14 启用，v1 仅当前对局快照）
+- 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
+
+## 5. 明确不建模的东西
+
+- 不建模"规则判定结果"（Won't：不做自动裁决）
+- 不建模玩家账号（local-first 红线）
+- v1 不建模 token 的自由坐标（v1.5 F-11 引入，届时 Seat/ReminderToken 增加可选坐标字段，向后兼容）

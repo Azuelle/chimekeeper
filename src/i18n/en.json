@@ -1,0 +1,46 @@
+{
+  "app": {
+    "title": "BotC Grimoire",
+    "communityNotice": "Unofficial community creation · Not affiliated with The Pandemonium Institute"
+  },
+  "scriptImport": {
+    "title": "Import Script",
+    "fromFile": "Upload JSON file",
+    "fromClipboard": "Paste JSON text",
+    "error": {
+      "invalidJson": "Cannot parse: not valid JSON",
+      "notArray": "Script format error: top level must be an array",
+      "invalidRole": "Entry #{{index}} is not a valid role definition",
+      "unknownTeam": "Role \"{{role}}\" has unrecognized team \"{{team}}\"",
+      "noRoles": "Script contains no roles"
+    },
+    "warning": {
+      "customMetaField": "Script contains custom field \"{{field}}\"; kept but unused"
+    }
+  },
+  "setup": {
+    "playerCount": "Player count",
+    "assignRoles": "Draw roles",
+    "demonBluffs": "Demon bluffs",
+    "errorPoolTooSmall": "Script role pool is too small for {{count}} players"
+  },
+  "nightOrder": {
+    "firstNight": "First night",
+    "otherNight": "Night {{round}}",
+    "wakePlayer": "Wake",
+    "done": "Done"
+  },
+  "day": {
+    "nominate": "Nominate",
+    "vote": "Vote",
+    "votesNeeded": "{{count}} votes needed to pass",
+    "execute": "Execute",
+    "died": "Died",
+    "survived": "Survived"
+  },
+  "recap": {
+    "export": "Export recap",
+    "copyMarkdown": "Copy Markdown",
+    "download": "Download file"
+  }
+}
