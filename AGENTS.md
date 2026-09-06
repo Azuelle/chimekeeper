@@ -16,6 +16,7 @@
 | `docs/DATA-MODEL.md` | 数据模型（Game/Event/Seat/Role） |
 | `docs/ARCHITECTURE.md` | 架构说明（分层 + 依赖方向） |
 | `docs/adr/NNN-*.md` | 架构决策记录（ADR） |
+| `docs/STATUS.md` | **当前状态快照 + 下一步任务分解（接手前必读）** |
 | `docs/reference/` | 从百科蒸馏的规则参考（设置调整/认知覆盖/复盘实例等） |
 | `src/types/` | TS 类型（script.ts / game.ts / events.ts） |
 | `src/lib/` | 纯函数核心逻辑（解析/注水库/抽袋/夜单/计票/战报/座位） |
@@ -50,8 +51,8 @@ npm run ci       # 提交前必跑
 
 ## 当前里程碑
 
-见 `docs/PRD.md` 的 M-x 表格。实现顺序：M0 骨架 → M1 开桌 → M2 入夜 →
-M3 天亮（v0.5 内测）→ M4 补全 → M5 上线。
+见 `docs/STATUS.md`（状态快照）与 `docs/PRD.md` 的 M-x 表格。
+实现顺序：M0 骨架 → M1 开桌 → M2 入夜 → M3 天亮（v0.5 内测）→ M4 补全 → M5 上线。
 
 ## 协作模式（用户 ↔ AI）
 
