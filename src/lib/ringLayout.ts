@@ -34,6 +34,15 @@ export function ringLayout(count: number, cols: number): RingLayout {
     };
   }
 
+  // 列数不足 2 时无法成环：退化为单列竖排（避免 rail/底行撞在同一格产生重复坐标）
+  if (C < 2) {
+    return {
+      rows: count,
+      cols: 1,
+      positions: Array.from({ length: count }, (_, i) => ({ row: i, col: 0 })),
+    };
+  }
+
   if (C === 2) return twoColumnRing(count);
   return ovalRing(count, C);
 }

@@ -12,6 +12,18 @@ describe('ringLayout（ADR-005 圆桌环）', () => {
     expect(l.positions.every((p) => p.row === 0)).toBe(true);
   });
 
+  it('单列（cols=1）且人数>1：退化为单列竖排、无重复坐标', () => {
+    const l = ringLayout(5, 1);
+    expect(l.rows).toBe(5);
+    expect(l.positions).toEqual([
+      { row: 0, col: 0 },
+      { row: 1, col: 0 },
+      { row: 2, col: 0 },
+      { row: 3, col: 0 },
+      { row: 4, col: 0 },
+    ]);
+  });
+
   it('7 人 2 列：两列闭环、末尾单座居左', () => {
     const l = ringLayout(7, 2);
     expect(l.rows).toBe(4);

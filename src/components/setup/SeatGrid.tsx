@@ -187,7 +187,11 @@ export function SeatGrid({ seats }: SeatGridProps) {
                   onFaceClick={() => handleFaceClick(seat.seatNumber)}
                 />
                 {menu?.seatNumber === seat.seatNumber && (
-                  <div className="seat-menu" role="menu">
+                  <div
+                    className="seat-menu"
+                    role="dialog"
+                    aria-label={t('seats.cardMenuLabel', { seat: String(seat.seatNumber) })}
+                  >
                     {menu.view === 'remove' ? (
                       <div className="seat-menu__remove">
                         <p className="seat-menu__remove-title">
@@ -287,7 +291,7 @@ function SeatCard({ seat, menuOpen, onFaceClick }: SeatCardProps) {
       type="button"
       className={`seat-face${menuOpen ? ' has-menu' : ''}`}
       aria-label={`${t('seats.seatNumberLabel')} ${String(seat.seatNumber)}`}
-      aria-haspopup="menu"
+      aria-haspopup="dialog"
       aria-expanded={menuOpen}
       onClick={onFaceClick}
     >

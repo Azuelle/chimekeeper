@@ -58,6 +58,7 @@
     "regenerateConfirm": "重新生成将清空现有昵称，确定？",
     "add": "添加座位",
     "seatNumberLabel": "座位编号",
+    "cardMenuLabel": "座位 {{seat}} 的操作",
     "nicknamePlaceholder": "昵称（可空）",
     "reminderPlaceholder": "点击添加提示标记",
     "menu": {

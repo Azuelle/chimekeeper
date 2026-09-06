@@ -26,8 +26,8 @@ export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
   /** 生成时才解析 clamp；输入过程保持原始文本，避免边打边改写光标处的值 */
   const parsedCount = (() => {
     const n = Number(countText);
-    if (!Number.isFinite(n) || n < 1) return 1;
-    return Math.min(MAX_COUNT, Math.floor(n));
+    if (!Number.isFinite(n)) return MIN_COUNT;
+    return Math.max(MIN_COUNT, Math.min(MAX_COUNT, Math.floor(n)));
   })();
 
   const handleRegenerate = () => {

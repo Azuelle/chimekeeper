@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "ci": "tsc --noEmit && vitest run && vite build",
+    "ci": "tsc --noEmit && vitest run && vite build && vitepress build docs",
     "build:builtin": "node scripts/build-builtin-scripts.mjs",
     "refresh:roledb": "node scripts/refresh-role-db.mjs",
     "docs:dev": "vitepress dev docs",

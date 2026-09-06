@@ -4,7 +4,7 @@
  * 当前是纯 CSS 自绘占位——不复制/外链集石或官方素材；未来取得 TPI 授权后
  * 在这个模块换成官方美术（icon URL/纹样）并保持同一数据接口，卡片组件零改动。
  */
-export type Alignment = 'good' | 'evil';
+import type { Alignment } from '../types/game';
 
 /** 阵营圆环主色：good 蓝 / evil 红（说书人可见性优先，符合官方 token 阵营色直觉） */
 export const TEAM_RING_COLOR: Record<Alignment, string> = {

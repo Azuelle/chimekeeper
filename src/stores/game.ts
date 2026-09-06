@@ -14,6 +14,7 @@ import {
   takePooledSeatNumber,
   enableAllRetired,
 } from '../lib/seats';
+import { newId } from '../lib/id';
 import type { Game } from '../types/game';
 import type { Script } from '../types/script';
 
@@ -40,13 +41,6 @@ interface GameState {
    */
   rippleShiftSeat(fromSeat: number, toSeat: number): void;
   reset(): void;
-}
-
-/** jsdom 环境可能缺 crypto.randomUUID，做一层兜底 */
-function newId(): string {
-  const c = globalThis.crypto;
-  if (c && 'randomUUID' in c) return c.randomUUID();
-  return `g-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 export const useGameStore = create<GameState>()((set, get) => ({

@@ -22,7 +22,9 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - **ADR-011 锚号不变量**：seatNumber = 椅子锚点，只增不改，移除默认退役；displayOrder = 物理位置独立字段；换位 = 原子交换住户字段（昵称/角色/生死/票token/提示标记），编号与位置不动——女舍监与 1 2 3 4 15 5 6 式排列免费支持，历史事件永不失效。原语见 `src/lib/seats.ts`
 - **Seat.alignment?: 'good' | 'evil'**（ADR-005 玩家卡）：玩家**实际阵营**，与角色
   阵营解耦——邪恶/善良旅行者、麻脸巫婆制造的善良恶魔等场景由说书人手动改；
-  undefined = 角色未分配（M1 全程 / M2 抽袋前）。token 着色以此为准
+  undefined = 角色未分配（M1 全程 / M2 抽袋前）。token 着色以此为准。
+  字面量联合收口为 `types/game.ts` 导出的 `Alignment` 类型（**单一真相源**，
+  `ui/tokenSkin.ts` 等皮肤层引用它，不各自声明，避免漂移）
 - **平移座位（涟漪）**：`rippleShift(seats, from, to)` = 链式 `swapOccupants`，
   选中住户逐位向目标交换，其余住户顺延（ABCD 选 A 移到 4 号位 → BCDA）；
   seatNumber 与 displayOrder 均不动，玩家换椅子、椅子不动

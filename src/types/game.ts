@@ -12,6 +12,9 @@ import type { Role } from './script';
 /** 游戏阶段 */
 export type GamePhase = 'setup' | 'firstNight' | 'day' | 'night' | 'ended';
 
+/** 实际阵营（单一真相源）：token/皮肤等一律引用此类型（ADR-005） */
+export type Alignment = 'good' | 'evil';
+
 /** 座位上的玩家。编号是面向国内环境的核心设计：座位号即身份。 */
 export interface Seat {
   /**
@@ -30,7 +33,7 @@ export interface Seat {
    * 麻脸巫婆制造的善良恶魔等由说书人手动改；token 着色以此为准。
    * undefined = 角色未分配（M1 全程 / M2 抽袋前）。
    */
-  alignment?: 'good' | 'evil';
+  alignment?: Alignment;
   /** 生死状态 */
   alive: boolean;
   /** 是否有投票权（死亡后一票，旅行者规则等，v1 简化为 boolean） */
@@ -65,7 +68,7 @@ export interface Game {
     roles: Role[];
   };
   seats: Seat[];
-  /** 座位号高水位（ADR-011）：只增不减，含已退役编号；新座位号 = max(当前最大, 此值-1)+1，防止退役号复用造成历史事件歧义 */
+  /** 座位号高水位（ADR-011）：只增不减，含已退役编号；新座位号 = max(场上最大号, 此高水位)+1，防止退役号复用造成历史事件歧义 */
   seatHighWater: number;
   /**
    * 已退役编号（ADR-011 修订）：不在场上且未启用复用；

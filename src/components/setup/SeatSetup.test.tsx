@@ -45,6 +45,16 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
     expect(game()?.seats).toHaveLength(5);
   });
 
+  it('人数下限：输入小于 5 也被 clamp 到 5', async () => {
+    const user = userEvent.setup();
+    render(<SeatSetup onChangeScript={() => {}} />);
+    const countInput = screen.getByLabelText('玩家人数');
+    await user.clear(countInput);
+    await user.type(countInput, '3');
+    await user.click(screen.getByRole('button', { name: '生成座位' }));
+    expect(game()?.seats).toHaveLength(5);
+  });
+
   it('添加座位：新编号 = 8', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();

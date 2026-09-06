@@ -58,6 +58,7 @@
     "regenerateConfirm": "Regenerating clears all nicknames. Continue?",
     "add": "Add seat",
     "seatNumberLabel": "Seat number",
+    "cardMenuLabel": "Actions for seat {{seat}}",
     "nicknamePlaceholder": "Nickname (optional)",
     "reminderPlaceholder": "Tap to add a reminder",
     "menu": {
