@@ -31,7 +31,8 @@ src/
 │   ├── nightOrder.ts      # 夜晚行动排序 + 系统锚点（ADR-006）
 │   ├── vote.ts            # 计票与处决判定
 │   ├── recap.ts           # 事件流 → Markdown 复盘
-│   └── seats.ts           # 座位锚号原语：换位/增删/高水位（ADR-011）
+│   ├── seats.ts           # 座位锚号原语：换位/涟漪平移/增删/高水位/复用池（ADR-011）
+│   └── ringLayout.ts      # 矩形环几何：人数×列数 → 网格坐标（ADR-005）
 ├── data/
 │   ├── official-roles.json        # 角色事实数据源
 │   └── builtin-scripts/           # 内置官方三版（ADR-015，npm run build:builtin 重生成）
@@ -39,9 +40,10 @@ src/
 │   ├── script.ts          # 剧本导入/选择（F-01）
 │   └── game.ts            # 对局 + 座位 CRUD，全走 lib/seats 原语（F-02）
 ├── components/
-│   └── setup/             # M1：ScriptImport / ScriptPreview / SeatSetup / SeatGrid
+│   └── setup/             # M1：ScriptImport / ScriptPreview / SeatSetup / SeatGrid（玩家卡+菜单）
+├── ui/                    # 视觉皮肤单点（tokenSkin.ts：阵营圆环配色，素材红线出口）
 ├── i18n/          # index.ts 初始化（zh-CN 默认）+ zh-CN.json / en.json
-├── styles/        # app.css（移动优先；ADR-005 座位网格）
+├── styles/        # app.css（移动优先；ADR-005 矩形环座位样式）
 ├── persistence/   # db.ts（Dexie schema v1；M2 接线双写）
 ├── App.tsx        # 线性流程：导入剧本 → 剧本预览 → 排座位
 └── main.tsx
@@ -58,7 +60,8 @@ fixtures/          # 国内真实剧本 JSON 样本（兼容层测试集）
 `scriptParser.parse()` → Script（含 warnings）→ ScriptPreview（错误面板 / 阵营分组 / 相克规则 / info 折叠）
 
 **排座位（M1 已实现）**：ScriptPreview →「排座位」→ `gameStore.createGame(script, n)`
-（`lib/seats.addSeat` 折叠生成 1..n）→ SeatGrid（ADR-005 网格；昵称 / 增删 / 换位走原语）
+（`lib/seats.addSeat` 折叠生成 1..n）→ SeatGrid（ADR-005 矩形环 + 玩家卡；
+点卡弹菜单：改名 / 交换 / 涟漪平移 / 移除，全走 `lib/seats` 原语）
 
 **开局抽袋**（M2）：scriptStore + 人数 → `setup.buildComposition()` → `setup.assignRoles()` → gameStore 分配角色 → persistence 落盘
 
