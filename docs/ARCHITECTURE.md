@@ -26,7 +26,7 @@ src/
 ├── types/         # 数据模型（唯一真相源，先改 docs/DATA-MODEL.md）
 ├── lib/           # 纯函数逻辑层（无 React/DOM/IndexedDB 依赖）
 │   ├── scriptParser.ts    # 剧本 JSON 宽松解析（Zod passthrough）+ 注水
-│   ├── roleDb.ts          # 143 官方角色事实库 / ID 规范化查询（ADR-007）
+│   ├── roleDb.ts          # 181 官方角色事实库（官方 botc-release 源）/ ID 规范化与改名别名（ADR-007）
 │   ├── setup.ts           # 阵营构成表、角色随机分配、恶魔伪装推荐
 │   ├── nightOrder.ts      # 夜晚行动排序 + 系统锚点（ADR-006）
 │   ├── vote.ts            # 计票与处决判定

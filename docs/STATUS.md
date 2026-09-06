@@ -7,7 +7,7 @@
 - M0 骨架：CI（tsc+vitest+build+docs-guard）、文档体系、类型、fixtures
 - **数据层全部就绪**（`src/lib/`，纯函数）：
   - `scriptParser` 剧本宽松解析 + 角色注水（ADR-003/007）
-  - `roleDb` 143 官方角色事实库（ADR-007）
+  - `roleDb` 181 官方角色事实库（官方 botc-release 源，含实验角色，ADR-007；`npm run refresh:roledb` 刷新）
   - `setup` 抽袋默认构成 + setup 角色提示文案（ADR-008，不做自动计算）
   - `nightOrder` 夜晚行动顺序 + 系统锚点（ADR-006）
   - `vote` 计票 / `recap` 复盘 Markdown 导出
