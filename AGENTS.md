@@ -1,47 +1,60 @@
-# AGENTS.md — AI 协作规范
+# AGENTS.md
 
-本文件是给 AI 协作者（Claude / Copilot / 其他 coding agent）的常驻指令。每次会话开始前阅读。
+> 本文件面向人类协作者与 AI 编码代理。修改代码前必读。
 
 ## 项目一句话
 
-《血染钟楼》（Blood on the Clocktower）线下说书辅助 + 过程记录 + 复盘导出的 local-first PWA。非官方社区创作，永久免费，不上架任何应用商店。
+血染钟楼（Blood on the Clocktower）线下说书辅助工具：local-first Web 应用，
+中文优先，开源非商业。桌面/手机浏览器双端，说书人视角。
 
-## 技术栈（不许擅自变更）
+## 目录地图
 
-- Vite + React 19 + TypeScript（strict）
-- 状态管理：Zustand
-- 本地持久化：Dexie（IndexedDB）
-- Schema 校验：Zod（宽松模式，见下）
-- i18n：react-i18next（默认 zh-CN，fallback en）
-- 测试：Vitest（单测）+ Playwright（e2e）
-- 文档站：VitePress（源码在 `docs/`）
+| 路径 | 内容 |
+|---|---|
+| `docs/PRD.md` | 需求文档（F-xx 功能编号 + 速记名） |
+| `docs/GLOSSARY.md` | **编号 × 速记名对照表（唯一权威映射）** |
+| `docs/DATA-MODEL.md` | 数据模型（Game/Event/Seat/Role） |
+| `docs/ARCHITECTURE.md` | 架构说明（分层 + 依赖方向） |
+| `docs/adr/NNN-*.md` | 架构决策记录（ADR） |
+| `docs/reference/` | 从百科蒸馏的规则参考（设置调整/认知覆盖/复盘实例等） |
+| `src/types/` | TS 类型（script.ts / game.ts / events.ts） |
+| `src/lib/` | 纯函数核心逻辑（解析/注水库/抽袋/夜单/计票/战报/座位） |
+| `src/stores/` | Zustand stores |
+| `src/components/` | React 组件（魔典/夜单/白天面板/时间线） |
+| `src/i18n/` | zh-CN / en 文案 |
+| `src/persistence/` | Dexie(IndexedDB) 封装 |
+| `fixtures/` | 测试剧本 JSON（官方工具导出 + 手搓最小例） |
 
-## 唯一真相源
+## 硬约束（每次编码必须遵守）
 
-| 关注点 | 真相源 | 规则 |
-|---|---|---|
-| 数据模型 | `src/types/` + `docs/DATA-MODEL.md` | **改 types 前必须先改 DATA-MODEL.md，并在 PR 说明** |
-| 需求与验收标准 | `docs/PRD.md` | 实现前核对对应验收条款 |
-| 架构决策 | `docs/adr/` | 与 ADR 冲突的实现方案先停下来提问 |
+1. **类型先行**：新数据结构先改 `src/types/`，写清字段注释，再写解析/序列化。
+2. **纯函数优先**：复杂逻辑放 `src/lib/`（不 import React），UI 只做渲染与事件转发。
+3. **local-first**：无服务端、无账号体系；状态持久化在 IndexedDB。
+4. **编号引用**：功能/决策用编号引用（F-03 抽袋、ADR-011 锚号），见 GLOSSARY。
+5. **TPI 合规**：不复制官方美术/文本资产；角色名/能力文案属官方，项目 MIT 仅覆盖代码。
+6. **中文优先**：UI 默认 zh-CN，en 为 secondary。
+7. **CI 必过**：`npm run ci` = tsc + vitest run + build + docs-guard。提交前本地跑通。
+8. **commit 规范**：`feat|fix|docs|refactor|test|chore: 中文简述`，
+   末尾加 `Co-authored-by: Claude <noreply@anthropic.com>`（AI 参与时）。
+9. **术语对齐**：界面上出现的所有术语必须与中文钟楼百科官方术语表对齐，禁止自造
+   （如"夜单"→"夜晚行动顺序"）。速记名仅供内部沟通，不进 UI 文案。
 
-## 硬性规则（违反 = PR 打回）
+## 开发
 
-1. **不许新增依赖**，除非在 PR 描述中说明理由并获得确认。
-2. **所有用户可见文本走 i18n key**，禁止硬编码中英文案。key 命名：`功能域.场景.条目`（如 `scriptImport.error.missingTeam`）。
-3. **游戏内容（角色名/能力/夜晚提示词）不做 UI 层翻译**——它们来自剧本 JSON 数据，不是 UI 文案。
-4. **剧本 JSON 解析必须是宽松模式**：未知字段透传不报错（记 warning），缺失必需字段给中文可读错误并指出具体角色/字段。兼容基准 = bra1n/townsquare 格式 + `fixtures/` 下全部国内样本。
-5. **事件类型不许超出 `src/types/events.ts` 的 `EventType` 枚举**。新增事件类型 = ADR + 数据模型文档更新。
-6. `src/lib/` 保持纯函数，不 import React / 不碰 DOM / 不碰 IndexedDB。
-7. 每个功能 PR 必须附带：Vitest 单测（lib 层）+ 更新相关文档（或声明无需更新）。
-8. 代码风格：TS strict 全过、无 `any`（`unknown` + 收窄代替）、无 `// @ts-ignore`。
+```bash
+npm install
+npm run dev      # 开发（含 i18n/types 检查）
+npm test         # vitest
+npm run ci       # 提交前必跑
+```
 
-## 版权红线（TPI 社区内容政策）
+## 当前里程碑
 
-- 页面显著位置保留"非官方社区创作"声明与 Community Created Content 徽章
-- 永不加入付费、广告、众筹入口
-- 不复制 bra1n/townsquare 与 Pocket Grimoire 的代码（两者均 GPL-3.0，本项目 MIT）；兼容其 JSON 数据格式是允许的
-- 官方角色图标仅链接引用、不打包再分发
+见 `docs/PRD.md` 的 M-x 表格。实现顺序：M0 骨架 → M1 开桌 → M2 入夜 →
+M3 天亮（v0.5 内测）→ M4 补全 → M5 上线。
 
-## 当前阶段
+## 协作模式（用户 ↔ AI）
 
-见 `docs/PRD.md` 的 Milestone 一节。实现任何功能前先确认它在当前 milestone 范围内；范围外的功能先记录在 issue，不要直接写。
+- 用户负责：验收标准、fixture 剧本、线下实测反馈、最终拍板。
+- AI 负责：把决策翻译成 ADR/PRD/类型/lib/组件/测试，保持文档与代码同步。
+- 一切规则分歧以 **中文钟楼百科 + 官方 Almanac** 为准；工具不做法官。
