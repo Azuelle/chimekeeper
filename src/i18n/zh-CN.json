@@ -12,10 +12,12 @@
       "notArray": "剧本格式错误：顶层应为数组",
       "invalidRole": "第 {{index}} 项不是合法的角色定义",
       "unknownTeam": "角色「{{role}}」的阵营「{{team}}」无法识别",
-      "noRoles": "剧本中没有角色"
+      "noRoles": "剧本中没有角色",
+      "unknownRole": "角色「{{role}}」不在内置角色库中，且剧本未提供其阵营。请在剧本 JSON 中补全该角色定义（至少需要 team 字段）"
     },
     "warning": {
-      "customMetaField": "剧本包含自定义字段「{{field}}」，已保留但不会被使用"
+      "customMetaField": "剧本包含自定义字段「{{field}}」，已保留但不会被使用",
+      "hydratedFromDb": "角色「{{role}}」仅有 ID，已从内置官方角色库补全数据"
     }
   },
   "setup": {

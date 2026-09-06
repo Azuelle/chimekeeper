@@ -11,7 +11,7 @@ describe('parseScript', () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.script.name).toBe('暗流涌动');
-    expect(result.script.roles).toHaveLength(8);
+    expect(result.script.roles).toHaveLength(9);
     expect(result.script.roles[0]?.team).toBe('townsfolk');
   });
 

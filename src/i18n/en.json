@@ -12,10 +12,12 @@
       "notArray": "Script format error: top level must be an array",
       "invalidRole": "Entry #{{index}} is not a valid role definition",
       "unknownTeam": "Role \"{{role}}\" has unrecognized team \"{{team}}\"",
-      "noRoles": "Script contains no roles"
+      "noRoles": "Script contains no roles",
+      "unknownRole": "Role \"{{role}}\" is not in the builtin database and the script does not define its team. Please provide a full role definition in the script JSON (at least a team field)"
     },
     "warning": {
-      "customMetaField": "Script contains custom field \"{{field}}\"; kept but unused"
+      "customMetaField": "Script contains custom field \"{{field}}\"; kept but unused",
+      "hydratedFromDb": "Role \"{{role}}\" was bare ID; hydrated from builtin official role database"
     }
   },
   "setup": {

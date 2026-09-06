@@ -5,7 +5,7 @@
 
 ## 收集要求
 
-- **覆盖多样性**：官方 script tool 导出、bloodstar 导出、国内二创工具导出、手写 JSON
+- **覆盖多样性**：官方 script tool / botcscripts 导出（纯 ID 格式）、bloodstar 导出、bra1n 系导出、国内二创工具导出、手写 JSON
 - **覆盖边界**：含自定义字段（logo/almanac/bootlegger）、含 jinx、含 fabled/traveler、缺字段的坏样本
 - 每个样本注明来源与特征，命名：`来源-剧本名-特征.json`
 

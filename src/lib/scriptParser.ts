@@ -6,6 +6,7 @@
  */
 import { z } from 'zod';
 import type { Edition, Role, Script, ScriptWarning, Team } from '../types/script';
+import { lookupRole } from './roleDb';
 
 const TEAMS: Team[] = ['townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'fabled', 'loric'];
 
@@ -13,7 +14,7 @@ const roleSchema = z
   .object({
     id: z.string().min(1),
     name: z.string().optional(),
-    team: z.string(),
+    team: z.string().optional(),
     edition: z.string().optional(),
     ability: z.string().optional(),
     firstNight: z.number().optional(),
@@ -88,22 +89,42 @@ export function parseScript(jsonText: string): ParseResult {
       };
     }
     const r = roleTry.data;
-    if (!TEAMS.includes(r.team as Team)) {
+
+    // 官方 script tool / botcscripts 生态：条目可能只有 id（无 team/name/夜晚顺序）。
+    // 尝试内置角色库注水（ADR-007）：剧本自带数据优先，缺失字段从内置库补全。
+    const builtin = lookupRole(r.id);
+    const usedDb = builtin !== undefined && (!r.team || !r.name);
+    const team = r.team ?? builtin?.team;
+    if (!team || !TEAMS.includes(team as Team)) {
       return {
         ok: false,
-        error: {
-          code: 'scriptImport.error.unknownTeam',
-          params: { role: r.name ?? r.id, team: r.team },
-        },
+        error: team
+          ? { code: 'scriptImport.error.unknownTeam', params: { role: r.name ?? r.id, team } }
+          : { code: 'scriptImport.error.unknownRole', params: { role: r.id } },
       };
     }
+
+    const roleName = r.name ?? builtin?.name ?? r.id;
+    const firstNight = r.firstNight ?? builtin?.firstNight ?? 0;
+    const otherNight = r.otherNight ?? builtin?.otherNight ?? 0;
+    if (usedDb) {
+      warnings.push({
+        level: 'info',
+        code: 'scriptImport.warning.hydratedFromDb',
+        params: { role: roleName },
+      });
+    }
+
     roles.push({
       ...r,
-      name: r.name ?? r.id,
-      team: r.team as Team,
+      name: roleName,
+      team: team as Team,
       edition: r.edition as Edition | undefined,
-      firstNight: r.firstNight ?? 0,
-      otherNight: r.otherNight ?? 0,
+      firstNight,
+      otherNight,
+      reminders: r.reminders ?? builtin?.reminders,
+      remindersGlobal: r.remindersGlobal ?? builtin?.remindersGlobal,
+      setup: r.setup ?? builtin?.setup,
     });
   }
 

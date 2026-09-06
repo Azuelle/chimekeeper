@@ -47,14 +47,24 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
 - **v2 玩家统计（F-15）的兼容性承诺**：事件粒度足以支撑"某玩家拿过哪些角色/胜率/同队关系"的聚合，座位编号与角色 id 不可从 payload 中移除
 
-## 4. 持久化 schema（Dexie / IndexedDB）
+## 4. 夜晚面板步骤（NightStep）— ADR-006
+
+夜晚面板 = 系统锚点步骤 + 角色步骤的合并清单。
+
+- **系统步骤**（内置，不来自剧本数据）：`dusk`（黄昏）/ `minion_info`（首夜爪牙信息，≥7 人）/ `demon_info`（首夜恶魔信息，≥7 人）/ `dawn`（黎明）
+- **角色步骤**：按在场角色的 firstNight/otherNight 排序（`nightOrder.ts`）
+- 顺序：首夜 = dusk → minion_info → demon_info → 角色 → dawn；其他夜晚 = dusk → 角色 → dawn
+- 角色改写系统步骤（罂粟种植者/魔术师等）：v1 仅展示提示文案，不自动改写
+- 中文百科调整版夜晚顺序为 v2 候选数据源（docs/reference/night-order-cn.md）
+
+## 5. 持久化 schema（Dexie / IndexedDB）
 
 - 表 `games`：Game 对象，主键 id，索引 updatedAt
 - 表 `events`：GameEvent，主键 id，索引 [gameId+round]
 - 表 `scripts`：收藏/历史的剧本（v1.5 F-14 启用，v1 仅当前对局快照）
 - 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
 
-## 5. 明确不建模的东西
+## 6. 明确不建模的东西
 
 - 不建模"规则判定结果"（Won't：不做自动裁决）
 - 不建模玩家账号（local-first 红线）

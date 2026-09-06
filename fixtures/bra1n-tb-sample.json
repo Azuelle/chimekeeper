@@ -97,5 +97,6 @@
     "otherNight": 0,
     "reminders": [],
     "setup": true
-  }
+  },
+  { "id": "undertaker" }
 ]
