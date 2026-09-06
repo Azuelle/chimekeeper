@@ -16,7 +16,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx tsc --noEmit
-      - run: npx vitest run
+      # --coverage：阈值在 vitest.config.ts 定义，低于阈值该 job 即 fail
+      - run: npx vitest run --coverage
 
   build:
     runs-on: ubuntu-latest
