@@ -1,6 +1,7 @@
 /**
- * 剧本预览（F-01e）：角色按阵营分组 + 相克规则 + 导入提示（warning 默认折叠，
- * 防注水类 info 提示刷屏）。
+ * 剧本预览（F-01e）：角色按阵营分组 + 相克规则 + 导入问题（只展示 warning 级，
+ * 需要说书人关注；info 级（角色注水/自定义字段透传）属 debug——在设置面板出现前
+ * 一律不进 UI，避免刷屏）。
  */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,9 @@ export function ScriptPreview({ onArrange }: { onArrange: () => void }) {
     return [...map.entries()].filter(([, roles]) => roles.length > 0);
   }, [script]);
 
+  /** 只展示 warning（需要说书人关注）；info 级 = debug（注水等），不进 UI */
+  const issues = script?.warnings.filter((w) => w.level === 'warning') ?? [];
+
   /** jinx 里的角色 id 转显示名（双写法规范化匹配，查不到回退原 id） */
   const roleName = (id: string) => {
     const norm = normalizeRoleId(id);
@@ -39,11 +43,11 @@ export function ScriptPreview({ onArrange }: { onArrange: () => void }) {
         <span>{t('scriptPreview.roleCount', { count: script.roles.length })}</span>
       </p>
 
-      {script.warnings.length > 0 && (
+      {issues.length > 0 && (
         <details className="notices">
-          <summary>{t('scriptPreview.warningsSummary', { count: script.warnings.length })}</summary>
+          <summary>{t('scriptPreview.warningsSummary', { count: issues.length })}</summary>
           <ul>
-            {script.warnings.map((w, i) => (
+            {issues.map((w, i) => (
               <li key={i}>{t(w.code, w.params)}</li>
             ))}
           </ul>
