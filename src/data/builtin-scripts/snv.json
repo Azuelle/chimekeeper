@@ -6,24 +6,16 @@
   {
     "id": "clockmaker",
     "team": "townsfolk",
-    "firstNight": 41,
+    "firstNight": 60,
     "otherNight": 0,
-    "reminders": [],
-    "setup": false
-  },
-  {
-    "id": "dreamer",
-    "team": "townsfolk",
-    "firstNight": 42,
-    "otherNight": 56,
     "reminders": [],
     "setup": false
   },
   {
     "id": "snakecharmer",
     "team": "townsfolk",
-    "firstNight": 20,
-    "otherNight": 11,
+    "firstNight": 37,
+    "otherNight": 23,
     "reminders": [
       "Poisoned"
     ],
@@ -32,21 +24,33 @@
   {
     "id": "mathematician",
     "team": "townsfolk",
-    "firstNight": 52,
-    "otherNight": 71,
+    "firstNight": 77,
+    "otherNight": 96,
     "reminders": [
+      "Abnormal",
+      "Abnormal",
+      "Abnormal",
+      "Abnormal",
       "Abnormal"
     ],
+    "setup": false
+  },
+  {
+    "id": "dreamer",
+    "team": "townsfolk",
+    "firstNight": 61,
+    "otherNight": 79,
+    "reminders": [],
     "setup": false
   },
   {
     "id": "flowergirl",
     "team": "townsfolk",
     "firstNight": 0,
-    "otherNight": 57,
+    "otherNight": 80,
     "reminders": [
-      "Demon voted",
-      "Demon not voted"
+      "Demon Voted",
+      "Demon Not Voted"
     ],
     "setup": false
   },
@@ -54,10 +58,10 @@
     "id": "towncrier",
     "team": "townsfolk",
     "firstNight": 0,
-    "otherNight": 58,
+    "otherNight": 81,
     "reminders": [
-      "Minions not nominated",
-      "Minion nominated"
+      "Minions Not Nominated",
+      "Minion Nominated"
     ],
     "setup": false
   },
@@ -65,7 +69,7 @@
     "id": "oracle",
     "team": "townsfolk",
     "firstNight": 0,
-    "otherNight": 59,
+    "otherNight": 82,
     "reminders": [],
     "setup": false
   },
@@ -80,21 +84,20 @@
   {
     "id": "seamstress",
     "team": "townsfolk",
-    "firstNight": 43,
-    "otherNight": 60,
+    "firstNight": 62,
+    "otherNight": 83,
     "reminders": [
-      "No ability"
+      "No Ability"
     ],
     "setup": false
   },
   {
     "id": "philosopher",
     "team": "townsfolk",
-    "firstNight": 2,
-    "otherNight": 2,
+    "firstNight": 14,
+    "otherNight": 11,
     "reminders": [
-      "Drunk",
-      "Is the Philosopher"
+      "Drunk"
     ],
     "setup": false
   },
@@ -104,7 +107,7 @@
     "firstNight": 0,
     "otherNight": 0,
     "reminders": [
-      "No ability"
+      "No Ability"
     ],
     "setup": false
   },
@@ -112,8 +115,12 @@
     "id": "juggler",
     "team": "townsfolk",
     "firstNight": 0,
-    "otherNight": 61,
+    "otherNight": 84,
     "reminders": [
+      "Correct",
+      "Correct",
+      "Correct",
+      "Correct",
       "Correct"
     ],
     "setup": false
@@ -122,15 +129,7 @@
     "id": "sage",
     "team": "townsfolk",
     "firstNight": 0,
-    "otherNight": 42,
-    "reminders": [],
-    "setup": false
-  },
-  {
-    "id": "mutant",
-    "team": "outsider",
-    "firstNight": 0,
-    "otherNight": 0,
+    "otherNight": 63,
     "reminders": [],
     "setup": false
   },
@@ -138,19 +137,9 @@
     "id": "sweetheart",
     "team": "outsider",
     "firstNight": 0,
-    "otherNight": 41,
+    "otherNight": 61,
     "reminders": [
       "Drunk"
-    ],
-    "setup": false
-  },
-  {
-    "id": "barber",
-    "team": "outsider",
-    "firstNight": 0,
-    "otherNight": 40,
-    "reminders": [
-      "Haircuts tonight"
     ],
     "setup": false
   },
@@ -163,20 +152,28 @@
     "setup": false
   },
   {
-    "id": "eviltwin",
-    "team": "minion",
-    "firstNight": 23,
-    "otherNight": 0,
+    "id": "barber",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 60,
     "reminders": [
-      "Twin"
+      "Haircuts Tonight"
     ],
+    "setup": false
+  },
+  {
+    "id": "mutant",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
     "setup": false
   },
   {
     "id": "witch",
     "team": "minion",
-    "firstNight": 24,
-    "otherNight": 14,
+    "firstNight": 42,
+    "otherNight": 27,
     "reminders": [
       "Cursed"
     ],
@@ -185,8 +182,8 @@
   {
     "id": "cerenovus",
     "team": "minion",
-    "firstNight": 25,
-    "otherNight": 15,
+    "firstNight": 43,
+    "otherNight": 28,
     "reminders": [
       "Mad"
     ],
@@ -196,52 +193,67 @@
     "id": "pithag",
     "team": "minion",
     "firstNight": 0,
-    "otherNight": 16,
+    "otherNight": 29,
     "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "eviltwin",
+    "team": "minion",
+    "firstNight": 41,
+    "otherNight": 0,
+    "reminders": [
+      "Twin"
+    ],
+    "setup": false
+  },
+  {
+    "id": "nodashii",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 46,
+    "reminders": [
+      "Dead",
+      "Poisoned",
+      "Poisoned"
+    ],
+    "setup": false
+  },
+  {
+    "id": "vigormortis",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 49,
+    "reminders": [
+      "Dead",
+      "Has Ability",
+      "Has Ability",
+      "Has Ability",
+      "Poisoned",
+      "Poisoned",
+      "Poisoned"
+    ],
+    "setup": true
+  },
+  {
+    "id": "vortox",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 47,
+    "reminders": [
+      "Dead"
+    ],
     "setup": false
   },
   {
     "id": "fanggu",
     "team": "demon",
     "firstNight": 0,
-    "otherNight": 29,
+    "otherNight": 45,
     "reminders": [
       "Dead",
       "Once"
     ],
     "setup": true
-  },
-  {
-    "id": "vigormortis",
-    "team": "demon",
-    "firstNight": 0,
-    "otherNight": 32,
-    "reminders": [
-      "Dead",
-      "Has ability",
-      "Poisoned"
-    ],
-    "setup": true
-  },
-  {
-    "id": "nodashii",
-    "team": "demon",
-    "firstNight": 0,
-    "otherNight": 30,
-    "reminders": [
-      "Dead",
-      "Poisoned"
-    ],
-    "setup": false
-  },
-  {
-    "id": "vortox",
-    "team": "demon",
-    "firstNight": 0,
-    "otherNight": 31,
-    "reminders": [
-      "Dead"
-    ],
-    "setup": false
   }
 ]
