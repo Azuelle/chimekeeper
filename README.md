@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Azuelle/chimekeeper/actions/workflows/ci.yml/badge.svg)](https://github.com/Azuelle/chimekeeper/actions/workflows/ci.yml) [![CodeQL](https://github.com/Azuelle/chimekeeper/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Azuelle/chimekeeper/actions/workflows/github-code-scanning/codeql) [![Deploy Docs](https://github.com/Azuelle/chimekeeper/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/Azuelle/chimekeeper/actions/workflows/deploy-docs.yml)
 
+//! TODO: make this less ai sloppy
+
 > 《血染钟楼》线下说书辅助 · 过程记录 · 复盘导出的 local-first PWA
 > **非官方社区创作**，与 The Pandemonium Institute 无关。遵循 [TPI 社区内容政策](https://bloodontheclocktower.com/pages/community-created-content-policy)。永久免费。
 
