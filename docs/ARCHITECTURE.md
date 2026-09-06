@@ -24,32 +24,50 @@
 ```
 src/
 ├── types/         # 数据模型（唯一真相源，先改 docs/DATA-MODEL.md）
-├── lib/
-│   ├── scriptParser.ts    # 剧本 JSON 宽松解析（Zod passthrough）
+├── lib/           # 纯函数逻辑层（无 React/DOM/IndexedDB 依赖）
+│   ├── scriptParser.ts    # 剧本 JSON 宽松解析（Zod passthrough）+ 注水
+│   ├── roleDb.ts          # 181 官方角色事实库（官方 botc-release 源）/ ID 规范化与改名别名（ADR-007）
 │   ├── setup.ts           # 阵营构成表、角色随机分配、恶魔伪装推荐
-│   ├── nightOrder.ts      # 夜晚行动排序
+│   ├── nightOrder.ts      # 夜晚行动排序 + 系统锚点（ADR-006）
 │   ├── vote.ts            # 计票与处决判定
 │   ├── recap.ts           # 事件流 → Markdown 复盘
-│   └── events.ts          # 事件构造辅助
-├── stores/        # gameStore, scriptStore, uiStore
-├── components/    # 按场景组织：setup/ grimoire/ night/ day/ recap/
-├── i18n/          # zh-CN.json（默认）+ en.json
-└── persistence/   # db.ts (Dexie schema)
-tests/
-├── e2e/           # Playwright：主链路 导入→分配→首夜→导出
+│   ├── seats.ts           # 座位锚号原语：换位/涟漪平移/增删/高水位/复用池（ADR-011）
+│   └── ringLayout.ts      # 圆桌环几何：人数×列数 → 座位坐标（ADR-005）
+├── data/
+│   ├── official-roles.json        # 角色事实数据源
+│   └── builtin-scripts/           # 内置官方三版（ADR-015，pnpm run build:builtin 重生成）
+├── stores/        # Zustand 状态（动作 = 调 lib 纯函数）
+│   ├── script.ts          # 剧本导入/选择（F-01）
+│   └── game.ts            # 对局 + 座位 CRUD，全走 lib/seats 原语（F-02）
+├── components/
+│   └── setup/             # M1：ScriptImport / ScriptPreview / SeatSetup / SeatGrid（玩家卡+菜单）
+├── ui/                    # 视觉皮肤单点（tokenSkin.ts：阵营圆环配色，素材红线出口）
+├── i18n/          # index.ts 初始化（zh-CN 默认）+ zh-CN.json / en.json
+├── styles/        # app.css（移动优先；ADR-005 圆桌环座位样式）
+├── persistence/   # db.ts（Dexie schema v1；M2 接线双写）
+├── App.tsx        # 线性流程：导入剧本 → 剧本预览 → 排座位
+└── main.tsx
+scripts/           # 构建脚本（builtin-scripts 生成器）
+tests/e2e/         # Playwright：主链路 导入→分配→首夜→导出（待启用）
 fixtures/          # 国内真实剧本 JSON 样本（兼容层测试集）
-docs/              # VitePress 文档站源码
 ```
+
+单测与组件测试均在 `src/**/*.test.ts(x)`（vitest + jsdom + @testing-library）。
 
 ## 关键数据流
 
-**导入剧本**：文件/剪贴板 → `scriptParser.parse()` → Script（含 warnings）→ scriptStore → 警告面板展示
+**导入剧本（M1 已实现）**：文件/剪贴板/URL/内置三版 → `scriptStore.importFrom*` →
+`scriptParser.parse()` → Script（含 warnings）→ ScriptPreview（错误面板 / 阵营分组 / 相克规则 / info 折叠）
 
-**开局**：scriptStore + 人数 → `setup.buildComposition()` → `setup.assignRoles()` → gameStore 创建 Game → persistence 落盘
+**排座位（M1 已实现）**：ScriptPreview →「排座位」→ `gameStore.createGame(script, n)`
+（`lib/seats.addSeat` 折叠生成 1..n）→ SeatGrid（ADR-005 圆桌环 + 玩家卡；
+点卡弹菜单：改名 / 交换 / 涟漪平移 / 移除，全走 `lib/seats` 原语）
 
-**夜晚**：gameStore 当前在场角色 → `nightOrder.build()` → 清单逐项打勾 → 每勾生成 `night_action` 事件 → 双写 events 表
+**开局抽袋**（M2）：scriptStore + 人数 → `setup.buildComposition()` → `setup.assignRoles()` → gameStore 分配角色 → persistence 落盘
 
-**复盘**：events 表按 gameId 取流 → `recap.generate()` → GameRecap → Markdown 渲染 → 剪贴板/下载
+**夜晚**（M2）：gameStore 当前在场角色 → `nightOrder.build()` → 清单逐项打勾 → 每勾生成 `night_action` 事件 → 双写 events 表
+
+**复盘**（M3）：events 表按 gameId 取流 → `recap.generate()` → GameRecap → Markdown 渲染 → 剪贴板/下载
 
 ## 部署架构
 

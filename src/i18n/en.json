@@ -7,18 +7,90 @@
     "title": "Import Script",
     "fromFile": "Upload JSON file",
     "fromClipboard": "Paste JSON text",
+    "fromUrl": "Import from URL",
+    "import": "Import",
+    "pastePlaceholder": "Paste script JSON here…",
+    "urlPlaceholder": "https://… (direct link to script JSON)",
     "error": {
       "invalidJson": "Cannot parse: not valid JSON",
       "notArray": "Script format error: top level must be an array",
       "invalidRole": "Entry #{{index}} is not a valid role definition",
       "unknownTeam": "Role \"{{role}}\" has unrecognized team \"{{team}}\"",
       "noRoles": "Script contains no roles",
-      "unknownRole": "Role \"{{role}}\" is not in the builtin database and the script does not define its team. Please provide a full role definition in the script JSON (at least a team field)"
+      "unknownRole": "Role \"{{role}}\" is not in the builtin database and the script does not define its team. Please provide a full role definition in the script JSON (at least a team field)",
+      "invalidUrl": "Enter a valid http(s) URL",
+      "fetchFailed": "Failed to fetch URL: network error or the site blocks cross-origin reads. Use paste or file upload instead."
     },
     "warning": {
       "customMetaField": "Script contains custom field \"{{field}}\"; kept but unused",
       "hydratedFromDb": "Role \"{{role}}\" was bare ID; hydrated from builtin official role database"
     }
+  },
+  "scriptPreview": {
+    "title": "Script preview",
+    "unnamed": "(Unnamed script)",
+    "author": "By {{author}}",
+    "roleCount": "{{count}} roles",
+    "warningsSummary": "Import notices ({{count}})",
+    "jinxes": "Jinxes",
+    "setupBadge": "Setup",
+    "arrangeSeats": "Arrange seats"
+  },
+  "builtin": {
+    "title": "Built-in official scripts",
+    "tb": "Trouble Brewing",
+    "bmr": "Bad Moon Rising",
+    "snv": "Sects & Violets"
+  },
+  "team": {
+    "townsfolk": "Townsfolk",
+    "outsider": "Outsider",
+    "minion": "Minion",
+    "demon": "Demon",
+    "traveler": "Traveller",
+    "fabled": "Fabled",
+    "loric": "Loric"
+  },
+  "seats": {
+    "title": "Arrange seats",
+    "generate": "Create seats",
+    "regenerate": "Regenerate",
+    "regenerateConfirm": "Regenerating clears all nicknames. Continue?",
+    "add": "Add seat",
+    "seatNumberLabel": "Seat number",
+    "cardMenuLabel": "Actions for seat {{seat}}",
+    "nicknamePlaceholder": "Nickname (optional)",
+    "reminderPlaceholder": "Tap to add a reminder",
+    "menu": {
+      "swapSeats": "Swap seats",
+      "rippleSeat": "Move player",
+      "removeSeat": "Remove seat",
+      "assignRole": "Assign role",
+      "changeRole": "Change role",
+      "addReminder": "Add reminder",
+      "setAlignment": "Set alignment",
+      "logNight": "Log night action",
+      "markDead": "Mark dead",
+      "markVote": "Mark voted",
+      "nominate": "Nominate"
+    },
+    "lock": {
+      "afterNight": "Unlocks at nightfall",
+      "day": "Unlocks during the day"
+    },
+    "select": {
+      "swap": "Seat {{seat}} picked: tap another seat to swap (tap again to cancel)",
+      "ripple": "Seat {{seat}} picked: tap the destination; players shift along (tap again to cancel)"
+    },
+    "removeTitle": "Remove seat {{seat}}?",
+    "removeDesc": "The number is retired for good by default; tick to let it be reused.",
+    "reuseSeat": "Put the number back in the reuse pool",
+    "confirmRemove": "Remove",
+    "cancel": "Cancel",
+    "retiredSummary": "Retired numbers: {{list}}",
+    "enableRetired": "Re-enable retired numbers",
+    "empty": "No seats: tap “Add seat”",
+    "changeScript": "Change script"
   },
   "setup": {
     "playerCount": "Player count",

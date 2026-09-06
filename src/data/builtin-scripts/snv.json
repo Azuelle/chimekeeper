@@ -1,0 +1,259 @@
+[
+  {
+    "id": "_meta",
+    "name": "梦殒春宵"
+  },
+  {
+    "id": "clockmaker",
+    "team": "townsfolk",
+    "firstNight": 60,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "snakecharmer",
+    "team": "townsfolk",
+    "firstNight": 37,
+    "otherNight": 23,
+    "reminders": [
+      "Poisoned"
+    ],
+    "setup": false
+  },
+  {
+    "id": "mathematician",
+    "team": "townsfolk",
+    "firstNight": 77,
+    "otherNight": 96,
+    "reminders": [
+      "Abnormal",
+      "Abnormal",
+      "Abnormal",
+      "Abnormal",
+      "Abnormal"
+    ],
+    "setup": false
+  },
+  {
+    "id": "dreamer",
+    "team": "townsfolk",
+    "firstNight": 61,
+    "otherNight": 79,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "flowergirl",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 80,
+    "reminders": [
+      "Demon Voted",
+      "Demon Not Voted"
+    ],
+    "setup": false
+  },
+  {
+    "id": "towncrier",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 81,
+    "reminders": [
+      "Minions Not Nominated",
+      "Minion Nominated"
+    ],
+    "setup": false
+  },
+  {
+    "id": "oracle",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 82,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "savant",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "seamstress",
+    "team": "townsfolk",
+    "firstNight": 62,
+    "otherNight": 83,
+    "reminders": [
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "philosopher",
+    "team": "townsfolk",
+    "firstNight": 14,
+    "otherNight": 11,
+    "reminders": [
+      "Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "artist",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "juggler",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 84,
+    "reminders": [
+      "Correct",
+      "Correct",
+      "Correct",
+      "Correct",
+      "Correct"
+    ],
+    "setup": false
+  },
+  {
+    "id": "sage",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 63,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "sweetheart",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 61,
+    "reminders": [
+      "Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "klutz",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "barber",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 60,
+    "reminders": [
+      "Haircuts Tonight"
+    ],
+    "setup": false
+  },
+  {
+    "id": "mutant",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "witch",
+    "team": "minion",
+    "firstNight": 42,
+    "otherNight": 27,
+    "reminders": [
+      "Cursed"
+    ],
+    "setup": false
+  },
+  {
+    "id": "cerenovus",
+    "team": "minion",
+    "firstNight": 43,
+    "otherNight": 28,
+    "reminders": [
+      "Mad"
+    ],
+    "setup": false
+  },
+  {
+    "id": "pithag",
+    "team": "minion",
+    "firstNight": 0,
+    "otherNight": 29,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "eviltwin",
+    "team": "minion",
+    "firstNight": 41,
+    "otherNight": 0,
+    "reminders": [
+      "Twin"
+    ],
+    "setup": false
+  },
+  {
+    "id": "nodashii",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 46,
+    "reminders": [
+      "Dead",
+      "Poisoned",
+      "Poisoned"
+    ],
+    "setup": false
+  },
+  {
+    "id": "vigormortis",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 49,
+    "reminders": [
+      "Dead",
+      "Has Ability",
+      "Has Ability",
+      "Has Ability",
+      "Poisoned",
+      "Poisoned",
+      "Poisoned"
+    ],
+    "setup": true
+  },
+  {
+    "id": "vortox",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 47,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "fanggu",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 45,
+    "reminders": [
+      "Dead",
+      "Once"
+    ],
+    "setup": true
+  }
+]

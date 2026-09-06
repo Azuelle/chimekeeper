@@ -1,0 +1,617 @@
+/* 司钟 v0 基础样式 — 移动优先（N-02），无框架依赖 */
+
+:root {
+  --bg: #141218;
+  --bg-elevated: #1e1b24;
+  --bg-input: #262230;
+  --border: #3a3446;
+  --text: #e8e4f0;
+  --text-dim: #a29bb3;
+  --accent: #d4a24e;
+  --accent-text: #1a1610;
+  --danger: #d46a6a;
+  --evil: #b46a9a;
+  --ring: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 布局 ─────────────────────────────── */
+
+.app-main {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 3rem;
+  flex: 1;
+}
+
+.app-header {
+  text-align: center;
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+}
+
+.app-header small {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.app-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-block: 0.75rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.panel h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+/* ── 表单与按钮 ────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-block: 0.5rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+input[type='text'],
+input[type='url'],
+input[type='number'],
+textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  width: 100%;
+}
+
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-input);
+  color: var(--text);
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.btn--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--compact {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+.builtin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── 反馈 ─────────────────────────────── */
+
+.error-box {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  border: 1px solid var(--danger);
+  border-radius: 0.5rem;
+  color: var(--danger);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  margin-block: 0.5rem;
+}
+
+.notices {
+  margin-block: 0.5rem;
+}
+
+.notices summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.notices ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+/* ── 剧本预览 ─────────────────────────── */
+
+.script-name {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.script-meta {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.team-group {
+  margin-block: 0.75rem;
+}
+
+.team-group h3 {
+  margin: 0 0 0.4rem;
+}
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.role-chip--evil {
+  border-color: color-mix(in srgb, var(--evil) 55%, var(--border));
+}
+
+.badge-setup {
+  font-size: 0.68rem;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 0.35rem;
+  padding: 0 0.3rem;
+}
+
+.jinx-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+}
+
+.jinx-list li {
+  margin-block: 0.25rem;
+}
+
+.jinx-pair {
+  font-weight: 600;
+}
+
+/* ── 座位环（ADR-005 矩形环 + 玩家卡） ──── */
+
+.seat-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+.seat-count-input {
+  width: 5.5rem;
+}
+
+.seat-ring {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+/* 网格列数/行数由 SeatGrid 按 ringLayout() 内联下发；卡内元素自适应 */
+.seat-cell {
+  position: relative;
+  min-width: 0;
+}
+
+/* 玩家卡 = 整卡按钮（token 主体 + 名牌 + 右侧提示标记区） */
+.seat-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 0.55rem 0.55rem 0.5rem;
+  cursor: pointer;
+}
+
+.seat-face.has-menu {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.seat-face__number {
+  position: absolute;
+  top: 0.28rem;
+  left: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
+}
+
+.seat-face__mid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+
+.seat-face__token {
+  display: flex;
+  justify-content: center;
+}
+
+/* token 圆环：占位灰环，阵营着色由 ui/tokenSkin 提供内联主色 */
+.token-ring {
+  position: relative;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 50%;
+  border: 0.32rem solid var(--border);
+  background: color-mix(in srgb, var(--bg-input) 88%, #fff 12%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease;
+}
+
+/* 自绘金属高光（无外部素材） */
+.token-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    rgba(255, 255, 255, 0.18),
+    transparent 38%,
+    rgba(255, 255, 255, 0.05) 66%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.token-ring__core {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-input) 70%, var(--border) 30%);
+}
+
+.seat-face__name {
+  min-height: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.1rem;
+}
+
+/* 提示标记区：堆叠 tokens；空时竖排占位 */
+.reminder-rail {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  min-height: 3.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+}
+
+.reminder-chip {
+  max-width: 100%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.6rem;
+  line-height: 1.2;
+  border-radius: 0.3rem;
+  padding: 0.08rem 0.28rem;
+  word-break: break-all;
+}
+
+.reminder-rail__empty {
+  writing-mode: vertical-rl;
+  font-size: 0.58rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+  opacity: 0.75;
+  letter-spacing: 0.08em;
+}
+
+/* 换位/平移选择态 */
+.seat-cell.is-origin .seat-face {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.seat-cell.is-target .seat-face {
+  cursor: crosshair;
+}
+
+.seat-hint {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  text-align: center;
+  margin-top: 0.6rem;
+}
+
+/* ── 玩家卡菜单（ADR-005 点击弹菜单；紧凑小字号） ─ */
+
+.seat-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 11rem;
+  max-width: calc(100vw - 2rem);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.5);
+  padding: 0.3rem;
+  font-size: 0.8rem;
+}
+
+/* 菜单顶部改名文本框：比正文字号再小一点 */
+.seat-menu__name {
+  margin-bottom: 0.2rem;
+  font-size: 0.74rem;
+  padding: 0.45rem 0.6rem;
+}
+
+/* 可用操作：单行三个图标 */
+.seat-menu__actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.seat-menu__action {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.seat-menu__action svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.seat-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.38rem 0.5rem;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.seat-menu__item:disabled {
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
+.seat-menu__glyph {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-dim);
+}
+
+.seat-menu__glyph svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.seat-menu__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seat-menu__tag {
+  flex: 0 0 auto;
+  font-size: 0.56rem;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.04rem 0.28rem;
+  white-space: nowrap;
+}
+
+.seat-menu__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.15rem 0.1rem;
+}
+
+.seat-menu__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.3rem;
+}
+
+.seat-menu__remove {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.3rem;
+}
+
+.seat-menu__remove-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.seat-menu__remove-desc {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.seat-menu__reuse {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.seat-menu__reuse input {
+  accent-color: var(--accent);
+}
+
+.seat-menu__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+/* 退役编号一览（工具栏内） */
+.retired-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.retired-bar__text {
+  overflow-wrap: anywhere;
+}

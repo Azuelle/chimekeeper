@@ -1,14 +1,14 @@
 /**
  * 内置官方角色数据库（hydration 层）
  *
- * 背景：官方 script tool / botcscripts 生态的剧本 JSON 只有角色 id（无名字、阵营、
- * 夜晚顺序），导入时必须用本地角色库补全。数据源为社区事实标准数据
- * （bra1n/townsquare 的 roles.json + fabled.json，130 官方角色 + 13 传奇），
- * 仅保留事实字段（阵营/夜晚顺序数值/提示标记名/英文角色名），
- * 图标为运行时外链，不打包再分发（ADR-004）。
+ * 数据源 = 官方 script tool 仓库 ThePandemoniumInstitute/botc-release
+ * （roles.json 事实字段 + nightsheet.json 夜晚顺序），含实验角色与奇遇；
+ * bra1n/townsquare 仅提供图标外链 URL 映射与已下架角色兜底。
+ * 由 scripts/refresh-role-db.mjs 生成（pnpm run refresh:roledb，需网络）。
  *
  * 注意：名字与能力文本为英文。中文显示名依赖剧本 JSON 自带数据或
  * v1.5 的 zh 名称映射层（见 PRD F-14）。
+ * 图标为运行时外链，不打包再分发（ADR-004）。
  */
 import rawDb from '../data/official-roles.json';
 import type { Role } from '../types/script';
@@ -22,9 +22,20 @@ export function normalizeRoleId(id: string): string {
 
 const dbByNormId = new Map<string, Role>(db.map((r) => [normalizeRoleId(r.id), r]));
 
-/** 按规范化 id 查询内置角色库 */
+/**
+ * 官方改名史：旧 id → 现 id（等价匹配）。
+ * 如 mephit → mezepheles（"Mephit" 为 Wizards of the Coast 商标，官方为规避而改名）。
+ */
+const RENAMED_IDS: Record<string, string> = {
+  mephit: 'mezepheles',
+};
+
+/** 按规范化 id 查询内置角色库（含改名别名） */
 export function lookupRole(id: string): Role | undefined {
-  return dbByNormId.get(normalizeRoleId(id));
+  const norm = normalizeRoleId(id);
+  const renamed = RENAMED_IDS[norm];
+  if (renamed) return dbByNormId.get(normalizeRoleId(renamed));
+  return dbByNormId.get(norm);
 }
 
 export const DB_SIZE = db.length;

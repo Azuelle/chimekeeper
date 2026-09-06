@@ -1,0 +1,270 @@
+[
+  {
+    "id": "_meta",
+    "name": "黯月初升"
+  },
+  {
+    "id": "grandmother",
+    "team": "townsfolk",
+    "firstNight": 59,
+    "otherNight": 73,
+    "reminders": [
+      "Grandchild",
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "sailor",
+    "team": "townsfolk",
+    "firstNight": 26,
+    "otherNight": 13,
+    "reminders": [
+      "Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "chambermaid",
+    "team": "townsfolk",
+    "firstNight": 76,
+    "otherNight": 95,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "innkeeper",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 19,
+    "reminders": [
+      "Safe",
+      "Safe",
+      "Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "gambler",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 21,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "exorcist",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 36,
+    "reminders": [
+      "Chosen"
+    ],
+    "setup": false
+  },
+  {
+    "id": "gossip",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 58,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "courtier",
+    "team": "townsfolk",
+    "firstNight": 35,
+    "otherNight": 18,
+    "reminders": [
+      "Drunk 3",
+      "Drunk 2",
+      "Drunk 1",
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "professor",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 65,
+    "reminders": [
+      "Alive",
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "minstrel",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "Everyone Is Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "tealady",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "Cannot Die",
+      "Cannot Die"
+    ],
+    "setup": false
+  },
+  {
+    "id": "fool",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "pacifist",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "goon",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "Drunk"
+    ],
+    "setup": false
+  },
+  {
+    "id": "lunatic",
+    "team": "outsider",
+    "firstNight": 22,
+    "otherNight": 35,
+    "reminders": [
+      "Chosen",
+      "Chosen",
+      "Chosen"
+    ],
+    "setup": false
+  },
+  {
+    "id": "tinker",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 71,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "moonchild",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 72,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "godfather",
+    "team": "minion",
+    "firstNight": 38,
+    "otherNight": 57,
+    "reminders": [
+      "Died Today",
+      "Dead"
+    ],
+    "setup": true
+  },
+  {
+    "id": "devilsadvocate",
+    "team": "minion",
+    "firstNight": 40,
+    "otherNight": 26,
+    "reminders": [
+      "Survives Execution"
+    ],
+    "setup": false
+  },
+  {
+    "id": "assassin",
+    "team": "minion",
+    "firstNight": 0,
+    "otherNight": 56,
+    "reminders": [
+      "Dead",
+      "No Ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "mastermind",
+    "team": "minion",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "pukka",
+    "team": "demon",
+    "firstNight": 47,
+    "otherNight": 42,
+    "reminders": [
+      "Poisoned",
+      "Poisoned",
+      "Dead"
+    ],
+    "setup": false
+  },
+  {
+    "id": "shabaloth",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 43,
+    "reminders": [
+      "Dead",
+      "Dead",
+      "Alive"
+    ],
+    "setup": false
+  },
+  {
+    "id": "po",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 44,
+    "reminders": [
+      "Dead",
+      "Dead",
+      "Dead",
+      "3 Attacks"
+    ],
+    "setup": false
+  },
+  {
+    "id": "zombuul",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 41,
+    "reminders": [
+      "Died Today",
+      "Dead"
+    ],
+    "setup": false
+  }
+]
