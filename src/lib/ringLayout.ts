@@ -23,7 +23,17 @@ export interface RingLayout {
 
 export function ringLayout(count: number, cols: number): RingLayout {
   if (count <= 0) return { rows: 0, cols: 0, positions: [] };
-  const C = Math.max(1, Math.min(cols, count));
+
+  // cols < 2 时无法形成环：退化为单列，避免 C=1 走 ovalRing 产生重复坐标。
+  if (cols < 2 || count === 1) {
+    return {
+      rows: count,
+      cols: 1,
+      positions: Array.from({ length: count }, (_, i) => ({ row: i, col: 0 })),
+    };
+  }
+
+  const C = Math.max(2, Math.min(cols, count));
 
   // 人数放得下时单行即可，无需成环
   if (count <= C) {
