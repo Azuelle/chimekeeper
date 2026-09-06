@@ -36,7 +36,7 @@
 6. **中文优先**：UI 默认 zh-CN，en 为 secondary。
 7. **CI 必过**：`npm run ci` = tsc + vitest run + build + docs-guard。提交前本地跑通。
 8. **commit 规范**：`feat|fix|docs|refactor|test|chore: 中文简述`，
-   末尾加 `Co-authored-by: Claude <noreply@anthropic.com>`（AI 参与时）。
+   末尾加 `Co-authored-by: GLM <noreply@z.ai>`（AI 参与时）。
 9. **术语对齐**：界面上出现的所有术语必须与中文钟楼百科官方术语表对齐，禁止自造
    （如"夜单"→"夜晚行动顺序"）。速记名仅供内部沟通，不进 UI 文案。
 
