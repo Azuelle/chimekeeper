@@ -7,9 +7,14 @@
  */
 import type { Seat } from '../types/game';
 
-/** 新座位编号 = 当前最大号 + 1（含已退役编号的残留时不回收） */
-export function nextSeatNumber(seats: Seat[]): number {
-  return seats.reduce((max, s) => Math.max(max, s.seatNumber), 0) + 1;
+/**
+ * 新座位编号（ADR-011）：高水位计数，只增不重用。
+ * 必须传入 Game.seatHighWater——从当前座位推导会复用刚退役的编号，
+ * 使历史事件引用歧义（旅行者 6 号离场后，下一个新人不能再拿 6 号）。
+ */
+export function nextSeatNumber(seats: Seat[], highWaterMark: number): number {
+  const currentMax = seats.reduce((max, s) => Math.max(max, s.seatNumber), 0);
+  return Math.max(currentMax, highWaterMark) + 1;
 }
 
 /** 下一个 displayOrder（追加到末尾；插入中间由调用方指定后重排） */
@@ -38,10 +43,12 @@ export function swapOccupants(seats: Seat[], seatA: number, seatB: number): Seat
 }
 
 /**
- * 新增座位（旅行者加入等）：编号 = nextSeatNumber，displayOrder 可指定插入位置。
+ * 新增座位（旅行者加入等）：编号 = nextSeatNumber(seats, highWaterMark)，
+ * displayOrder 可指定插入位置。
  */
 export function addSeat(
   seats: Seat[],
+  highWaterMark: number,
   occupant: Omit<Seat, 'seatNumber' | 'displayOrder' | 'alive' | 'hasVoteToken' | 'reminderTokens'> &
     Partial<Pick<Seat, 'alive' | 'hasVoteToken' | 'reminderTokens'>>,
   displayOrder?: number,
@@ -51,7 +58,7 @@ export function addSeat(
     hasVoteToken: true,
     reminderTokens: [],
     ...occupant,
-    seatNumber: nextSeatNumber(seats),
+    seatNumber: nextSeatNumber(seats, highWaterMark),
     displayOrder: displayOrder ?? nextDisplayOrder(seats),
   };
   return [...seats, seat];

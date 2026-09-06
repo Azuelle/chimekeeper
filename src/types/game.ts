@@ -59,6 +59,8 @@ export interface Game {
     roles: Role[];
   };
   seats: Seat[];
+  /** 座位号高水位（ADR-011）：只增不减，含已退役编号；新座位号 = max(当前最大, 此值-1)+1，防止退役号复用造成历史事件歧义 */
+  seatHighWater: number;
   /** 恶魔的三个伪装（不在场的善良角色，说书人设置） */
   demonBluffs: string[];
   phase: GamePhase;

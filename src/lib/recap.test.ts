@@ -6,6 +6,7 @@ import type { GameEvent } from '../types/events';
 const game: Game = {
   id: 'g1',
   scriptSnapshot: { name: '暗流涌动', roles: [] },
+  seatHighWater: 2,
   seats: [
     { seatNumber: 1, displayOrder: 1, playerName: '小明', roleId: 'monk', alive: true, hasVoteToken: true, reminderTokens: [] },
     { seatNumber: 2, displayOrder: 2, roleId: 'imp', alive: true, hasVoteToken: true, reminderTokens: [] },
