@@ -1,0 +1,212 @@
+[
+  {
+    "id": "_meta",
+    "name": "暗流涌动"
+  },
+  {
+    "id": "washerwoman",
+    "team": "townsfolk",
+    "firstNight": 33,
+    "otherNight": 0,
+    "reminders": [
+      "Townsfolk",
+      "Wrong"
+    ],
+    "setup": false
+  },
+  {
+    "id": "librarian",
+    "team": "townsfolk",
+    "firstNight": 34,
+    "otherNight": 0,
+    "reminders": [
+      "Outsider",
+      "Wrong"
+    ],
+    "setup": false
+  },
+  {
+    "id": "investigator",
+    "team": "townsfolk",
+    "firstNight": 35,
+    "otherNight": 0,
+    "reminders": [
+      "Minion",
+      "Wrong"
+    ],
+    "setup": false
+  },
+  {
+    "id": "chef",
+    "team": "townsfolk",
+    "firstNight": 36,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "empath",
+    "team": "townsfolk",
+    "firstNight": 37,
+    "otherNight": 53,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "fortuneteller",
+    "team": "townsfolk",
+    "firstNight": 38,
+    "otherNight": 54,
+    "reminders": [
+      "Red herring"
+    ],
+    "setup": false
+  },
+  {
+    "id": "undertaker",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 55,
+    "reminders": [
+      "Executed"
+    ],
+    "setup": false
+  },
+  {
+    "id": "monk",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 12,
+    "reminders": [
+      "Protected"
+    ],
+    "setup": false
+  },
+  {
+    "id": "ravenkeeper",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 52,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "virgin",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "No ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "slayer",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [
+      "No ability"
+    ],
+    "setup": false
+  },
+  {
+    "id": "soldier",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "mayor",
+    "team": "townsfolk",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "butler",
+    "team": "outsider",
+    "firstNight": 39,
+    "otherNight": 67,
+    "reminders": [
+      "Master"
+    ],
+    "setup": false
+  },
+  {
+    "id": "drunk",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "remindersGlobal": [
+      "Drunk"
+    ],
+    "setup": true
+  },
+  {
+    "id": "recluse",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "saint",
+    "team": "outsider",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "poisoner",
+    "team": "minion",
+    "firstNight": 17,
+    "otherNight": 7,
+    "reminders": [
+      "Poisoned"
+    ],
+    "setup": false
+  },
+  {
+    "id": "spy",
+    "team": "minion",
+    "firstNight": 49,
+    "otherNight": 68,
+    "reminders": [],
+    "setup": false
+  },
+  {
+    "id": "scarletwoman",
+    "team": "minion",
+    "firstNight": 0,
+    "otherNight": 19,
+    "reminders": [
+      "Demon"
+    ],
+    "setup": false
+  },
+  {
+    "id": "baron",
+    "team": "minion",
+    "firstNight": 0,
+    "otherNight": 0,
+    "reminders": [],
+    "setup": true
+  },
+  {
+    "id": "imp",
+    "team": "demon",
+    "firstNight": 0,
+    "otherNight": 24,
+    "reminders": [
+      "Dead"
+    ],
+    "setup": false
+  }
+]
