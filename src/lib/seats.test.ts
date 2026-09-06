@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { nextSeatNumber, swapOccupants, addSeat, removeSeat } from './seats';
+import {
+  nextSeatNumber,
+  swapOccupants,
+  addSeat,
+  addSeatWithNumber,
+  removeSeat,
+  takePooledSeatNumber,
+  enableAllRetired,
+  rippleShift,
+} from './seats';
 import type { Seat } from '../types/game';
 
 const seat = (n: number, name: string, roleId: string, extra: Partial<Seat> = {}): Seat => ({
@@ -96,5 +105,68 @@ describe('addSeat / removeSeat（旅行者进出）', () => {
 
   it('移除不存在的座位返回 null', () => {
     expect(removeSeat(game15(), 99)).toBeNull();
+  });
+});
+
+describe('复用池原语（ADR-011 修订）', () => {
+  it('takePooledSeatNumber 取最小号并从池中移除', () => {
+    expect(takePooledSeatNumber([])).toBeNull();
+    expect(takePooledSeatNumber([7, 3, 5])).toEqual({ seatNumber: 3, pool: [5, 7] });
+  });
+
+  it('enableAllRetired：retired 全部并入池，去重排序', () => {
+    expect(enableAllRetired([9, 4], [7, 4])).toEqual([4, 7, 9]);
+    expect(enableAllRetired([], [])).toEqual([]);
+  });
+
+  it('addSeatWithNumber：显式编号落座，重复号抛错', () => {
+    const after = addSeatWithNumber(game15(), 6, { playerName: '补位', roleId: 'scapegoat' });
+    expect(after.find((s) => s.playerName === '补位')!.seatNumber).toBe(6);
+    expect(() => addSeatWithNumber(game15(), 3, { playerName: '冲突', roleId: 'scapegoat' })).toThrow();
+  });
+});
+
+describe('rippleShift（平移座位，ADR-005 玩家卡）', () => {
+  const abcd = () => [
+    seat(1, 'A', 'chef'),
+    seat(2, 'B', 'empath'),
+    seat(3, 'C', 'monk'),
+    seat(4, 'D', 'imp'),
+  ];
+  const names = (seats: Seat[]) => [...seats].sort((a, b) => a.displayOrder - b.displayOrder).map((s) => s.playerName);
+
+  it('ABCD 选 A 移到 4 号位 → BCDA（向后平移）', () => {
+    expect(names(rippleShift(abcd(), 1, 4)!)).toEqual(['B', 'C', 'D', 'A']);
+  });
+
+  it('ABCD 选 D 移到 1 号位 → DABC（向前平移）', () => {
+    expect(names(rippleShift(abcd(), 4, 1)!)).toEqual(['D', 'A', 'B', 'C']);
+  });
+
+  it('锚号与 displayOrder 均不动，住户字段逐位顺延', () => {
+    const after = rippleShift(abcd(), 1, 4)!;
+    expect(after.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4]);
+    expect(after.map((s) => s.displayOrder).sort((a, b) => a - b)).toEqual([1, 2, 3, 4]);
+    // 1 号椅子现在坐着 B
+    expect(after.find((s) => s.seatNumber === 1)!.playerName).toBe('B');
+    expect(after.find((s) => s.seatNumber === 4)!.playerName).toBe('A');
+  });
+
+  it('跨乱序 displayOrder 的平移按物理位置走（1 2 3 4 15 场景）', () => {
+    // 15 号旅行者位于物理位置 5，5 号玩家位于位置 6
+    // 4 号(位置4) 平移到 15 号(位置5)：相邻一次交换，锚号全不动
+    const result = rippleShift(game15(), 4, 15);
+    expect(result).not.toBeNull();
+    if (!result) return;
+    const order = [...result].sort((a, b) => a.displayOrder - b.displayOrder).map((s) => s.seatNumber);
+    expect(order).toEqual([1, 2, 3, 4, 15, 5]); // 编号仍在原位
+    // 住户交换：4 号椅子坐着旅行者，15 号椅子坐着小美
+    expect(result.find((s) => s.seatNumber === 4)!.playerName).toBe('小旅');
+    expect(result.find((s) => s.seatNumber === 15)!.playerName).toBe('小美');
+  });
+
+  it('起止相同或座位不存在返回 null', () => {
+    expect(rippleShift(abcd(), 2, 2)).toBeNull();
+    expect(rippleShift(abcd(), 1, 99)).toBeNull();
   });
 });

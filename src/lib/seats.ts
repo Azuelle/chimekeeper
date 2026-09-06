@@ -53,15 +53,70 @@ export function addSeat(
     Partial<Pick<Seat, 'alive' | 'hasVoteToken' | 'reminderTokens'>>,
   displayOrder?: number,
 ): Seat[] {
+  return addSeatWithNumber(seats, nextSeatNumber(seats, highWaterMark), occupant, displayOrder);
+}
+
+/**
+ * 以显式编号新增座位（复用池消费路径，ADR-011 修订）。
+ * 前置条件：seatNumber 不与在场座位冲突且未被二次入池——池的完整性由 store 层维护。
+ */
+export function addSeatWithNumber(
+  seats: Seat[],
+  seatNumber: number,
+  occupant: Omit<Seat, 'seatNumber' | 'displayOrder' | 'alive' | 'hasVoteToken' | 'reminderTokens'> &
+    Partial<Pick<Seat, 'alive' | 'hasVoteToken' | 'reminderTokens'>>,
+  displayOrder?: number,
+): Seat[] {
+  if (seats.some((s) => s.seatNumber === seatNumber)) {
+    throw new Error(`座位号 ${String(seatNumber)} 已在场，复用池数据不一致`);
+  }
   const seat: Seat = {
     alive: true,
     hasVoteToken: true,
     reminderTokens: [],
     ...occupant,
-    seatNumber: nextSeatNumber(seats, highWaterMark),
+    seatNumber,
     displayOrder: displayOrder ?? nextDisplayOrder(seats),
   };
   return [...seats, seat];
+}
+
+/** 从复用池取最小号（ADR-011 修订）。返回 null = 池空，调用方走高水位。 */
+export function takePooledSeatNumber(pool: number[]): { seatNumber: number; pool: number[] } | null {
+  if (pool.length === 0) return null;
+  const sorted = [...pool].sort((a, b) => a - b);
+  return { seatNumber: sorted[0]!, pool: sorted.slice(1) };
+}
+
+/** 「启用全部退役编号」：retired 全部并入池（去重排序）。 */
+export function enableAllRetired(retired: number[], pool: number[]): number[] {
+  return [...new Set([...pool, ...retired])].sort((a, b) => a - b);
+}
+
+/**
+ * 平移座位（涟漪式，ADR-005 玩家卡菜单）：
+ * 选中住户逐位向目标交换（链式 swapOccupants），其余住户顺延。
+ * 例：ABCD 选 A 移到 4 号位 → BCDA。seatNumber 与 displayOrder 均不动。
+ * 返回 null = 起止相同 / 座位不存在。
+ */
+export function rippleShift(seats: Seat[], fromSeatNumber: number, toSeatNumber: number): Seat[] | null {
+  if (fromSeatNumber === toSeatNumber) return null;
+  const ordered = [...seats].sort((a, b) => a.displayOrder - b.displayOrder);
+  const fromIdx = ordered.findIndex((s) => s.seatNumber === fromSeatNumber);
+  const toIdx = ordered.findIndex((s) => s.seatNumber === toSeatNumber);
+  if (fromIdx === -1 || toIdx === -1) return null;
+
+  let current = fromSeatNumber;
+  let result = seats;
+  const step = fromIdx < toIdx ? 1 : -1;
+  for (let i = fromIdx; i !== toIdx; i += step) {
+    const next = ordered[i + step]!.seatNumber;
+    const swapped = swapOccupants(result, current, next);
+    if (!swapped) return null;
+    result = swapped;
+    current = next;
+  }
+  return result;
 }
 
 /** 移除座位：编号退役不重用；其余座位编号不动。返回 null 表示座位不存在。 */

@@ -54,6 +54,9 @@ const out = officialRoles.map((r) => {
     reminders: r.reminders ?? [],
     setup: Boolean(r.setup),
     ability: r.ability,
+    // 官方 reminder 文案随数据源引用（ADR-004 边界同 ability），F-04 夜晚面板的提示词来源
+    firstNightReminder: r.firstNightReminder,
+    otherNightReminder: r.otherNightReminder,
   };
   if (brainIconIds.has(r.id)) {
     entry.image = `${BRAIN}/src/assets/icons/${r.id}.png`;

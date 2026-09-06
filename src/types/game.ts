@@ -25,6 +25,12 @@ export interface Seat {
   playerName?: string;
   /** 实际抽到的角色（仅说书人可见） */
   roleId?: string;
+  /**
+   * 实际阵营（ADR-005 玩家卡）：与角色阵营解耦——邪恶/善良旅行者、
+   * 麻脸巫婆制造的善良恶魔等由说书人手动改；token 着色以此为准。
+   * undefined = 角色未分配（M1 全程 / M2 抽袋前）。
+   */
+  alignment?: 'good' | 'evil';
   /** 生死状态 */
   alive: boolean;
   /** 是否有投票权（死亡后一票，旅行者规则等，v1 简化为 boolean） */
@@ -61,6 +67,13 @@ export interface Game {
   seats: Seat[];
   /** 座位号高水位（ADR-011）：只增不减，含已退役编号；新座位号 = max(当前最大, 此值-1)+1，防止退役号复用造成历史事件歧义 */
   seatHighWater: number;
+  /**
+   * 已退役编号（ADR-011 修订）：不在场上且未启用复用；
+   * 经「启用全部退役编号」批量转入 reusePool。
+   */
+  retiredSeatNumbers: number[];
+  /** 复用池：addSeat 优先消费池中最小号，池空才走高水位（ADR-011 修订） */
+  reusePool: number[];
   /** 恶魔的三个伪装（不在场的善良角色，说书人设置） */
   demonBluffs: string[];
   phase: GamePhase;

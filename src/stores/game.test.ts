@@ -88,3 +88,78 @@ describe('gameStore 座位 CRUD（ADR-011）', () => {
     expect(store().game?.seats.find((s) => s.seatNumber === 1)?.playerName).toBe('张三');
   });
 });
+
+describe('gameStore 复用池（ADR-011 修订）', () => {
+  it('默认移除 → 编号进退役表，不入池；addSeat 走高水位', () => {
+    store().createGame(script, 5);
+    store().removeSeat(3);
+    expect(store().game?.retiredSeatNumbers).toEqual([3]);
+    expect(store().game?.reusePool).toEqual([]);
+    store().addSeat();
+    expect(store().game?.seats.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 4, 5, 6]);
+  });
+
+  it('勾选复用移除 → 编号入池；addSeat 消费池中最小号', () => {
+    store().createGame(script, 5);
+    store().removeSeat(3, true);
+    expect(store().game?.retiredSeatNumbers).toEqual([]);
+    expect(store().game?.reusePool).toEqual([3]);
+    store().addSeat();
+    expect(store().game?.seats.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5]);
+    expect(store().game?.reusePool).toEqual([]);
+  });
+
+  it('池中有多个号 → 取最小；非最小号仍在池中待补', () => {
+    store().createGame(script, 5);
+    store().removeSeat(2, true);
+    store().removeSeat(4, true);
+    expect(store().game?.reusePool).toEqual([2, 4]);
+    store().addSeat(); // 只补回最小号 2，4 号仍待补
+    expect(store().game?.reusePool).toEqual([4]);
+    expect(store().game?.seats.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 5]);
+    store().addSeat(); // 补回 4
+    expect(store().game?.reusePool).toEqual([]);
+    expect(store().game?.seats.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  it('启用全部退役编号：retired → 池，退役表清空', () => {
+    store().createGame(script, 5);
+    store().removeSeat(2);
+    store().removeSeat(4);
+    expect(store().game?.retiredSeatNumbers).toEqual([2, 4]);
+    store().enableAllRetiredSeats();
+    expect(store().game?.retiredSeatNumbers).toEqual([]);
+    expect(store().game?.reusePool).toEqual([2, 4]);
+    store().enableAllRetiredSeats();
+    expect(store().game?.reusePool).toEqual([2, 4]);
+  });
+
+  it('池空 + 高水位兜底：消费完池后新号 = max+1', () => {
+    store().createGame(script, 4);
+    store().removeSeat(2, true);
+    store().addSeat();
+    store().addSeat();
+    expect(store().game?.seats.map((s) => s.seatNumber).sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5]);
+  });
+});
+
+describe('gameStore.rippleShiftSeat（平移座位，ADR-005）', () => {
+  it('ABCD 选 A 移到 4 号位 → BCDA；编号与位置不动', () => {
+    store().createGame(script, 4);
+    store().renameSeat(1, 'A');
+    store().renameSeat(2, 'B');
+    store().renameSeat(3, 'C');
+    store().renameSeat(4, 'D');
+    store().rippleShiftSeat(1, 4);
+    const ordered = [...(store().game?.seats ?? [])].sort((a, b) => a.displayOrder - b.displayOrder);
+    expect(ordered.map((s) => s.playerName)).toEqual(['B', 'C', 'D', 'A']);
+    expect(ordered.map((s) => s.seatNumber)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('起止相同 = no-op', () => {
+    store().createGame(script, 3);
+    store().renameSeat(1, '张三');
+    store().rippleShiftSeat(1, 1);
+    expect(store().game?.seats.find((s) => s.seatNumber === 1)?.playerName).toBe('张三');
+  });
+});
