@@ -35,6 +35,12 @@ export type EventType =
   | 'note'
   /** 玩家声称的角色及其发动的能力/获得的信息（F-20）。payload: claimRoleId?, text */
   | 'claim'
+  /** 两名玩家互换座位（F-22 女舍监等）。payload: seatA, seatB（编号不动，住户交换） */
+  | 'seat_swap'
+  /** 新增座位（旅行者加入等，ADR-011）。payload: seatNumber, roleId? */
+  | 'seat_add'
+  /** 移除座位（离场；编号退役不重用）。payload: seatNumber, reason? */
+  | 'seat_remove'
   /** 阶段切换（系统自动产生）。 */
   | 'phase_change'
   /** 游戏结束。payload: winningTeam, reason */

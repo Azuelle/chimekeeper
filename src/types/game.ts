@@ -14,8 +14,13 @@ export type GamePhase = 'setup' | 'firstNight' | 'day' | 'night' | 'ended';
 
 /** 座位上的玩家。编号是面向国内环境的核心设计：座位号即身份。 */
 export interface Seat {
-  /** 座位号（从 1 开始，顺时针），全场唯一，复盘记录以此为锚 */
+  /**
+   * 座位号 = 椅子锚点（ADR-011）：全场唯一、只增不改不重用；新座位 = 当前最大号+1，
+   * 移除后退役。复盘事件全部以此为锚，永不失效。
+   */
   seatNumber: number;
+  /** 物理位置（ADR-011）：网格/座位圈显示顺序，与编号无关；支持 1 2 3 4 15 5 6 式排列 */
+  displayOrder: number;
   /** 玩家昵称（可空，纯编号局） */
   playerName?: string;
   /** 实际抽到的角色（仅说书人可见） */

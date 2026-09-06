@@ -19,6 +19,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 ## 2. 对局（Game）— `src/types/game.ts`
 
 - **Seat.seatNumber 是全场主键**：复盘事件、玩家统计全部以编号为锚（国内编号文化，核心设计决策）
+- **ADR-011 锚号不变量**：seatNumber = 椅子锚点，只增不改不重用，移除即退役（新号=max+1）；displayOrder = 物理位置独立字段；换位 = 原子交换住户字段（昵称/角色/生死/票token/提示标记），编号与位置不动——女舍监与 1 2 3 4 15 5 6 式排列免费支持，历史事件永不失效。原语见 `src/lib/seats.ts`
 - 玩家昵称可选——纯编号局是合法状态
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
 - phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
