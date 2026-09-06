@@ -6,9 +6,9 @@
  *   DOM 顺序始终为 displayOrder 序。
  * - 卡片：左上角编号小字 + token 圆环（阵营着色见 ui/tokenSkin）+ 名牌 + 右侧
  *   提示标记区；整卡点击弹出菜单。
- * - 菜单：顶部 = 改名文本框（直改昵称，省一层弹层）；下方 交换座位 / 平移座位
- *   （涟漪式）/ 移除座位（可选编号入复用池）；M2 角色类 / M3 白天类项目置灰占位
- *   并标注原因。
+ * - 菜单：顶部 = 改名文本框（直改昵称，字号略小）；其下**单行三个单色图标** =
+ *   交换座位 / 平移座位（涟漪式）/ 移除座位（细节由选中后的提示文案承担）；
+ *   M2 角色类 / M3 白天类项目置灰占位、带单色图标并标注阶段。
  * - 纯渲染 + 事件转发，座位变更全走 gameStore（底层 lib/seats 原语）。
  */
 import { useEffect, useRef, useState } from 'react';
@@ -17,6 +17,7 @@ import { ringLayout } from '../../lib/ringLayout';
 import { useGameStore } from '../../stores/game';
 import type { Seat } from '../../types/game';
 import { ringSkinFor } from '../../ui/tokenSkin';
+import { SeatGlyph, type SeatGlyphName } from '../../ui/icons';
 
 interface SeatGridProps {
   seats: Seat[];
@@ -37,15 +38,15 @@ interface MovePick {
 }
 
 /** M2/M3 门控：置灰占位行（ADR-005：未到里程碑标注原因，不可点） */
-const LOCKED_ITEMS: Array<{ key: string; lock: 'afterNight' | 'day' }> = [
-  { key: 'seats.menu.assignRole', lock: 'afterNight' },
-  { key: 'seats.menu.changeRole', lock: 'afterNight' },
-  { key: 'seats.menu.addReminder', lock: 'afterNight' },
-  { key: 'seats.menu.setAlignment', lock: 'afterNight' },
-  { key: 'seats.menu.logNight', lock: 'afterNight' },
-  { key: 'seats.menu.markDead', lock: 'day' },
-  { key: 'seats.menu.markVote', lock: 'day' },
-  { key: 'seats.menu.nominate', lock: 'day' },
+const LOCKED_ITEMS: Array<{ key: string; glyph: SeatGlyphName; lock: 'afterNight' | 'day' }> = [
+  { key: 'seats.menu.assignRole', glyph: 'assignRole', lock: 'afterNight' },
+  { key: 'seats.menu.changeRole', glyph: 'changeRole', lock: 'afterNight' },
+  { key: 'seats.menu.addReminder', glyph: 'addReminder', lock: 'afterNight' },
+  { key: 'seats.menu.setAlignment', glyph: 'setAlignment', lock: 'afterNight' },
+  { key: 'seats.menu.logNight', glyph: 'logNight', lock: 'afterNight' },
+  { key: 'seats.menu.markDead', glyph: 'markDead', lock: 'day' },
+  { key: 'seats.menu.markVote', glyph: 'markVote', lock: 'day' },
+  { key: 'seats.menu.nominate', glyph: 'nominate', lock: 'day' },
 ];
 
 const MIN_COLS = 2;
@@ -220,15 +221,27 @@ export function SeatGrid({ seats }: SeatGridProps) {
                           placeholder={t('seats.nicknamePlaceholder')}
                           onChange={(e) => renameSeat(seat.seatNumber, e.target.value)}
                         />
-                        <button type="button" className="seat-menu__item" onClick={() => startMove('swap')}>
-                          {t('seats.menu.swapSeats')}
-                        </button>
-                        <button type="button" className="seat-menu__item" onClick={() => startMove('ripple')}>
-                          {t('seats.menu.rippleSeat')}
-                        </button>
-                        <button type="button" className="seat-menu__item" onClick={openRemove}>
-                          {t('seats.menu.removeSeat')}
-                        </button>
+                        {/* 可用操作：单行三图标（细节见选中后的提示文案） */}
+                        <div className="seat-menu__actions" role="group" aria-label={t('seats.title')}>
+                          {(
+                            [
+                              { key: 'swapSeats', glyph: 'swap' as SeatGlyphName, run: () => startMove('swap') },
+                              { key: 'rippleSeat', glyph: 'ripple' as SeatGlyphName, run: () => startMove('ripple') },
+                              { key: 'removeSeat', glyph: 'remove' as SeatGlyphName, run: openRemove },
+                            ] as const
+                          ).map((item) => (
+                            <button
+                              type="button"
+                              key={item.key}
+                              className="seat-menu__action"
+                              aria-label={t(`seats.menu.${item.key}`)}
+                              title={t(`seats.menu.${item.key}`)}
+                              onClick={item.run}
+                            >
+                              <SeatGlyph name={item.glyph} />
+                            </button>
+                          ))}
+                        </div>
                         <div className="seat-menu__divider" />
                         {LOCKED_ITEMS.map((item) => (
                           <button
@@ -238,6 +251,9 @@ export function SeatGrid({ seats }: SeatGridProps) {
                             disabled
                             title={t(`seats.lock.${item.lock}`)}
                           >
+                            <span className="seat-menu__glyph" aria-hidden="true">
+                              <SeatGlyph name={item.glyph} />
+                            </span>
                             <span className="seat-menu__label">{t(item.key)}</span>
                             <span className="seat-menu__tag">{t(`seats.lock.${item.lock}`)}</span>
                           </button>
