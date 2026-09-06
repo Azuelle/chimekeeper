@@ -25,9 +25,11 @@ describe('baseComposition', () => {
 describe('setupRoleHints（ADR-008）', () => {
   it('在场 setup 角色高亮 + 调整方向文案', () => {
     const hints = setupRoleHints(tbRoles);
-    expect(hints).toHaveLength(1); // 男爵
-    expect(hints[0]?.roleId).toBe('baron');
-    expect(hints[0]?.hint).toContain('+2外来者');
+    expect(hints.map((h) => h.roleId).sort()).toEqual(['baron', 'drunk']); // 男爵+酒鬼均为 setup 角色
+    const baron = hints.find((h) => h.roleId === 'baron');
+    expect(baron?.hint).toContain('+2外来者');
+    const drunk = hints.find((h) => h.roleId === 'drunk');
+    expect(drunk?.hint).toContain('认知覆盖');
   });
 
   it('未知 setup 角色（DIY）给通用提示', () => {
