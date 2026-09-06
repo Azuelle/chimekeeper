@@ -24,7 +24,7 @@ interface ScriptState {
   clear(): void;
 }
 
-export const useScriptStore = create<ScriptState>()((set) => ({
+export const useScriptStore = create<ScriptState>()((set, get) => ({
   script: null,
   error: null,
 
@@ -39,7 +39,7 @@ export const useScriptStore = create<ScriptState>()((set) => ({
   },
 
   async importFromFile(file) {
-    return this.importFromText(await file.text());
+    return get().importFromText(await file.text());
   },
 
   async importFromUrl(url) {
@@ -64,12 +64,12 @@ export const useScriptStore = create<ScriptState>()((set) => ({
       set({ error: { code: 'scriptImport.error.fetchFailed' } });
       return false;
     }
-    return this.importFromText(text);
+    return get().importFromText(text);
   },
 
   selectBuiltin(id) {
     // 与文件导入走同一条解析链路，零特判（ADR-015）
-    return this.importFromText(builtinScriptJson(id));
+    return get().importFromText(builtinScriptJson(id));
   },
 
   clear() {
