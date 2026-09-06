@@ -23,6 +23,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
 - phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
 - demonBluffs：3 个不在场善良角色 id
+- `Seat.isTraveler?: boolean`（v0.5 预留，ADR-009）：旅行者座位；阵营计算（共情者邻座
+  邪恶计数、存活人数、票数门槛）均排除旅行者；死后阵营转邪由说书人手动标记
 
 ## 3. 事件日志（Event Log）— `src/types/events.ts`
 
@@ -37,7 +39,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 | `execution` | 处决 | died（弄臣等 false） |
 | `revival` | 复活（教授等） | — |
 | `role_change` | 角色变化（哲学家/pit-hag） | fromRoleId, toRoleId |
-| `note` | 说书人自由备注 | text |
+| `note` | 说书人自由备注（含 F-19 备忘填空结果） | text |
+| `claim` | 玩家声称的角色/信息/能力（F-20） | claimRoleId?, text |
 | `phase_change` | 阶段切换（自动） | — |
 | `game_end` | 结局登记 | winningTeam, reason? |
 

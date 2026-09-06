@@ -24,6 +24,8 @@ export interface Seat {
   alive: boolean;
   /** 是否有投票权（死亡后一票，旅行者规则等，v1 简化为 boolean） */
   hasVoteToken: boolean;
+  /** 旅行者座位（v0.5 预留，ADR-009）：阵营计算/存活数/票数门槛均排除旅行者 */
+  isTraveler?: boolean;
   /** 挂在该座位上的提示标记 */
   reminderTokens: ReminderToken[];
 }

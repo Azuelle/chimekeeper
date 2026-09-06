@@ -2,7 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseScript } from './scriptParser';
-import { baseComposition, adjustedComposition, assignRoles, recommendDemonBluffs } from './setup';
+import { baseComposition, assignRoles, recommendDemonBluffs, setupRoleHints } from './setup';
+import type { TeamComposition } from '../types/game';
 import type { Role } from '../types/script';
 
 const tbResult = parseScript(readFileSync(join(__dirname, '../../fixtures/official-tool-tb-sample.json'), 'utf-8'));
@@ -21,20 +22,33 @@ describe('baseComposition', () => {
   });
 });
 
-describe('adjustedComposition', () => {
-  it('含 Baron 时 +2 外来者 -2 镇民', () => {
-    const comp = adjustedComposition(7, tbRoles);
-    expect(comp).toEqual({ townsfolk: 3, outsider: 2, minion: 1, demon: 1 });
+describe('setupRoleHints（ADR-008）', () => {
+  it('在场 setup 角色高亮 + 调整方向文案', () => {
+    const hints = setupRoleHints(tbRoles);
+    expect(hints).toHaveLength(1); // 男爵
+    expect(hints[0]?.roleId).toBe('baron');
+    expect(hints[0]?.hint).toContain('+2外来者');
   });
-  it('不含 Baron 时保持基础构成', () => {
-    const noBaron = tbRoles.filter((r) => r.id !== 'baron');
-    expect(adjustedComposition(7, noBaron)).toEqual(baseComposition(7));
+
+  it('未知 setup 角色（DIY）给通用提示', () => {
+    const diy: Role[] = [
+      { id: 'custom_setup_guy', name: '自定义调整角色', team: 'townsfolk', firstNight: 0, otherNight: 0, setup: true },
+    ];
+    const hints = setupRoleHints(diy);
+    expect(hints[0]?.hint).toBe('该角色会调整初始设置，请按其能力说明调整构成');
+  });
+
+  it('隐士特例文案', () => {
+    const hermit: Role[] = [
+      { id: 'hermit', name: '隐士', team: 'outsider', firstNight: 0, otherNight: 0, setup: true },
+    ];
+    expect(setupRoleHints(hermit)[0]?.hint).toContain('-0~1外来者');
   });
 });
 
 describe('assignRoles', () => {
   it('分配数量等于玩家人数，阵营构成正确', () => {
-    const assigned = assignRoles(tbRoles, 7, fixedRng);
+    const assigned = assignRoles(tbRoles, baseComposition(7)!, fixedRng);
     expect(assigned).not.toBeNull();
     expect(assigned).toHaveLength(7);
     const count = (team: string) => assigned!.filter((r) => r.team === team).length;
@@ -44,13 +58,14 @@ describe('assignRoles', () => {
 
   it('角色池不足时返回 null', () => {
     const onlyOneRole = tbRoles.slice(0, 1);
-    expect(assignRoles(onlyOneRole, 7, fixedRng)).toBeNull();
+    const sevenPlayerComp: TeamComposition = { townsfolk: 5, outsider: 0, minion: 1, demon: 1 };
+    expect(assignRoles(onlyOneRole, sevenPlayerComp, fixedRng)).toBeNull();
   });
 });
 
 describe('recommendDemonBluffs', () => {
   it('推荐 3 个不在场的善良角色', () => {
-    const assigned = assignRoles(tbRoles, 7, fixedRng)!;
+    const assigned = assignRoles(tbRoles, baseComposition(7)!, fixedRng)!;
     const bluffs = recommendDemonBluffs(tbRoles, assigned, fixedRng);
     const assignedIds = new Set(assigned.map((r) => r.id));
     for (const b of bluffs) {

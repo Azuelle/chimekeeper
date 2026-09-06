@@ -31,8 +31,10 @@ export type EventType =
   | 'revival'
   /** 角色变化（如哲学家获得能力、pit-hag 变人）。payload: fromRoleId, toRoleId */
   | 'role_change'
-  /** 说书人自由备注（判罚、口误修正、精彩发言记录等）。payload: text */
+  /** 说书人自由备注（判罚、口误修正、精彩发言、F-19 备忘填空等）。payload: text */
   | 'note'
+  /** 玩家声称的角色及其发动的能力/获得的信息（F-20）。payload: claimRoleId?, text */
+  | 'claim'
   /** 阶段切换（系统自动产生）。 */
   | 'phase_change'
   /** 游戏结束。payload: winningTeam, reason */

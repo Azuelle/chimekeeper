@@ -24,17 +24,51 @@ export function baseComposition(playerCount: number): TeamComposition | null {
   return COMPOSITION_TABLE[playerCount] ?? null;
 }
 
-/** Baron 类 setup 调整：每有一个 Baron 类角色在场，+2 outsider -2 townsfolk */
-export function adjustedComposition(playerCount: number, scriptRoles: Role[]): TeamComposition | null {
-  const base = baseComposition(playerCount);
-  if (!base) return null;
-  const baronCount = scriptRoles.filter((r) => r.setup && r.id === 'baron').length;
-  if (baronCount === 0) return base;
-  return {
-    ...base,
-    townsfolk: base.townsfolk - 2 * baronCount,
-    outsider: base.outsider + 2 * baronCount,
-  };
+/**
+ * 在场 setup 角色的调整方向提示（ADR-008）：不自动改构成，仅供 UI 高亮文案。
+ * 文案蒸馏自中文钟楼百科【设置调整】页；未知 setup 角色（DIY）给通用提示。
+ */
+const SETUP_HINTS: Record<string, string> = {
+  baron: '+2外来者 -2镇民',
+  godfather: '+1或-1外来者，调整相应镇民',
+  fanggu: '+1外来者 -1镇民',
+  zombuul: '-1外来者 +1镇民',
+  balloonist: '+0~1外来者，调整相应镇民',
+  heretic: '+0外来者（每有一名玩家死亡，多一人获胜）',
+  hermit: '-0~1外来者 +对应镇民（说书人决定）',
+  summoner: '-1恶魔 +1镇民',
+  xaan: '加减任意数量外来者，调整相应镇民',
+  maligner: '+1爪牙（自身不出场）',
+  kazali: '移除所有爪牙，调整外来者，补镇民至人数',
+  lordoftyphon: '移除所有爪牙，调整外来者，补镇民至人数',
+  senti: '+1或-1外来者或不变（传奇）',
+  drunk: '-1酒鬼 +1镇民（认知覆盖）',
+  lunatic: '认知覆盖：以为的恶魔（构成不变）',
+  marionette: '移除自身 +1镇民，抽取后标记（认知覆盖）',
+  vortox: '（特殊）全镇民获得错误信息',
+  atheist: '（特殊）移除所有邪恶角色，说书人自由设置',
+  legion: '（特殊）过半角色标记替换为军团',
+  politically: '',
+};
+delete SETUP_HINTS['politically'];
+
+export interface SetupHint {
+  roleId: string;
+  roleName: string;
+  /** 调整方向一句话；内置表没有的 setup 角色给通用提示 */
+  hint: string;
+}
+
+export const GENERIC_SETUP_HINT = '该角色会调整初始设置，请按其能力说明调整构成';
+
+export function setupRoleHints(scriptRoles: Role[]): SetupHint[] {
+  return scriptRoles
+    .filter((r) => r.setup)
+    .map((r) => ({
+      roleId: r.id,
+      roleName: r.name,
+      hint: SETUP_HINTS[r.id] ?? GENERIC_SETUP_HINT,
+    }));
 }
 
 function shuffle<T>(arr: T[], rng: () => number): T[] {
@@ -51,12 +85,16 @@ function shuffle<T>(arr: T[], rng: () => number): T[] {
  * 返回长度 = playerCount 的角色数组（按座位顺序）。
  * 角色池不足对应阵营时返回 null（调用层给中文错误）。
  */
+/**
+ * 从剧本角色池按【说书人确认后的构成】随机抽角（ADR-008：构成由手动加减得出，
+ * 不再自动计算 setup 调整）。
+ */
 export function assignRoles(
   scriptRoles: Role[],
-  playerCount: number,
+  composition: TeamComposition,
   rng: () => number = Math.random,
 ): Role[] | null {
-  const comp = adjustedComposition(playerCount, scriptRoles);
+  const comp = composition;
   if (!comp) return null;
 
   const byTeam = (t: Team) => scriptRoles.filter((r) => r.team === t);
