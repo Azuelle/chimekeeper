@@ -1,13 +1,47 @@
-// 占位 App — M0 骨架阶段，仅验证构建链路。
-// M1 起按 docs/PRD.md 的 milestone 实现实际界面。
+/**
+ * 应用外壳与线性流程（M1）：导入剧本 → 剧本预览 → 排座位。
+ * 无路由依赖，步骤由 script/game store 状态 + 本地 step 派生。
+ */
+import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ScriptImport } from './components/setup/ScriptImport';
+import { ScriptPreview } from './components/setup/ScriptPreview';
+import { SeatSetup } from './components/setup/SeatSetup';
+import { useScriptStore } from './stores/script';
+import { useGameStore } from './stores/game';
+
+type Step = 'import' | 'preview' | 'seats';
+
 export function App() {
+  const { t } = useTranslation();
+  const [step, setStep] = useState<Step>('import');
+  const script = useScriptStore((s) => s.script);
+  const clearScript = useScriptStore((s) => s.clear);
+  const resetGame = useGameStore((s) => s.reset);
+
+  // 剧本未导入一律回导入页，防止状态漂移；导入成功自动从 import 进入 preview
+  const current: Step = !script ? 'import' : step === 'import' ? 'preview' : step;
+
+  const handleChangeScript = () => {
+    clearScript();
+    resetGame();
+    setStep('import');
+  };
+
   return (
-    <main style={{ fontFamily: 'system-ui', padding: '2rem', maxWidth: '40rem', margin: '0 auto' }}>
-      <h1>染·魔典</h1>
-      <p>血染钟楼线下说书辅助 · 过程记录 · 复盘导出</p>
-      <p>
-        <small>非官方社区创作 · 与 The Pandemonium Institute 无关 · 永久免费</small>
-      </p>
-    </main>
+    <>
+      <header className="app-header">
+        <h1>{t('app.title')}</h1>
+        <small>{t('app.communityNotice')}</small>
+      </header>
+      <main className="app-main">
+        {current === 'import' && <ScriptImport />}
+        {current === 'preview' && <ScriptPreview onArrange={() => setStep('seats')} />}
+        {current === 'seats' && <SeatSetup onChangeScript={handleChangeScript} />}
+      </main>
+      <footer className="app-footer">
+        <small>{t('app.communityNotice')}</small>
+      </footer>
+    </>
   );
 }
