@@ -34,7 +34,7 @@
 4. **编号引用**：功能/决策用编号引用（F-03 抽袋、ADR-011 锚号），见 GLOSSARY。
 5. **TPI 合规**：不复制官方美术/文本资产；角色名/能力文案属官方，项目 MIT 仅覆盖代码。
 6. **中文优先**：UI 默认 zh-CN，en 为 secondary。
-7. **CI 必过**：`npm run ci` = tsc + vitest run --coverage + vite build + vitepress docs 构建
+7. **CI 必过**：`pnpm run ci` = tsc + vitest run --coverage + vite build + vitepress docs 构建
    （coverage 阈值见 vitest.config.ts；docs-guard 为 PR 内强制检查：改 types/stores 必须同步 docs）。提交前本地跑通。
 8. **commit 规范**：`feat|fix|docs|refactor|test|chore: 中文简述`，
    末尾加 `Co-authored-by: GLM <noreply@z.ai>`（AI 参与时）。
@@ -44,10 +44,10 @@
 ## 开发
 
 ```bash
-npm install
-npm run dev      # 开发（含 i18n/types 检查）
-npm test         # vitest
-npm run ci       # 提交前必跑
+pnpm install
+pnpm run dev      # 开发（含 i18n/types 检查）
+pnpm test         # vitest
+pnpm run ci       # 提交前必跑
 ```
 
 ## 当前里程碑

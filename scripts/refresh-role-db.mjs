@@ -11,7 +11,7 @@
  *
  * 版权边界（ADR-004）：仅蒸馏事实字段，名称/能力为官方文本随数据源引用，
  * 项目 MIT 仅覆盖代码；图标为运行时外链，不打包再分发。
- * 运行：npm run refresh:roledb（需网络；产出 src/data/official-roles.json）
+ * 运行：pnpm run refresh:roledb（需网络；产出 src/data/official-roles.json）
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';

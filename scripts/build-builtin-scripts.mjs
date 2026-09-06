@@ -3,7 +3,7 @@
  * 内置官方三版剧本生成器（ADR-015）。
  * 从 src/data/official-roles.json 按 edition 筛选核心四阵营角色，
  * 产物只含 id + 事实字段——不含角色名/能力文案（版权线），解析时由 roleDb 注水补全。
- * 运行：npm run build:builtin（产物提交进仓库；官方更新角色数据后手动重跑）。
+ * 运行：pnpm run build:builtin（产物提交进仓库；官方更新角色数据后手动重跑）。
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';

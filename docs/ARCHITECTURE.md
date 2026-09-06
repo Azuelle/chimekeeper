@@ -35,7 +35,7 @@ src/
 │   └── ringLayout.ts      # 圆桌环几何：人数×列数 → 座位坐标（ADR-005）
 ├── data/
 │   ├── official-roles.json        # 角色事实数据源
-│   └── builtin-scripts/           # 内置官方三版（ADR-015，npm run build:builtin 重生成）
+│   └── builtin-scripts/           # 内置官方三版（ADR-015，pnpm run build:builtin 重生成）
 ├── stores/        # Zustand 状态（动作 = 调 lib 纯函数）
 │   ├── script.ts          # 剧本导入/选择（F-01）
 │   └── game.ts            # 对局 + 座位 CRUD，全走 lib/seats 原语（F-02）

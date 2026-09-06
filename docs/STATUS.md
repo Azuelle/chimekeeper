@@ -7,7 +7,7 @@
 - M0 骨架：CI（tsc+vitest+build+docs-guard）、文档体系、类型、fixtures
 - **数据层全部就绪**（`src/lib/`，纯函数）：
   - `scriptParser` 剧本宽松解析 + 角色注水（ADR-003/007）
-  - `roleDb` 181 官方角色事实库（官方 botc-release 源，含实验角色，ADR-007；`npm run refresh:roledb` 刷新）
+  - `roleDb` 181 官方角色事实库（官方 botc-release 源，含实验角色，ADR-007；`pnpm run refresh:roledb` 刷新）
   - `setup` 抽袋默认构成 + setup 角色提示文案（ADR-008，不做自动计算）
   - `nightOrder` 夜晚行动顺序 + 系统锚点（ADR-006）
   - `vote` 计票 / `recap` 复盘 Markdown 导出
@@ -16,7 +16,7 @@
 - **M1 开桌完成**（feat/m1-ui 分支）：
   - F-01 读剧本 UI：粘贴 / 上传 / URL 三入口 + 错误中文提示（F-01c）
     + 内置官方三版一键选择（ADR-015；生成器 `scripts/build-builtin-scripts.mjs`，
-    产物 `src/data/builtin-scripts/`，npm run build:builtin 重生成）
+    产物 `src/data/builtin-scripts/`，pnpm run build:builtin 重生成）
   - F-01e 预览：角色按阵营分组、相克规则、warning 面板（info 级默认折叠防注水刷屏）
   - F-02 排座位 UI v2（ADR-005 改写）：座位沿**圆桌环**顺时针连续相邻（顶行铺满、
     左右 rail 等长、底行整行或收窄一格省行；手机竖屏 2 列整行闭环省空间 / 桌面按
@@ -30,7 +30,7 @@
     只增不减；addSeat 优先消费池中最小号）。角色数据 refresh 顺带保留官方
     reminder 文案字段（M2 夜单提示词来源）。
   - F-10 i18n 初始化（zh-CN 默认 + en fallback）+ 移动优先样式
-  - 测试 105 个全绿；`npm run ci`（tsc + vitest --coverage + build + docs 构建）通过；构建达标（N-01）
+  - 测试 105 个全绿；`pnpm run ci`（tsc + vitest --coverage + build + docs 构建）通过；构建达标（N-01）
 - 16 条 ADR、26 项 F- 需求（v0.5 分层见 ADR-009）
 
 ## 已知边界（M1）
@@ -64,7 +64,7 @@
 - 座位操作全走 `lib/seats.ts` / `lib/ringLayout.ts`
 - `src/lib/` 不许 import React（纯函数层）
 - 现有测试不许破坏；新代码配测试
-- commit 前 `npm run ci` 全绿
+- commit 前 `pnpm run ci` 全绿
 
 ## 给 opencode agent 的话
 

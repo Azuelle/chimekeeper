@@ -4,7 +4,7 @@
  * 数据源 = 官方 script tool 仓库 ThePandemoniumInstitute/botc-release
  * （roles.json 事实字段 + nightsheet.json 夜晚顺序），含实验角色与奇遇；
  * bra1n/townsquare 仅提供图标外链 URL 映射与已下架角色兜底。
- * 由 scripts/refresh-role-db.mjs 生成（npm run refresh:roledb，需网络）。
+ * 由 scripts/refresh-role-db.mjs 生成（pnpm run refresh:roledb，需网络）。
  *
  * 注意：名字与能力文本为英文。中文显示名依赖剧本 JSON 自带数据或
  * v1.5 的 zh 名称映射层（见 PRD F-14）。

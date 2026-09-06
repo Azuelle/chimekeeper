@@ -20,11 +20,11 @@
 ## 开发
 
 ```bash
-npm ci
-npm run dev        # 开发服务器
-npm run test       # Vitest 单测
-npm run build      # 构建静态产物（dist/，可任意静态托管）
-npm run docs:dev   # 文档站开发预览
+pnpm install
+pnpm run dev        # 开发服务器
+pnpm run test       # Vitest 单测
+pnpm run build      # 构建静态产物（dist/，可任意静态托管）
+pnpm run docs:dev   # 文档站开发预览
 ```
 
 ## 参与贡献

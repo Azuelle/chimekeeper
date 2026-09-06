@@ -1,7 +1,7 @@
 # Dependabot（npm）— 依赖安全 + 版本更新
-# 说明：依赖升级 PR 只改 package.json/package-lock.json，不碰 src/types|stores，
+# 说明：依赖升级 PR 只改 package.json/pnpm-lock.yaml，不碰 src/types|stores，
 # 因此不会触发 docs-guard（它只在改动匹配 src/(types|stores)/ 时要求同步 docs）。
-# CI 用 `npm ci` 锁 lockfile，Dependabot 在自己开的 PR 里改锁并跑全套 CI，安全。
+# CI 用 `pnpm install --frozen-lockfile` 锁 lockfile，Dependabot 在自己开的 PR 里改锁并跑全套 CI，安全。
 # 生效需合并进默认分支（main）后由 GitHub 调度。
 version: 2
 updates:
@@ -29,7 +29,7 @@ updates:
           - "zustand"
           - "dexie"
           - "zod"
-      # vitest 全家（含 coverage/provider）必须同版本升，否则 peer 漂移会让 npm ci 挂
+      # vitest 全家（含 coverage/provider）必须同版本升，否则 peer 漂移会让 pnpm install 挂
       vitest:
         patterns:
           - "vitest"
