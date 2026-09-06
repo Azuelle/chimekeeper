@@ -57,13 +57,40 @@
     "regenerate": "重新生成",
     "regenerateConfirm": "重新生成将清空现有昵称，确定？",
     "add": "添加座位",
-    "remove": "移除",
-    "removeConfirm": "座位 {{seat}} 的编号将退役且不会复用，确定移除？",
-    "swap": "换位",
-    "swapHint": "点选两个座位完成换位",
-    "nicknamePlaceholder": "昵称（可空）",
     "seatNumberLabel": "座位编号",
-    "circularHint": "座位按编号顺时针排列，末位与 1 号相邻",
+    "nicknamePlaceholder": "昵称（可空）",
+    "reminderPlaceholder": "点击添加提示标记",
+    "menu": {
+      "editName": "编辑名字",
+      "swapSeats": "交换座位",
+      "rippleSeat": "平移座位",
+      "removeSeat": "移除座位",
+      "assignRole": "分配角色",
+      "changeRole": "更换角色",
+      "addReminder": "添加提示标记",
+      "setAlignment": "设置阵营",
+      "logNight": "记录夜晚行动",
+      "markDead": "标记死亡",
+      "markVote": "标记投票",
+      "nominate": "提名"
+    },
+    "lock": {
+      "afterNight": "入夜阶段开放",
+      "day": "白天阶段开放"
+    },
+    "select": {
+      "swap": "已选中 {{seat}} 号：点选另一个座位完成换位（点原座位取消）",
+      "ripple": "已选中 {{seat}} 号：点选目标座位，住户整体平移（点原座位取消）"
+    },
+    "removeTitle": "移除座位 {{seat}}？",
+    "removeDesc": "编号默认退役、不再使用；勾选后进入复用池，可再次使用。",
+    "reuseSeat": "将编号放入复用池",
+    "confirmRemove": "移除",
+    "save": "保存",
+    "cancel": "取消",
+    "retiredSummary": "退役编号：{{list}}",
+    "enableRetired": "启用退役编号",
+    "empty": "暂无座位：请点「添加座位」",
     "changeScript": "换个剧本"
   },
   "setup": {

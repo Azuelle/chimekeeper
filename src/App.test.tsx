@@ -37,8 +37,11 @@ describe('App 主流程（M1 验收链路）', () => {
     expect(useGameStore.getState().game?.seats).toHaveLength(7);
     expect(screen.getAllByRole('listitem')).toHaveLength(7);
 
-    // 4. 昵称
+    // 4. 昵称：点卡片 → 菜单「编辑名字」
+    await user.click(screen.getByRole('button', { name: '座位编号 2' }));
+    await user.click(screen.getByRole('button', { name: '编辑名字' }));
     await user.type(screen.getByLabelText('座位编号 2 昵称（可空）'), '小美');
+    await user.click(screen.getByRole('button', { name: '保存' }));
     expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 2)?.playerName).toBe('小美');
   });
 

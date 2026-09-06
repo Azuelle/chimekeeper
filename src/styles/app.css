@@ -278,7 +278,7 @@ button:focus-visible {
   font-weight: 600;
 }
 
-/* ── 座位圈（ADR-005 响应式网格） ───────── */
+/* ── 座位环（ADR-005 矩形环 + 玩家卡） ──── */
 
 .seat-toolbar {
   display: flex;
@@ -292,70 +292,153 @@ button:focus-visible {
   width: 5.5rem;
 }
 
-.seat-grid {
+.seat-ring {
   list-style: none;
   margin: 0.75rem 0 0;
   padding: 0;
   display: grid;
-  gap: 0.75rem;
-  /* 手机竖屏两列（ADR-005），minmax 防挤压 */
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
 }
 
-@media (min-width: 34rem) {
-  .seat-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 52rem) {
-  .seat-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-.seat-card {
+/* 网格列数/行数由 SeatGrid 按 ringLayout() 内联下发；卡内元素自适应 */
+.seat-cell {
   position: relative;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 0.6rem 0.6rem 0.7rem;
+  min-width: 0;
+}
+
+/* 玩家卡 = 整卡按钮（token 主体 + 名牌 + 右侧提示标记区） */
+.seat-face {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.3rem;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  padding: 0.55rem 0.55rem 0.5rem;
+  cursor: pointer;
 }
 
-/* 邻座连接线：每张卡向右延伸，表达顺时针相邻（末位与 1 号相邻见提示文案） */
-.seat-card:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -0.75rem;
-  width: 0.75rem;
-  height: 2px;
-  background: var(--border);
-}
-
-.seat-card.swap-pending {
+.seat-face.has-menu {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--ring);
 }
 
-.seat-number {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  color: var(--accent);
+.seat-face__number {
+  position: absolute;
+  top: 0.28rem;
+  left: 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.03em;
 }
 
-.seat-actions {
+.seat-face__mid {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 0.4rem;
+  margin-top: 0.1rem;
 }
 
-.seat-actions .btn {
-  flex: 1;
+.seat-face__token {
+  display: flex;
+  justify-content: center;
+}
+
+/* token 圆环：占位灰环，阵营着色由 ui/tokenSkin 提供内联主色 */
+.token-ring {
+  position: relative;
+  width: 3.1rem;
+  height: 3.1rem;
+  border-radius: 50%;
+  border: 0.32rem solid var(--border);
+  background: color-mix(in srgb, var(--bg-input) 88%, #fff 12%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s ease;
+}
+
+/* 自绘金属高光（无外部素材） */
+.token-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 210deg,
+    rgba(255, 255, 255, 0.18),
+    transparent 38%,
+    rgba(255, 255, 255, 0.05) 66%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+.token-ring__core {
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-input) 70%, var(--border) 30%);
+}
+
+.seat-face__name {
+  min-height: 1rem;
+  font-size: 0.8rem;
+  line-height: 1.15;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 0.1rem;
+}
+
+/* 提示标记区：堆叠 tokens；空时竖排占位 */
+.reminder-rail {
+  flex: 0 0 auto;
+  width: 2.5rem;
+  min-height: 3.1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.22rem;
+}
+
+.reminder-chip {
+  max-width: 100%;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.6rem;
+  line-height: 1.2;
+  border-radius: 0.3rem;
+  padding: 0.08rem 0.28rem;
+  word-break: break-all;
+}
+
+.reminder-rail__empty {
+  writing-mode: vertical-rl;
+  font-size: 0.58rem;
+  line-height: 1.4;
+  color: var(--text-dim);
+  opacity: 0.75;
+  letter-spacing: 0.08em;
+}
+
+/* 换位/平移选择态 */
+.seat-cell.is-origin .seat-face {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.seat-cell.is-target .seat-face {
+  cursor: crosshair;
 }
 
 .seat-hint {
@@ -363,4 +446,127 @@ button:focus-visible {
   font-size: 0.78rem;
   text-align: center;
   margin-top: 0.6rem;
+}
+
+/* ── 玩家卡菜单（ADR-005 点击弹菜单） ───── */
+
+.seat-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 12rem;
+  max-width: calc(100vw - 2rem);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  box-shadow: 0 0.6rem 1.6rem rgba(0, 0, 0, 0.5);
+  padding: 0.35rem;
+}
+
+.seat-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.6rem;
+  font: inherit;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.seat-menu__item:disabled {
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
+.seat-menu__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seat-menu__tag {
+  flex: 0 0 auto;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 0.25rem;
+  padding: 0.06rem 0.32rem;
+  white-space: nowrap;
+}
+
+.seat-menu__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.2rem 0.1rem;
+}
+
+.seat-menu__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.3rem;
+}
+
+.seat-menu__remove {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.3rem;
+}
+
+.seat-menu__remove-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.seat-menu__remove-desc {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.seat-menu__reuse {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.seat-menu__reuse input {
+  accent-color: var(--accent);
+}
+
+.seat-menu__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.15rem;
+}
+
+/* 退役编号一览（工具栏内） */
+.retired-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.retired-bar__text {
+  overflow-wrap: anywhere;
 }

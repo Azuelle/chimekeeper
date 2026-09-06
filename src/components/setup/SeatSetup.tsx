@@ -1,6 +1,6 @@
 /**
- * 排座位（F-02）：人数输入 → 生成座位圈；增座/删座/换位（F-22 原语的 UI 面板）。
- * 换位交互 = 点选两个座位（再点同一个取消）。
+ * 排座位（F-02）：人数输入 → 生成座位环；增座 / 重新生成 /
+ * 退役编号一览与启用（复用池）。座位环卡片与其菜单见 SeatGrid。
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,10 +17,9 @@ export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
   const game = useGameStore((s) => s.game);
   const createGame = useGameStore((s) => s.createGame);
   const addSeat = useGameStore((s) => s.addSeat);
-  const swapSeats = useGameStore((s) => s.swapSeats);
+  const enableAllRetiredSeats = useGameStore((s) => s.enableAllRetiredSeats);
 
   const [countText, setCountText] = useState('7');
-  const [pendingSwap, setPendingSwap] = useState<number | null>(null);
 
   if (!script) return null;
 
@@ -31,25 +30,14 @@ export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
     return Math.min(MAX_COUNT, Math.floor(n));
   })();
 
-  const handleSwapPick = (seatNumber: number) => {
-    if (pendingSwap === seatNumber) {
-      setPendingSwap(null); // 再点同一个 = 取消
-      return;
-    }
-    if (pendingSwap === null) {
-      setPendingSwap(seatNumber);
-      return;
-    }
-    swapSeats(pendingSwap, seatNumber);
-    setPendingSwap(null);
-  };
-
   const handleRegenerate = () => {
     if (!window.confirm(t('seats.regenerateConfirm'))) return;
     // setup 阶段尚无历史事件，重建座位圈安全；M2 起夜后不再提供此入口
-    setPendingSwap(null);
     createGame(script, parsedCount);
   };
+
+  const retired = game ? [...game.retiredSeatNumbers].sort((a, b) => a - b) : [];
+  const retiredText = retired.join(', ');
 
   return (
     <section className="panel" aria-label={t('seats.title')}>
@@ -84,8 +72,15 @@ export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
 
       {game && (
         <>
-          {pendingSwap !== null && <p className="seat-hint">{t('seats.swapHint')}</p>}
-          <SeatGrid seats={game.seats} pendingSwap={pendingSwap} onSwapPick={handleSwapPick} />
+          {retired.length > 0 && (
+            <div className="retired-bar">
+              <span className="retired-bar__text">{t('seats.retiredSummary', { list: retiredText })}</span>
+              <button type="button" className="btn btn--compact" onClick={enableAllRetiredSeats}>
+                {t('seats.enableRetired')}
+              </button>
+            </div>
+          )}
+          <SeatGrid seats={game.seats} />
           <div className="btn-row">
             <button type="button" className="btn" onClick={onChangeScript}>
               {t('seats.changeScript')}

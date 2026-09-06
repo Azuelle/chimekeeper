@@ -57,13 +57,40 @@
     "regenerate": "Regenerate",
     "regenerateConfirm": "Regenerating clears all nicknames. Continue?",
     "add": "Add seat",
-    "remove": "Remove",
-    "removeConfirm": "Seat {{seat}}'s number will be retired and never reused. Remove?",
-    "swap": "Swap",
-    "swapHint": "Tap two seats to swap them",
-    "nicknamePlaceholder": "Nickname (optional)",
     "seatNumberLabel": "Seat number",
-    "circularHint": "Seats run clockwise by number; the last seat adjoins seat 1",
+    "nicknamePlaceholder": "Nickname (optional)",
+    "reminderPlaceholder": "Tap to add a reminder",
+    "menu": {
+      "editName": "Edit name",
+      "swapSeats": "Swap seats",
+      "rippleSeat": "Move player",
+      "removeSeat": "Remove seat",
+      "assignRole": "Assign role",
+      "changeRole": "Change role",
+      "addReminder": "Add reminder",
+      "setAlignment": "Set alignment",
+      "logNight": "Log night action",
+      "markDead": "Mark dead",
+      "markVote": "Mark voted",
+      "nominate": "Nominate"
+    },
+    "lock": {
+      "afterNight": "Unlocks at nightfall",
+      "day": "Unlocks during the day"
+    },
+    "select": {
+      "swap": "Seat {{seat}} picked: tap another seat to swap (tap again to cancel)",
+      "ripple": "Seat {{seat}} picked: tap the destination; players shift along (tap again to cancel)"
+    },
+    "removeTitle": "Remove seat {{seat}}?",
+    "removeDesc": "The number is retired for good by default; tick to let it be reused.",
+    "reuseSeat": "Put the number back in the reuse pool",
+    "confirmRemove": "Remove",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retiredSummary": "Retired numbers: {{list}}",
+    "enableRetired": "Re-enable retired numbers",
+    "empty": "No seats: tap “Add seat”",
     "changeScript": "Change script"
   },
   "setup": {
