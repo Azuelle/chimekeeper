@@ -7,18 +7,64 @@
     "title": "导入剧本",
     "fromFile": "上传 JSON 文件",
     "fromClipboard": "粘贴 JSON 文本",
+    "fromUrl": "从 URL 导入",
+    "import": "导入",
+    "pastePlaceholder": "把剧本 JSON 粘贴到这里…",
+    "urlPlaceholder": "https://…（剧本 JSON 直链）",
     "error": {
       "invalidJson": "无法解析：这不是合法的 JSON 文本",
       "notArray": "剧本格式错误：顶层应为数组",
       "invalidRole": "第 {{index}} 项不是合法的角色定义",
       "unknownTeam": "角色「{{role}}」的阵营「{{team}}」无法识别",
       "noRoles": "剧本中没有角色",
-      "unknownRole": "角色「{{role}}」不在内置角色库中，且剧本未提供其阵营。请在剧本 JSON 中补全该角色定义（至少需要 team 字段）"
+      "unknownRole": "角色「{{role}}」不在内置角色库中，且剧本未提供其阵营。请在剧本 JSON 中补全该角色定义（至少需要 team 字段）",
+      "invalidUrl": "请输入合法的 http(s) URL",
+      "fetchFailed": "URL 拉取失败：可能是网络问题，或目标站点不允许跨域读取。请改用粘贴或上传文件"
     },
     "warning": {
       "customMetaField": "剧本包含自定义字段「{{field}}」，已保留但不会被使用",
       "hydratedFromDb": "角色「{{role}}」仅有 ID，已从内置官方角色库补全数据"
     }
+  },
+  "scriptPreview": {
+    "title": "剧本预览",
+    "unnamed": "（未命名剧本）",
+    "author": "作者：{{author}}",
+    "roleCount": "共 {{count}} 个角色",
+    "warningsSummary": "导入提示（{{count}}）",
+    "jinxes": "相克规则",
+    "setupBadge": "设置调整",
+    "arrangeSeats": "排座位"
+  },
+  "builtin": {
+    "title": "内置官方剧本",
+    "tb": "暗流涌动",
+    "bmr": "黯月初升",
+    "snv": "梦殒春宵"
+  },
+  "team": {
+    "townsfolk": "镇民",
+    "outsider": "外来者",
+    "minion": "爪牙",
+    "demon": "恶魔",
+    "traveler": "旅行者",
+    "fabled": "传奇",
+    "loric": "奇遇"
+  },
+  "seats": {
+    "title": "排座位",
+    "generate": "生成座位",
+    "regenerate": "重新生成",
+    "regenerateConfirm": "重新生成将清空现有昵称，确定？",
+    "add": "添加座位",
+    "remove": "移除",
+    "removeConfirm": "座位 {{seat}} 的编号将退役且不会复用，确定移除？",
+    "swap": "换位",
+    "swapHint": "点选两个座位完成换位",
+    "nicknamePlaceholder": "昵称（可空）",
+    "seatNumberLabel": "座位编号",
+    "circularHint": "座位按编号顺时针排列，末位与 1 号相邻",
+    "changeScript": "换个剧本"
   },
   "setup": {
     "playerCount": "玩家人数",

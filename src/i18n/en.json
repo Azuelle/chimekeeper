@@ -7,18 +7,64 @@
     "title": "Import Script",
     "fromFile": "Upload JSON file",
     "fromClipboard": "Paste JSON text",
+    "fromUrl": "Import from URL",
+    "import": "Import",
+    "pastePlaceholder": "Paste script JSON here…",
+    "urlPlaceholder": "https://… (direct link to script JSON)",
     "error": {
       "invalidJson": "Cannot parse: not valid JSON",
       "notArray": "Script format error: top level must be an array",
       "invalidRole": "Entry #{{index}} is not a valid role definition",
       "unknownTeam": "Role \"{{role}}\" has unrecognized team \"{{team}}\"",
       "noRoles": "Script contains no roles",
-      "unknownRole": "Role \"{{role}}\" is not in the builtin database and the script does not define its team. Please provide a full role definition in the script JSON (at least a team field)"
+      "unknownRole": "Role \"{{role}}\" is not in the builtin database and the script does not define its team. Please provide a full role definition in the script JSON (at least a team field)",
+      "invalidUrl": "Enter a valid http(s) URL",
+      "fetchFailed": "Failed to fetch URL: network error or the site blocks cross-origin reads. Use paste or file upload instead."
     },
     "warning": {
       "customMetaField": "Script contains custom field \"{{field}}\"; kept but unused",
       "hydratedFromDb": "Role \"{{role}}\" was bare ID; hydrated from builtin official role database"
     }
+  },
+  "scriptPreview": {
+    "title": "Script preview",
+    "unnamed": "(Unnamed script)",
+    "author": "By {{author}}",
+    "roleCount": "{{count}} roles",
+    "warningsSummary": "Import notices ({{count}})",
+    "jinxes": "Jinxes",
+    "setupBadge": "Setup",
+    "arrangeSeats": "Arrange seats"
+  },
+  "builtin": {
+    "title": "Built-in official scripts",
+    "tb": "Trouble Brewing",
+    "bmr": "Bad Moon Rising",
+    "snv": "Sects & Violets"
+  },
+  "team": {
+    "townsfolk": "Townsfolk",
+    "outsider": "Outsider",
+    "minion": "Minion",
+    "demon": "Demon",
+    "traveler": "Traveller",
+    "fabled": "Fabled",
+    "loric": "Loric"
+  },
+  "seats": {
+    "title": "Arrange seats",
+    "generate": "Create seats",
+    "regenerate": "Regenerate",
+    "regenerateConfirm": "Regenerating clears all nicknames. Continue?",
+    "add": "Add seat",
+    "remove": "Remove",
+    "removeConfirm": "Seat {{seat}}'s number will be retired and never reused. Remove?",
+    "swap": "Swap",
+    "swapHint": "Tap two seats to swap them",
+    "nicknamePlaceholder": "Nickname (optional)",
+    "seatNumberLabel": "Seat number",
+    "circularHint": "Seats run clockwise by number; the last seat adjoins seat 1",
+    "changeScript": "Change script"
   },
   "setup": {
     "playerCount": "Player count",

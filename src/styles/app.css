@@ -1,0 +1,366 @@
+/* 司钟 v0 基础样式 — 移动优先（N-02），无框架依赖 */
+
+:root {
+  --bg: #141218;
+  --bg-elevated: #1e1b24;
+  --bg-input: #262230;
+  --border: #3a3446;
+  --text: #e8e4f0;
+  --text-dim: #a29bb3;
+  --accent: #d4a24e;
+  --accent-text: #1a1610;
+  --danger: #d46a6a;
+  --evil: #b46a9a;
+  --ring: color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── 布局 ─────────────────────────────── */
+
+.app-main {
+  width: 100%;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0.75rem 1rem 3rem;
+  flex: 1;
+}
+
+.app-header {
+  text-align: center;
+  padding: 1.25rem 1rem 0.5rem;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: 0.35em;
+  text-indent: 0.35em;
+}
+
+.app-header small {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.app-footer {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  padding: 1.5rem 1rem 2rem;
+}
+
+.panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-block: 0.75rem;
+}
+
+.panel h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+}
+
+.panel h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+/* ── 表单与按钮 ────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-block: 0.5rem;
+}
+
+.field label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+input[type='text'],
+input[type='url'],
+input[type='number'],
+textarea {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  color: var(--text);
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  width: 100%;
+}
+
+textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.8rem;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-input);
+  color: var(--text);
+  padding: 0.55rem 1rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn--primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.btn--danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--compact {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.78rem;
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+.builtin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── 反馈 ─────────────────────────────── */
+
+.error-box {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  border: 1px solid var(--danger);
+  border-radius: 0.5rem;
+  color: var(--danger);
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  margin-block: 0.5rem;
+}
+
+.notices {
+  margin-block: 0.5rem;
+}
+
+.notices summary {
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.notices ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+/* ── 剧本预览 ─────────────────────────── */
+
+.script-name {
+  margin: 0 0 0.25rem;
+  font-size: 1.2rem;
+}
+
+.script-meta {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+}
+
+.team-group {
+  margin-block: 0.75rem;
+}
+
+.team-group h3 {
+  margin: 0 0 0.4rem;
+}
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.85rem;
+}
+
+.role-chip--evil {
+  border-color: color-mix(in srgb, var(--evil) 55%, var(--border));
+}
+
+.badge-setup {
+  font-size: 0.68rem;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  border-radius: 0.35rem;
+  padding: 0 0.3rem;
+}
+
+.jinx-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+}
+
+.jinx-list li {
+  margin-block: 0.25rem;
+}
+
+.jinx-pair {
+  font-weight: 600;
+}
+
+/* ── 座位圈（ADR-005 响应式网格） ───────── */
+
+.seat-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block: 0.5rem;
+}
+
+.seat-count-input {
+  width: 5.5rem;
+}
+
+.seat-grid {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+  /* 手机竖屏两列（ADR-005），minmax 防挤压 */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (min-width: 34rem) {
+  .seat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 52rem) {
+  .seat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.seat-card {
+  position: relative;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.6rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+/* 邻座连接线：每张卡向右延伸，表达顺时针相邻（末位与 1 号相邻见提示文案） */
+.seat-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -0.75rem;
+  width: 0.75rem;
+  height: 2px;
+  background: var(--border);
+}
+
+.seat-card.swap-pending {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+.seat-number {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  color: var(--accent);
+}
+
+.seat-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.seat-actions .btn {
+  flex: 1;
+}
+
+.seat-hint {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  text-align: center;
+  margin-top: 0.6rem;
+}
