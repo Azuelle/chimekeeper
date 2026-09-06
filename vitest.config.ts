@@ -7,6 +7,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
+      all: true,
       // 只统计业务代码（lib/stores/components/ui/types 等），排除测试/入口
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx'],
