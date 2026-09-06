@@ -1,4 +1,4 @@
-# 染·魔典 (BotC Grimoire)
+# 司钟 (Chimekeeper)
 
 > 《血染钟楼》线下说书辅助 · 过程记录 · 复盘导出的 local-first PWA
 > **非官方社区创作**，与 The Pandemonium Institute 无关。遵循 [TPI 社区内容政策](https://bloodontheclocktower.com/pages/community-created-content-policy)。永久免费。

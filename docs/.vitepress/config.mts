@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress';
 
 export default defineConfig({
-  title: '染·魔典',
+  title: '司钟',
   description: '血染钟楼线下说书辅助 · 过程记录 · 复盘导出',
   lang: 'zh-CN',
   themeConfig: {

@@ -6,7 +6,7 @@ import Dexie, { type EntityTable } from 'dexie';
 import type { Game } from '../types/game';
 import type { GameEvent } from '../types/events';
 
-export const db = new Dexie('botc-grimoire') as Dexie & {
+export const db = new Dexie('chimekeeper') as Dexie & {
   games: EntityTable<Game, 'id'>;
   events: EntityTable<GameEvent, 'id'>;
 };
