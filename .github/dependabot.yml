@@ -29,3 +29,8 @@ updates:
           - "zustand"
           - "dexie"
           - "zod"
+      # vitest 全家（含 coverage/provider）必须同版本升，否则 peer 漂移会让 npm ci 挂
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
