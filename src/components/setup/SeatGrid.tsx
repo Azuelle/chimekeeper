@@ -2,15 +2,16 @@
  * 座位环（ADR-005 玩家卡）：圆桌环 + 点击弹菜单。
  *
  * - 环形：`ringLayout(count, cols)` 按容器宽度自适应列数（手机竖屏 2 列，
- *   桌面 3–8），座位按阅读顺序（顶行左起 → 右 rail → 底行右→左 → 左 rail）
- *   围成一圈，DOM 顺序始终为 displayOrder 序。
- * - 卡片：左上角编号小字 + token 圆环（阵营着色见 ui/tokenSkin）+ 名牌
- *   + 右侧提示标记区；点击整卡弹出菜单。
- * - 菜单：编辑名字（内联）、交换座位、平移座位（涟漪式）、移除座位
- *   （可选编号入复用池）；M2 角色类 / M3 白天类项目置灰占位并标注原因。
+ *   桌面 3–8），座位按阅读顺序（顶行 → 右 rail → 底行右→左 → 左 rail）围成一圈，
+ *   DOM 顺序始终为 displayOrder 序。
+ * - 卡片：左上角编号小字 + token 圆环（阵营着色见 ui/tokenSkin）+ 名牌 + 右侧
+ *   提示标记区；整卡点击弹出菜单。
+ * - 菜单：顶部 = 改名文本框（直改昵称，省一层弹层）；下方 交换座位 / 平移座位
+ *   （涟漪式）/ 移除座位（可选编号入复用池）；M2 角色类 / M3 白天类项目置灰占位
+ *   并标注原因。
  * - 纯渲染 + 事件转发，座位变更全走 gameStore（底层 lib/seats 原语）。
  */
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ringLayout } from '../../lib/ringLayout';
 import { useGameStore } from '../../stores/game';
@@ -21,7 +22,7 @@ interface SeatGridProps {
   seats: Seat[];
 }
 
-type MenuView = 'root' | 'rename' | 'remove';
+type MenuView = 'root' | 'remove';
 
 /** 单个开放中的菜单：座位 + 视图 */
 interface OpenMenu {
@@ -69,7 +70,6 @@ export function SeatGrid({ seats }: SeatGridProps) {
   const [cols, setCols] = useState<number>(FALLBACK_COLS);
   const [menu, setMenu] = useState<OpenMenu | null>(null);
   const [move, setMove] = useState<MovePick | null>(null);
-  const [renameDraft, setRenameDraft] = useState('');
   const [reuseChecked, setReuseChecked] = useState(false);
 
   const sorted = [...seats].sort((a, b) => a.displayOrder - b.displayOrder);
@@ -126,26 +126,15 @@ export function SeatGrid({ seats }: SeatGridProps) {
     setMenu((m) => (m?.seatNumber === seatNumber ? null : { seatNumber, view: 'root' }));
   };
 
-  const openView = (view: MenuView) => {
+  const openRemove = () => {
     if (!menu) return;
-    if (view === 'rename') {
-      const seat = sorted.find((s) => s.seatNumber === menu.seatNumber);
-      setRenameDraft(seat?.playerName ?? '');
-    }
-    if (view === 'remove') setReuseChecked(false);
-    setMenu({ ...menu, view });
+    setReuseChecked(false);
+    setMenu({ ...menu, view: 'remove' });
   };
 
   const startMove = (kind: MovePick['kind']) => {
     if (!menu) return;
     setMove({ kind, from: menu.seatNumber });
-    setMenu(null);
-  };
-
-  const submitRename = (e: FormEvent) => {
-    e.preventDefault();
-    if (!menu) return;
-    renameSeat(menu.seatNumber, renameDraft);
     setMenu(null);
   };
 
@@ -198,28 +187,7 @@ export function SeatGrid({ seats }: SeatGridProps) {
                 />
                 {menu?.seatNumber === seat.seatNumber && (
                   <div className="seat-menu" role="menu">
-                    {menu.view === 'rename' && (
-                      <form className="seat-menu__form" onSubmit={submitRename}>
-                        <input
-                          type="text"
-                          value={renameDraft}
-                          autoFocus
-                          aria-label={`${t('seats.seatNumberLabel')} ${String(seat.seatNumber)} ${t('seats.nicknamePlaceholder')}`}
-                          placeholder={t('seats.nicknamePlaceholder')}
-                          onChange={(e) => setRenameDraft(e.target.value)}
-                        />
-                        <div className="seat-menu__footer">
-                          <button type="button" className="btn btn--compact" onClick={() => setMenu(null)}>
-                            {t('seats.cancel')}
-                          </button>
-                          <button type="submit" className="btn btn--compact btn--primary">
-                            {t('seats.save')}
-                          </button>
-                        </div>
-                      </form>
-                    )}
-
-                    {menu.view === 'remove' && (
+                    {menu.view === 'remove' ? (
                       <div className="seat-menu__remove">
                         <p className="seat-menu__remove-title">
                           {t('seats.removeTitle', { seat: String(seat.seatNumber) })}
@@ -242,20 +210,23 @@ export function SeatGrid({ seats }: SeatGridProps) {
                           </button>
                         </div>
                       </div>
-                    )}
-
-                    {menu.view === 'root' && (
+                    ) : (
                       <>
-                        <button type="button" className="seat-menu__item" onClick={() => openView('rename')}>
-                          {t('seats.menu.editName')}
-                        </button>
+                        <input
+                          type="text"
+                          className="seat-menu__name"
+                          value={seat.playerName ?? ''}
+                          aria-label={`${t('seats.seatNumberLabel')} ${String(seat.seatNumber)} ${t('seats.nicknamePlaceholder')}`}
+                          placeholder={t('seats.nicknamePlaceholder')}
+                          onChange={(e) => renameSeat(seat.seatNumber, e.target.value)}
+                        />
                         <button type="button" className="seat-menu__item" onClick={() => startMove('swap')}>
                           {t('seats.menu.swapSeats')}
                         </button>
                         <button type="button" className="seat-menu__item" onClick={() => startMove('ripple')}>
                           {t('seats.menu.rippleSeat')}
                         </button>
-                        <button type="button" className="seat-menu__item" onClick={() => openView('remove')}>
+                        <button type="button" className="seat-menu__item" onClick={openRemove}>
                           {t('seats.menu.removeSeat')}
                         </button>
                         <div className="seat-menu__divider" />
@@ -290,7 +261,7 @@ interface SeatCardProps {
   onFaceClick: () => void;
 }
 
-/** 单张玩家卡（ADR-005）：token 主体 + 名牌 + 右侧提示标记区 */
+/** 单张玩家卡（ADR-005）：token 主体 + 名牌 + 右侧提示标记区；整卡点击弹菜单 */
 function SeatCard({ seat, menuOpen, onFaceClick }: SeatCardProps) {
   const { t } = useTranslation();
   const ringSkin = ringSkinFor(seat.alignment);

@@ -61,7 +61,6 @@
     "nicknamePlaceholder": "昵称（可空）",
     "reminderPlaceholder": "点击添加提示标记",
     "menu": {
-      "editName": "编辑名字",
       "swapSeats": "交换座位",
       "rippleSeat": "平移座位",
       "removeSeat": "移除座位",
@@ -86,7 +85,6 @@
     "removeDesc": "编号默认退役、不再使用；勾选后进入复用池，可再次使用。",
     "reuseSeat": "将编号放入复用池",
     "confirmRemove": "移除",
-    "save": "保存",
     "cancel": "取消",
     "retiredSummary": "退役编号：{{list}}",
     "enableRetired": "启用退役编号",

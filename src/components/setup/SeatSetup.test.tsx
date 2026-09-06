@@ -24,17 +24,14 @@ const openMenu = async (user: ReturnType<typeof userEvent.setup>, n: number) => 
 };
 
 describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
-  it('默认 7 人：生成座位环 + 菜单内编辑昵称回写 store', async () => {
+  it('默认 7 人：生成座位环 + 菜单顶部文本框改昵称回写 store', async () => {
     const user = userEvent.setup();
     render(<SeatSetup onChangeScript={() => {}} />);
     await user.click(screen.getByRole('button', { name: '生成座位' }));
     expect(game()?.seats).toHaveLength(7);
 
     await openMenu(user, 1);
-    await user.click(screen.getByRole('button', { name: '编辑名字' }));
-    const tb = screen.getByLabelText('座位编号 1 昵称（可空）');
-    await user.type(tb, '阿明');
-    await user.click(screen.getByRole('button', { name: '保存' }));
+    await user.type(screen.getByLabelText('座位编号 1 昵称（可空）'), '阿明');
     expect(seat(1)?.playerName).toBe('阿明');
   });
 

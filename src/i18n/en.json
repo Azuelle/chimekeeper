@@ -61,7 +61,6 @@
     "nicknamePlaceholder": "Nickname (optional)",
     "reminderPlaceholder": "Tap to add a reminder",
     "menu": {
-      "editName": "Edit name",
       "swapSeats": "Swap seats",
       "rippleSeat": "Move player",
       "removeSeat": "Remove seat",
@@ -86,7 +85,6 @@
     "removeDesc": "The number is retired for good by default; tick to let it be reused.",
     "reuseSeat": "Put the number back in the reuse pool",
     "confirmRemove": "Remove",
-    "save": "Save",
     "cancel": "Cancel",
     "retiredSummary": "Retired numbers: {{list}}",
     "enableRetired": "Re-enable retired numbers",

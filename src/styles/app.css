@@ -467,6 +467,12 @@ button:focus-visible {
   padding: 0.35rem;
 }
 
+/* 菜单顶部 = 改名文本框（省一层弹层/按钮） */
+.seat-menu__name {
+  margin-bottom: 0.2rem;
+  font-size: 0.88rem;
+}
+
 .seat-menu__item {
   display: flex;
   align-items: center;
