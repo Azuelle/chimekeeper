@@ -1,4 +1,4 @@
-# ADR-001: 技术栈选型 — Vite + React + TS + Zustand + Dexie + Zod
+# ADR-001（选型）: 技术栈选型 — Vite + React + TS + Zustand + Dexie + Zod
 
 - 日期: 2026-09-05
 - 状态: 已接受
