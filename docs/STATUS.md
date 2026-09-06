@@ -30,7 +30,7 @@
     只增不减；addSeat 优先消费池中最小号）。角色数据 refresh 顺带保留官方
     reminder 文案字段（M2 夜单提示词来源）。
   - F-10 i18n 初始化（zh-CN 默认 + en fallback）+ 移动优先样式
-  - 测试 100 个全绿；`npm run ci`（tsc+vitest+build）通过；构建约 122KB gzip（N-01 达标）
+  - 测试 105 个全绿；`npm run ci`（tsc + vitest --coverage + build + docs 构建）通过；构建达标（N-01）
 - 16 条 ADR、26 项 F- 需求（v0.5 分层见 ADR-009）
 
 ## 已知边界（M1）
