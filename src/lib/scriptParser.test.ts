@@ -34,6 +34,11 @@ describe('parseScript', () => {
     expect(result.error.code).toBe('scriptImport.error.invalidJson');
   });
 
+  it('UTF-8 BOM 开头的 JSON 可解析（Windows 工具导出）', () => {
+    const result = parseScript(`\uFEFF${fixture('bra1n-tb-sample.json')}`);
+    expect(result.ok).toBe(true);
+  });
+
   it('未知阵营返回指明角色的错误', () => {
     const bad = JSON.stringify([{ id: 'x', name: '测试角色', team: 'werewolf' }]);
     const result = parseScript(bad);

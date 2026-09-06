@@ -7,10 +7,25 @@ import { normalizeRoleId, lookupRole, DB_SIZE } from './roleDb';
 const fixture = (name: string) => readFileSync(join(__dirname, '../../fixtures', name), 'utf-8');
 
 describe('内置角色库 hydration（ADR-007）', () => {
-  it('角色库覆盖官方 130 角色 + 传奇', () => {
-    expect(DB_SIZE).toBeGreaterThanOrEqual(143);
+  it('角色库覆盖官方 botc-release 全量（核心 + 实验 + 奇遇 + 传奇）', () => {
+    expect(DB_SIZE).toBeGreaterThanOrEqual(181);
     expect(lookupRole('fortuneteller')?.team).toBe('townsfolk');
     expect(lookupRole('imp')?.otherNight).toBeGreaterThan(0);
+  });
+
+  it('实验角色可查（官方 nightsheet 序号）', () => {
+    // 回归：曾因库快照落后导致 botcscripts 剧本导入失败
+    expect(lookupRole('shugenja')?.team).toBe('townsfolk');
+    expect(lookupRole('shugenja')?.firstNight).toBeGreaterThan(0);
+    expect(lookupRole('highpriestess')?.team).toBe('townsfolk');
+    expect(lookupRole('boffin')?.team).toBe('minion');
+    expect(lookupRole('xaan')?.team).toBe('minion');
+  });
+
+  it('官方改名等价：mephit 与 mezepheles 是同一角色', () => {
+    // "Mephit" 为 Wizards of the Coast 商标，官方为规避改名
+    expect(lookupRole('mephit')?.id).toBe('mezepheles');
+    expect(lookupRole('Mezepheles')?.name).toBe('Mezepheles');
   });
 
   it('ID 规范化：下划线/无下划线写法等价', () => {

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "ci": "tsc --noEmit && vitest run && vite build",
     "build:builtin": "node scripts/build-builtin-scripts.mjs",
+    "refresh:roledb": "node scripts/refresh-role-db.mjs",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs"
   },

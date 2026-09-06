@@ -46,7 +46,8 @@ export type ParseResult =
 export function parseScript(jsonText: string): ParseResult {
   let raw: unknown;
   try {
-    raw = JSON.parse(jsonText);
+    // Windows 工具导出的文件常带 UTF-8 BOM，JSON.parse 不认，先剥掉（ADR-003 宽容）
+    raw = JSON.parse(jsonText.replace(/^\uFEFF/, ''));
   } catch {
     return { ok: false, error: { code: 'scriptImport.error.invalidJson' } };
   }

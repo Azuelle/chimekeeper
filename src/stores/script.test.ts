@@ -17,6 +17,7 @@ describe('scriptStore（F-01）', () => {
       'bra1n-tb-sample.json',
       'official-tool-tb-sample.json',
       'botcscripts-outed-evil.json',
+      'botcscripts-quickmaths.json',
       'custom-cn-fields-sample.json',
     ]) {
       expect(store().importFromText(fixture(name)), name).toBe(true);
