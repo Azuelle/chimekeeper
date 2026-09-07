@@ -12,6 +12,7 @@ import { SeatSetup } from './components/setup/SeatSetup';
 import { Drawing } from './components/setup/Drawing';
 import { NightPanel } from './components/night/NightPanel';
 import { DayPlaceholder } from './components/DayPlaceholder';
+import { Timeline } from './components/Timeline';
 import { useScriptStore } from './stores/script';
 import { useGameStore } from './stores/game';
 
@@ -70,9 +71,15 @@ export function App() {
       </header>
       <main className="app-main">
         {!hydrated ? null : nightView ? (
-          <NightPanel />
+          <>
+            <NightPanel />
+            <Timeline />
+          </>
         ) : phase === 'day' || phase === 'ended' ? (
-          <DayPlaceholder />
+          <>
+            <DayPlaceholder />
+            <Timeline />
+          </>
         ) : setupStep === 'import' ? (
           <ScriptImport />
         ) : setupStep === 'preview' ? (

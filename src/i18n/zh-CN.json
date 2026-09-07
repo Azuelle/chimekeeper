@@ -155,7 +155,17 @@
   },
   "timeline": {
     "title": "事件日志",
-    "empty": "暂无事件"
+    "empty": "暂无事件",
+    "event": {
+      "phaseToFirstNight": "入夜（首夜）",
+      "phaseToDay": "进入白天",
+      "phaseToNight": "入夜",
+      "seatAdd": "新增座位 {{seat}}",
+      "seatRemove": "移除座位 {{seat}}",
+      "seatSwap": "换位：{{a}} ⇄ {{b}}",
+      "seatRipple": "平移：{{a}} → {{b}}",
+      "unknown": "［{{type}}］"
+    }
   },
   "day": {
     "nominate": "提名",

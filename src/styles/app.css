@@ -813,3 +813,34 @@ button:focus-visible {
   font-size: 0.85rem;
   color: var(--text-dim);
 }
+
+/* ===== M2 时间线（F-06b 事件日志） ===== */
+
+.timeline__section + .timeline__section {
+  margin-top: 0.7rem;
+}
+
+.timeline__section h3 {
+  margin: 0 0 0.25rem;
+}
+
+.timeline__section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.timeline__event {
+  font-size: 0.85rem;
+  padding-left: 0.7rem;
+  position: relative;
+}
+
+.timeline__event::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--text-dim);
+}

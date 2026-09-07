@@ -69,6 +69,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 设计约束：
 - 事件构造统一走 `lib/events.ts` 的 `createEvent()`（id 来自 `lib/id.ts`，ADR-017），
   继承对局当时的 round + phase
+- **seat_* 事件只在非 setup 阶段产生**（初次摆桌的反复调整不记流水，ADR-011 #4）；
+  涟漪平移记一条 `seat_swap`，payload 附加 `ripple: true`
 - 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
 - `seatNumbers: number[]` 引用涉及座位
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证

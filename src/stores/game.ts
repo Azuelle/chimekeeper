@@ -30,6 +30,15 @@ export interface SeatRoleAssignment {
   roleId: string;
 }
 
+/**
+ * 座位操作记流水（ADR-011 #4，F-06a）：换位/增删各生成结构化事件。
+ * setup 阶段（初次摆桌反复调整）不记录，避免噪音；round/phase 取操作后的对局状态。
+ */
+function emitSeatEvent(game: Game, type: 'seat_add' | 'seat_remove' | 'seat_swap', payload: Record<string, unknown>): void {
+  if (game.phase === 'setup') return;
+  useEventStore.getState().append(createEvent(game, type, { payload }));
+}
+
 interface GameState {
   game: Game | null;
   /** 启动恢复是否完成（App 挂载 hydrate 后置 true，防止恢复前误判「无对局」） */
@@ -135,14 +144,16 @@ export const useGameStore = create<GameState>()((set, get) => {
       const pooled = takePooledSeatNumber(game.reusePool);
       const seatNumber = pooled?.seatNumber ?? nextSeatNumber(game.seats, game.seatHighWater);
       const seats = addSeatWithNumber(game.seats, seatNumber, {});
-      write({
+      const next: Game = {
         ...game,
         seats,
         reusePool: pooled?.pool ?? game.reusePool,
         // 高水位只增不减：池中取号（可能 < 高水位）不影响，新号则推进
         seatHighWater: Math.max(game.seatHighWater, seatNumber),
         updatedAt: Date.now(),
-      });
+      };
+      write(next);
+      emitSeatEvent(next, 'seat_add', { seatNumber });
     },
 
     removeSeat(seatNumber, reuse = false) {
@@ -150,17 +161,20 @@ export const useGameStore = create<GameState>()((set, get) => {
       if (!game) return;
       const seats = removeSeat(game.seats, seatNumber);
       if (!seats) return;
+      let next: Game;
       if (reuse) {
         // 入复用池：编号不进退役表（ADR-011 修订），可被下一个 addSeat 消费
-        write({ ...game, seats, reusePool: [...game.reusePool, seatNumber], updatedAt: Date.now() });
-        return;
+        next = { ...game, seats, reusePool: [...game.reusePool, seatNumber], updatedAt: Date.now() };
+      } else {
+        next = {
+          ...game,
+          seats,
+          retiredSeatNumbers: [...game.retiredSeatNumbers, seatNumber],
+          updatedAt: Date.now(),
+        };
       }
-      write({
-        ...game,
-        seats,
-        retiredSeatNumbers: [...game.retiredSeatNumbers, seatNumber],
-        updatedAt: Date.now(),
-      });
+      write(next);
+      emitSeatEvent(next, 'seat_remove', { seatNumber, reuse });
     },
 
     enableAllRetiredSeats() {
@@ -179,7 +193,9 @@ export const useGameStore = create<GameState>()((set, get) => {
       if (!game) return;
       const seats = swapOccupants(game.seats, seatA, seatB);
       if (!seats) return;
-      write({ ...game, seats, updatedAt: Date.now() });
+      const next = { ...game, seats, updatedAt: Date.now() };
+      write(next);
+      emitSeatEvent(next, 'seat_swap', { seatA, seatB });
     },
 
     rippleShiftSeat(fromSeat, toSeat) {
@@ -187,7 +203,10 @@ export const useGameStore = create<GameState>()((set, get) => {
       if (!game) return;
       const seats = rippleShift(game.seats, fromSeat, toSeat);
       if (!seats) return;
-      write({ ...game, seats, updatedAt: Date.now() });
+      const next = { ...game, seats, updatedAt: Date.now() };
+      write(next);
+      // 涟漪 = 链式换位，整体记一条（ADR-011 #4）
+      emitSeatEvent(next, 'seat_swap', { seatA: fromSeat, seatB: toSeat, ripple: true });
     },
 
     assignRoleDraw(seatRoles, composition, demonBluffs) {

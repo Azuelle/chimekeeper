@@ -256,4 +256,19 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     store().createGame(script, 5);
     expect(useEventStore.getState().events).toEqual([]);
   });
+
+  it('座位操作记流水（F-06a）：仅非 setup 阶段；涟漪带 ripple 标记', () => {
+    store().createGame(script, 5);
+    store().addSeat();
+    store().removeSeat(3);
+    expect(useEventStore.getState().events.filter((e) => e.type.startsWith('seat_'))).toEqual([]);
+
+    store().enterFirstNight();
+    store().swapSeats(1, 2);
+    store().rippleShiftSeat(2, 4);
+    const seatEvents = useEventStore.getState().events.filter((e) => e.type === 'seat_swap');
+    expect(seatEvents[0]?.payload).toEqual({ seatA: 1, seatB: 2 });
+    expect(seatEvents[1]?.payload).toEqual({ seatA: 2, seatB: 4, ripple: true });
+    expect(seatEvents.every((e) => e.phase === 'firstNight' && e.round === 0)).toBe(true);
+  });
 });

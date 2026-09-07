@@ -155,7 +155,17 @@
   },
   "timeline": {
     "title": "Event log",
-    "empty": "No events yet"
+    "empty": "No events yet",
+    "event": {
+      "phaseToFirstNight": "Night falls (first night)",
+      "phaseToDay": "Day breaks",
+      "phaseToNight": "Night falls",
+      "seatAdd": "Seat {{seat}} added",
+      "seatRemove": "Seat {{seat}} removed",
+      "seatSwap": "Swap: {{a}} ⇄ {{b}}",
+      "seatRipple": "Move: {{a}} → {{b}}",
+      "unknown": "[{{type}}]"
+    }
   },
   "day": {
     "nominate": "Nominate",
