@@ -122,15 +122,23 @@ export function assignRoles(
   return shuffle([...demons, ...minions, ...outsiders, ...townsfolk], rng);
 }
 
-/** 推荐恶魔伪装：不在场（未分配）的善良角色，取 3 个 */
+/**
+ * 推荐恶魔伪装（F-03e）：默认策略 2 镇民 + 1 外来者（PRD）。
+ * 对应池不足时从另一善良阵营补足；善良角色合计不足 3 个时返回实际可得数量
+ * （调用层按 <3 提示）。
+ */
 export function recommendDemonBluffs(
   scriptRoles: Role[],
   assigned: Role[],
   rng: () => number = Math.random,
 ): Role[] {
   const assignedIds = new Set(assigned.map((r) => r.id));
-  const goodNotInPlay = scriptRoles.filter(
-    (r) => (r.team === 'townsfolk' || r.team === 'outsider') && !assignedIds.has(r.id),
-  );
-  return shuffle(goodNotInPlay, rng).slice(0, 3);
+  const pool = (team: Team) =>
+    shuffle(
+      scriptRoles.filter((r) => r.team === team && !assignedIds.has(r.id)),
+      rng,
+    );
+  const townsfolk = pool('townsfolk');
+  const outsiders = pool('outsider');
+  return [...townsfolk.slice(0, 2), ...outsiders.slice(0, 1), ...townsfolk.slice(2), ...outsiders.slice(1)].slice(0, 3);
 }

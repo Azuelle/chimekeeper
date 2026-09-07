@@ -11,7 +11,7 @@
  *   M2 角色类 / M3 白天类项目置灰占位、带单色图标并标注阶段。
  * - 纯渲染 + 事件转发，座位变更全走 gameStore（底层 lib/seats 原语）。
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ringLayout } from '../../lib/ringLayout';
 import { useGameStore } from '../../stores/game';
@@ -66,6 +66,13 @@ export function SeatGrid({ seats }: SeatGridProps) {
   const swapSeats = useGameStore((s) => s.swapSeats);
   const removeSeat = useGameStore((s) => s.removeSeat);
   const rippleShiftSeat = useGameStore((s) => s.rippleShiftSeat);
+  // 角色名展示（M2 抽袋后 token 内芯显示角色）；DIY 快照缺失的角色留空
+  const snapshotRoles = useGameStore((s) => s.game?.scriptSnapshot.roles);
+  const roleNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of snapshotRoles ?? []) map.set(r.id, r.name);
+    return map;
+  }, [snapshotRoles]);
 
   const ringRef = useRef<HTMLOListElement | null>(null);
   const [cols, setCols] = useState<number>(FALLBACK_COLS);
@@ -183,6 +190,7 @@ export function SeatGrid({ seats }: SeatGridProps) {
               >
                 <SeatCard
                   seat={seat}
+                  roleName={seat.roleId !== undefined ? (roleNameById.get(seat.roleId) ?? null) : null}
                   menuOpen={menu?.seatNumber === seat.seatNumber}
                   onFaceClick={() => handleFaceClick(seat.seatNumber)}
                 />
@@ -277,12 +285,14 @@ export function SeatGrid({ seats }: SeatGridProps) {
 
 interface SeatCardProps {
   seat: Seat;
+  /** 已分配角色的显示名（未分配/快照缺失为 null → token 内芯留空） */
+  roleName: string | null;
   menuOpen: boolean;
   onFaceClick: () => void;
 }
 
 /** 单张玩家卡（ADR-005）：token 主体 + 名牌 + 右侧提示标记区；整卡点击弹菜单 */
-function SeatCard({ seat, menuOpen, onFaceClick }: SeatCardProps) {
+function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
   const { t } = useTranslation();
   const ringSkin = ringSkinFor(seat.alignment);
 
@@ -308,7 +318,7 @@ function SeatCard({ seat, menuOpen, onFaceClick }: SeatCardProps) {
             style={ringSkin}
             aria-hidden="true"
           >
-            <span className="token-ring__core" />
+            <span className="token-ring__core">{roleName}</span>
           </span>
         </span>
         <span className="reminder-rail" aria-hidden="true">

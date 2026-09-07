@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseScript } from '../lib/scriptParser';
 import { useGameStore } from './game';
+import { useEventStore } from './events';
 
 const scriptJson = readFileSync(join(__dirname, '../../fixtures/bra1n-tb-sample.json'), 'utf-8');
 const script = (() => {
@@ -161,5 +162,98 @@ describe('gameStore.rippleShiftSeat（平移座位，ADR-005）', () => {
     store().renameSeat(1, '张三');
     store().rippleShiftSeat(1, 1);
     expect(store().game?.seats.find((s) => s.seatNumber === 1)?.playerName).toBe('张三');
+  });
+});
+
+describe('gameStore 抽袋与阶段机（M2）', () => {
+  it('assignRoleDraw：座位写入角色+实际阵营，composition/demonBluffs 落位', () => {
+    store().createGame(script, 5);
+    const imp = script.roles.find((r) => r.id === 'imp')!;
+    const poisoner = script.roles.find((r) => r.id === 'poisoner')!;
+    store().assignRoleDraw(
+      [
+        { seatNumber: 1, roleId: imp.id },
+        { seatNumber: 2, roleId: poisoner.id },
+      ],
+      { townsfolk: 3, outsider: 0, minion: 1, demon: 1 },
+      ['washerwoman', 'librarian', 'chef'],
+    );
+    const game = store().game!;
+    expect(game.seats.find((s) => s.seatNumber === 1)).toMatchObject({ roleId: 'imp', alignment: 'evil' });
+    expect(game.seats.find((s) => s.seatNumber === 2)).toMatchObject({ roleId: 'poisoner', alignment: 'evil' });
+    expect(game.seats.find((s) => s.seatNumber === 3)?.roleId).toBeUndefined();
+    expect(game.composition).toEqual({ townsfolk: 3, outsider: 0, minion: 1, demon: 1 });
+    expect(game.demonBluffs).toHaveLength(3);
+  });
+
+  it('assignRoleDraw 仅限 setup 阶段；demonBluffs 截断到 3', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().assignRoleDraw([{ seatNumber: 1, roleId: 'imp' }], { townsfolk: 3, outsider: 0, minion: 1, demon: 1 }, []);
+    expect(store().game?.seats.find((s) => s.seatNumber === 1)?.roleId).toBeUndefined();
+
+    store().reset();
+    store().createGame(script, 5);
+    store().setDemonBluffs(['a', 'b', 'c', 'd']);
+    expect(store().game?.demonBluffs).toEqual(['a', 'b', 'c']);
+  });
+
+  it('changeSeatRole：单座改角色并同步阵营', () => {
+    store().createGame(script, 5);
+    store().changeSeatRole(3, 'monk');
+    expect(store().game?.seats.find((s) => s.seatNumber === 3)).toMatchObject({
+      roleId: 'monk',
+      alignment: 'good',
+    });
+  });
+
+  it('阶段机：首夜(0) → 白天1 → 夜2(同round) → 白天2；各跳转记 phase_change 事件', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    let game = store().game!;
+    expect(game.phase).toBe('firstNight');
+    expect(game.round).toBe(0);
+    expect(game.nightProgress).toEqual({ round: 0, checked: [] });
+
+    store().finishNight();
+    game = store().game!;
+    expect(game.phase).toBe('day');
+    expect(game.round).toBe(1);
+    expect(game.nightProgress).toBeUndefined();
+
+    store().enterNextNight();
+    game = store().game!;
+    expect(game.phase).toBe('night');
+    expect(game.round).toBe(1);
+    expect(game.nightProgress).toEqual({ round: 1, checked: [] });
+
+    store().finishNight();
+    expect(store().game?.round).toBe(2);
+
+    const changes = useEventStore.getState().events.filter((e) => e.type === 'phase_change');
+    expect(changes.map((e) => e.payload.to)).toEqual(['firstNight', 'day', 'night', 'day']);
+    expect(changes.map((e) => e.round)).toEqual([0, 1, 1, 2]);
+  });
+
+  it('toggleNightStep：打勾/取消写 nightProgress；仅夜阶段可用', () => {
+    store().createGame(script, 5);
+    store().toggleNightStep('system:dusk', true);
+    expect(store().game?.nightProgress).toBeUndefined();
+
+    store().enterFirstNight();
+    store().toggleNightStep('system:dusk', true);
+    store().toggleNightStep('role:poisoner', true);
+    expect(store().game?.nightProgress?.checked.sort()).toEqual(['role:poisoner', 'system:dusk']);
+    store().toggleNightStep('system:dusk', false);
+    expect(store().game?.nightProgress?.checked).toEqual(['role:poisoner']);
+  });
+
+  it('createGame 清空上一局事件内存', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    expect(useEventStore.getState().events.length).toBeGreaterThan(0);
+    store().reset();
+    store().createGame(script, 5);
+    expect(useEventStore.getState().events).toEqual([]);
   });
 });

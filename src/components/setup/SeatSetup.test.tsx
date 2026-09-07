@@ -26,7 +26,7 @@ const openMenu = async (user: ReturnType<typeof userEvent.setup>, n: number) => 
 describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('默认 7 人：生成座位环 + 菜单顶部文本框改昵称回写 store', async () => {
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
     await user.click(screen.getByRole('button', { name: '生成座位' }));
     expect(game()?.seats).toHaveLength(7);
 
@@ -37,7 +37,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
 
   it('人数可改为 5 人局', async () => {
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
     const countInput = screen.getByLabelText('玩家人数');
     await user.clear(countInput);
     await user.type(countInput, '5');
@@ -47,7 +47,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
 
   it('人数下限：输入小于 5 也被 clamp 到 5', async () => {
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
     const countInput = screen.getByLabelText('玩家人数');
     await user.clear(countInput);
     await user.type(countInput, '3');
@@ -58,7 +58,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('添加座位：新编号 = 8', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
     await user.click(screen.getByRole('button', { name: '添加座位' }));
     expect(game()?.seats).toHaveLength(8);
     expect(seat(8)).toBeDefined();
@@ -69,7 +69,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
     useGameStore.getState().renameSeat(1, '张三');
     useGameStore.getState().renameSeat(3, '李四');
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 1);
     await user.click(screen.getByRole('button', { name: '交换座位' }));
@@ -85,7 +85,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
     useGameStore.getState().renameSeat(1, '张三');
     useGameStore.getState().renameSeat(3, '李四');
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 1);
     await user.click(screen.getByRole('button', { name: '交换座位' }));
@@ -99,7 +99,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 4);
     ['甲', '乙', '丙', '丁'].forEach((name, i) => useGameStore.getState().renameSeat(i + 1, name));
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 1);
     await user.click(screen.getByRole('button', { name: '平移座位' }));
@@ -116,7 +116,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('移除座位（默认退役）：编号进退役表，环上移除', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 7);
     await user.click(screen.getByRole('button', { name: '移除座位' }));
@@ -131,7 +131,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('移除座位（勾选复用）：编号入复用池，再添加可复用该号', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 5);
     await user.click(screen.getByRole('button', { name: '移除座位' }));
@@ -150,7 +150,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('退役编号：启用后批量入池，下一次添加取最小号', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     // 依次移除 6、3（默认退役），退役表按输入顺序 [6, 3]，展示升序
     await openMenu(user, 6);
@@ -177,7 +177,7 @@ describe('SeatSetup（F-02 玩家卡 + 菜单）', () => {
   it('菜单内 M2/M3 项目置灰占位（disabled + 标注阶段）', async () => {
     useGameStore.getState().createGame(useScriptStore.getState().script!, 7);
     const user = userEvent.setup();
-    render(<SeatSetup onChangeScript={() => {}} />);
+    render(<SeatSetup onChangeScript={() => {}} onAssign={() => {}} />);
 
     await openMenu(user, 1);
     const assignRole = screen.getByRole('button', { name: /分配角色/ });

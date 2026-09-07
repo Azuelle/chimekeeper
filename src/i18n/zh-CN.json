@@ -98,11 +98,64 @@
     "demonBluffs": "恶魔伪装",
     "errorPoolTooSmall": "剧本角色池不足以支撑 {{count}} 人局"
   },
+  "drawing": {
+    "title": "角色分配（盲抽袋）",
+    "cta": "角色分配",
+    "baseComposition": "官方默认构成（{{count}} 人）",
+    "baseUnavailable": "{{count}} 人超出官方人数表（5–15 人），请按剧本说明手动设置构成",
+    "bagTotal": "袋内 {{total}} 个角色 / {{players}} 名玩家",
+    "totalMismatch": "袋内总数（{{total}}）与玩家数（{{players}}）不一致，请核对设置调整",
+    "setupHintsTitle": "设置调整提示",
+    "draw": "随机分配",
+    "redraw": "重新抽取",
+    "redrawConfirm": "重新抽取将覆盖全部已分配的角色，确定？",
+    "resultTitle": "分配结果",
+    "resultSeat": "座位",
+    "resultRole": "角色",
+    "bluffTitle": "恶魔伪装",
+    "bluffHint": "展示给恶魔的三个不在场善良角色（默认 2 镇民 + 1 外来者）",
+    "bluffEmpty": "剧本中没有足够的善良角色可作伪装",
+    "enterNight": "入夜（首夜）",
+    "enterNightConfirm": "入夜后进入夜晚行动顺序，角色分配不再修改。确定入夜？"
+  },
   "nightOrder": {
     "firstNight": "首夜",
     "otherNight": "第 {{round}} 夜",
     "wakePlayer": "唤醒",
-    "done": "完成"
+    "done": "完成",
+    "hint": {
+      "poppyGrower": "罂粟种植者在场：跳过爪牙信息与恶魔信息步骤（能力生效期间）",
+      "magician": "魔术师在场：爪牙信息与恶魔信息的内容需按其能力调整",
+      "snitch": "告密者在场：爪牙信息步骤需向爪牙展示三个不在场善良角色"
+    }
+  },
+  "nightPanel": {
+    "title": "夜晚行动顺序",
+    "progress": "{{done}} / {{total}}",
+    "system": {
+      "dusk": "黄昏",
+      "minion_info": "爪牙信息",
+      "demon_info": "恶魔信息",
+      "dawn": "黎明"
+    },
+    "seatsLabel": "座位 {{seats}}",
+    "infoPlaceholder": "信息记录（可选）",
+    "finishHint": "勾选「黎明」后自动进入白天",
+    "reminderShow": "提示词",
+    "reminderHide": "收起"
+  },
+  "phase": {
+    "setup": "准备阶段",
+    "day": "第 {{round}} 个白天"
+  },
+  "dayPanel": {
+    "enterNight": "入夜",
+    "enterNightConfirm": "进入第 {{round}} 夜？",
+    "m3Placeholder": "白天流程（提名 / 投票 / 处决）将在下个版本上线"
+  },
+  "timeline": {
+    "title": "事件日志",
+    "empty": "暂无事件"
   },
   "day": {
     "nominate": "提名",

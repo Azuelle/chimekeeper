@@ -35,8 +35,10 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
   `Game.reusePool: number[]`（待复用）。高水位依旧只增不减
 - 玩家昵称可选——纯编号局是合法状态
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
-- phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
-  （首夜=0，第一个白天=1，夜 n 与其后白天 n+1 同链推进）
+- phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round = 已完成夜数——
+  首夜 0、第一个白天 1、夜 n（n≥2）= n-1（夜 n 与其前的白天 n-1 同 round）
+- 抽袋写入（F-03c，ADR-011 #5）：`assignRoleDraw` 单一事务写全部座位 roleId +
+  实际阵营 + composition + demonBluffs；手动换角 `changeSeatRole` 单座改写
 - demonBluffs：3 个不在场善良角色 id
 - `Game.composition?: TeamComposition`（M2 F-03）：说书人手动 +/- 确认后的袋内构成；
   undefined = 尚未抽袋。ADR-008：构成是手动结果，不做自动 setup 计算
@@ -52,7 +54,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 
 | 类型 | 何时产生 | 关键 payload |
 |---|---|---|
-| `night_action` | 夜晚面板打勾某角色行动 | roleId, info? |
+| `night_action` | 夜晚面板打勾某角色行动；爪牙/恶魔信息步骤复用此类型（roleId=`system:minion_info`/`system:demon_info`，ADR-017） | roleId, stepKey, info? |
 | `death` | 夜晚结算/任意时间死亡登记 | cause?, announced |
 | `nomination` | 白天提名 | nominatorSeat, nominatedSeat |
 | `vote` | 投票计票 | votesFor, votesNeeded, passed |
