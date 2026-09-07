@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { ScriptImport } from './components/setup/ScriptImport';
 import { ScriptPreview } from './components/setup/ScriptPreview';
 import { SeatSetup } from './components/setup/SeatSetup';
+import { SeatGrid } from './components/setup/SeatGrid';
 import { Drawing } from './components/setup/Drawing';
 import { NightPanel } from './components/night/NightPanel';
 import { DayPlaceholder } from './components/DayPlaceholder';
@@ -25,6 +26,7 @@ export function App() {
   const clearScript = useScriptStore((s) => s.clear);
   const restoreScript = useScriptStore((s) => s.restoreFromSnapshot);
   const game = useGameStore((s) => s.game);
+  const seats = game?.seats ?? [];
   const hydrated = useGameStore((s) => s.hydrated);
   const hydrate = useGameStore((s) => s.hydrate);
   const resetGame = useGameStore((s) => s.reset);
@@ -72,11 +74,13 @@ export function App() {
       <main className="app-main">
         {!hydrated ? null : nightView ? (
           <>
+            <SeatGrid seats={seats} />
             <NightPanel />
             <Timeline />
           </>
         ) : phase === 'day' || phase === 'ended' ? (
           <>
+            <SeatGrid seats={seats} />
             <DayPlaceholder />
             <Timeline />
           </>
