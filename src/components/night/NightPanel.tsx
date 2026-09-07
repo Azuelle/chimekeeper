@@ -19,6 +19,7 @@ export function NightPanel() {
   const game = useGameStore((s) => s.game);
   const toggleNightStep = useGameStore((s) => s.toggleNightStep);
   const finishNight = useGameStore((s) => s.finishNight);
+  const rewindPhase = useGameStore((s) => s.rewindPhase);
   const events = useEventStore((s) => s.events);
   const appendEvent = useEventStore((s) => s.append);
   const removeEvent = useEventStore((s) => s.remove);
@@ -166,6 +167,11 @@ export function NightPanel() {
         })}
       </ol>
       <p className="night-finish-hint">{t('nightPanel.finishHint')}</p>
+      <div className="btn-row">
+        <button type="button" className="btn" onClick={rewindPhase}>
+          {game.phase === 'firstNight' ? t('nightPanel.rewindToSetup') : t('nightPanel.rewind')}
+        </button>
+      </div>
     </section>
   );
 }

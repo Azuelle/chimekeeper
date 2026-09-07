@@ -132,6 +132,8 @@
   "nightPanel": {
     "title": "Night order",
     "progress": "{{done}} / {{total}}",
+    "rewind": "Go back",
+    "rewindToSetup": "Back to setup",
     "system": {
       "dusk": "Dusk",
       "minion_info": "Minion info",
@@ -151,6 +153,7 @@
   "dayPanel": {
     "enterNight": "Enter the night",
     "enterNightConfirm": "Enter night {{round}}?",
+    "rewind": "Go back",
     "m3Placeholder": "Daytime flow (nomination / voting / execution) arrives in the next release"
   },
   "timeline": {

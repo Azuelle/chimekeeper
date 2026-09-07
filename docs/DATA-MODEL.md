@@ -36,7 +36,9 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 玩家昵称可选——纯编号局是合法状态
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
 - phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round = 已完成夜数——
-  首夜 0、第一个白天 1、夜 n（n≥2）= n-1（夜 n 与其前的白天 n-1 同 round）
+  首夜 0、第一个白天 1、夜 n（n≥2）= n-1（夜 n 与其前的白天 n-1 同 round）。
+  支持 `rewindPhase` 返回上一阶段：day→上一夜、night→day、firstNight→setup；
+  回退到夜阶段时从 `night_action` 事件恢复 `nightProgress.checked`
 - 抽袋写入（F-03c，ADR-011 #5）：`assignRoleDraw` 单一事务写全部座位 roleId +
   实际阵营 + composition + demonBluffs；手动换角 `changeSeatRole` 单座改写
 - demonBluffs：3 个不在场善良角色 id

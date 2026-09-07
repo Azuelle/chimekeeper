@@ -47,6 +47,8 @@
     白天占位 `DayPlaceholder`（M3 计票落地）+ 入夜入口
   - F-06(a)(b) 流水：座位操作记 seat_* 事件（setup 阶段摆桌不记；涟漪带 ripple 标记）；
     `components/Timeline.tsx` 按 round+phase 分组时间线（system:* 特判显示爪牙/恶魔信息）
+  - 阶段回退（UX 补完）：NightPanel / DayPlaceholder 提供「返回上一阶段」按钮；
+    `rewindPhase` 还原阶段/round，删除对应 phase_change 事件，并从 night_action 事件恢复夜单进度
   - 阶段机：setup → firstNight(0) → day(1) ⇄ night(1) → day(2)…（round=已完成夜数），
     各跳转记 phase_change 事件；App 按 `game.phase` 路由（ADR-017 #4）
   - 测试 144 个全绿（+39）；覆盖率 95/87/93/95
@@ -58,7 +60,6 @@
 
 - 内置三版角色名显示英文——中文显示名映射层是 v1.5 F-14（ADR-015 既定路线）
 - URL 导入受 CORS 限制（raw.githubusercontent 等直链可用），失败引导粘贴/上传兜底
-- 首夜若已勾部分步骤后想整夜重来，无「重置本夜」入口（uncheck 逐项即可；v0.5 观察需求）
 - 夜单 info 文本勾选后不可再编辑（事件修正属 M3 F-06d）
 - 白天占位页无计票功能（M3 F-05）；F-06(c)(d) 自由备注/事件修正同属 M3
 - 提示标记（reminder token）挂接、菜单角色类操作（更换角色/设置阵营/记录夜晚行动）

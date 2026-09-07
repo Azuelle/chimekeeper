@@ -10,6 +10,7 @@ export function DayPlaceholder() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
   const enterNextNight = useGameStore((s) => s.enterNextNight);
+  const rewindPhase = useGameStore((s) => s.rewindPhase);
 
   if (!game || game.phase !== 'day') return null;
 
@@ -23,6 +24,9 @@ export function DayPlaceholder() {
       <h2>{t('phase.day', { round: String(game.round) })}</h2>
       <p className="day-placeholder-note">{t('dayPanel.m3Placeholder')}</p>
       <div className="btn-row">
+        <button type="button" className="btn" onClick={rewindPhase}>
+          {t('dayPanel.rewind')}
+        </button>
         <button type="button" className="btn btn--primary" onClick={handleEnterNight}>
           {t('dayPanel.enterNight')}
         </button>

@@ -30,6 +30,17 @@ export interface SeatRoleAssignment {
   roleId: string;
 }
 
+/** 计算上一阶段（rewindPhase 用）：day→上一夜；night→day；firstNight→setup */
+function previousPhase(game: Game): { phase: Game['phase']; round: number } | null {
+  if (game.phase === 'firstNight') return { phase: 'setup', round: 0 };
+  if (game.phase === 'night') return { phase: 'day', round: game.round };
+  if (game.phase === 'day') {
+    if (game.round === 1) return { phase: 'firstNight', round: 0 };
+    return { phase: 'night', round: game.round - 1 };
+  }
+  return null;
+}
+
 /**
  * 座位操作记流水（ADR-011 #4，F-06a）：换位/增删各生成结构化事件。
  * setup 阶段（初次摆桌反复调整）不记录，避免噪音；round/phase 取操作后的对局状态。
@@ -80,6 +91,8 @@ interface GameState {
   finishNight(): void;
   /** 白天入夜（下一夜）：day → night，round 不变（白天 n 与其后的夜 n+1 共用 round=n）；记 phase_change */
   enterNextNight(): void;
+  /** 返回上一阶段（说书人误操作回退）：阶段/round 还原，夜单进度从事件恢复，删除最近一次 phase_change */
+  rewindPhase(): void;
   /** 夜单步骤打勾/取消（ADR-017：nightProgress 持久化；事件由夜单面板维护） */
   toggleNightStep(key: string, checked: boolean): void;
   /** 废弃当前对局：删库（级联事件）+ 清内存 */
@@ -293,6 +306,44 @@ export const useGameStore = create<GameState>()((set, get) => {
       useEventStore.getState().append(
         createEvent(next, 'phase_change', { payload: { from: 'day', to: 'night' } }),
       );
+    },
+
+    rewindPhase() {
+      const game = get().game;
+      if (!game) return;
+      const target = previousPhase(game);
+      if (!target) return;
+
+      // 删除最近一次 phase_change（即进入当前阶段的那条事件）
+      const events = useEventStore.getState().events;
+      const lastPhaseChange = events.filter((e) => e.type === 'phase_change').at(-1);
+      if (lastPhaseChange) useEventStore.getState().remove(lastPhaseChange.id);
+
+      // 若回退到夜阶段，从已记录的 night_action 事件恢复打勾进度
+      const nightProgress =
+        target.phase === 'firstNight' || target.phase === 'night'
+          ? {
+              round: target.round,
+              checked: events
+                .filter(
+                  (e) =>
+                    e.type === 'night_action' &&
+                    e.round === target.round &&
+                    e.phase === target.phase &&
+                    typeof e.payload.stepKey === 'string',
+                )
+                .map((e) => e.payload.stepKey as string),
+            }
+          : undefined;
+
+      const next: Game = {
+        ...game,
+        phase: target.phase,
+        round: target.round,
+        nightProgress,
+        updatedAt: Date.now(),
+      };
+      write(next);
     },
 
     toggleNightStep(key, checked) {

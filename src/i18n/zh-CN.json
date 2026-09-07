@@ -132,6 +132,8 @@
   "nightPanel": {
     "title": "夜晚行动顺序",
     "progress": "{{done}} / {{total}}",
+    "rewind": "返回上一阶段",
+    "rewindToSetup": "返回准备阶段",
     "system": {
       "dusk": "黄昏",
       "minion_info": "爪牙信息",
@@ -151,6 +153,7 @@
   "dayPanel": {
     "enterNight": "入夜",
     "enterNightConfirm": "进入第 {{round}} 夜？",
+    "rewind": "返回上一阶段",
     "m3Placeholder": "白天流程（提名 / 投票 / 处决）将在下个版本上线"
   },
   "timeline": {
