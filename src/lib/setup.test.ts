@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseScript } from './scriptParser';
-import { baseComposition, assignRoles, recommendDemonBluffs, setupRoleHints } from './setup';
+import { baseComposition, alignmentForRole, assignRoles, recommendDemonBluffs, setupRoleHints } from './setup';
 import type { TeamComposition } from '../types/game';
 import type { Role } from '../types/script';
 
@@ -45,6 +45,21 @@ describe('setupRoleHints（ADR-008）', () => {
       { id: 'hermit', name: '隐士', team: 'outsider', firstNight: 0, otherNight: 0, setup: true },
     ];
     expect(setupRoleHints(hermit)[0]?.hint).toContain('-0~1外来者');
+  });
+});
+
+describe('alignmentForRole（M2 抽袋阵营写入）', () => {
+  it('四袋内阵营：镇民/外来者→good，爪牙/恶魔→evil', () => {
+    expect(alignmentForRole('townsfolk')).toBe('good');
+    expect(alignmentForRole('outsider')).toBe('good');
+    expect(alignmentForRole('minion')).toBe('evil');
+    expect(alignmentForRole('demon')).toBe('evil');
+  });
+
+  it('非袋内阵营（旅行者/传奇/奇遇）返回 null，留给说书人手动指定', () => {
+    expect(alignmentForRole('traveler')).toBeNull();
+    expect(alignmentForRole('fabled')).toBeNull();
+    expect(alignmentForRole('loric')).toBeNull();
   });
 });
 

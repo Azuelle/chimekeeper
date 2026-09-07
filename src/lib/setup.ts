@@ -3,7 +3,17 @@
  * 纯函数，不碰 UI 与持久化。
  */
 import type { Role, Team } from '../types/script';
-import type { TeamComposition } from '../types/game';
+import type { Alignment, TeamComposition } from '../types/game';
+
+/**
+ * 角色阵营 → 实际阵营（M2 抽袋写 Seat.alignment 用）。
+ * traveler / fabled / loric 不进盲抽袋，返回 null（M4 旅行者阶段说书人手动指定）。
+ */
+export function alignmentForRole(team: Team): Alignment | null {
+  if (team === 'minion' || team === 'demon') return 'evil';
+  if (team === 'townsfolk' || team === 'outsider') return 'good';
+  return null;
+}
 
 /** 官方阵营构成表（5–15 人），traveler 另算不进表 */
 const COMPOSITION_TABLE: Record<number, TeamComposition> = {

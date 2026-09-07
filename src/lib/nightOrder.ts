@@ -66,6 +66,11 @@ export function buildNightOrder(
   return steps;
 }
 
+/** 步骤唯一 key（ADR-017 夜单进度持久化）：system→system:${kind}，role→role:${roleId} */
+export function stepKey(step: NightStep): string {
+  return step.kind === 'system' ? `system:${step.system}` : `role:${step.roleId}`;
+}
+
 /** 返回在场角色触发的系统步骤改写提示（i18n keys），供面板顶部展示 */
 export function systemStepOverrideHints(inPlayRoles: Role[], firstNight: boolean): string[] {
   if (!firstNight) return [];

@@ -36,7 +36,13 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 玩家昵称可选——纯编号局是合法状态
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
 - phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
+  （首夜=0，第一个白天=1，夜 n 与其后白天 n+1 同链推进）
 - demonBluffs：3 个不在场善良角色 id
+- `Game.composition?: TeamComposition`（M2 F-03）：说书人手动 +/- 确认后的袋内构成；
+  undefined = 尚未抽袋。ADR-008：构成是手动结果，不做自动 setup 计算
+- `Game.nightProgress?: { round: number; checked: string[] }`（ADR-017）：夜单打勾进度。
+  `checked` 存步骤 key（`nightOrder.stepKey()`：system→`system:${kind}`、role→`role:${roleId}`）；
+  进入新的一夜整体重置（round 对齐，checked 清空）
 - `Seat.isTraveler?: boolean`（v0.5 预留，ADR-009）：旅行者座位；阵营计算（共情者邻座
   邪恶计数、存活人数、票数门槛）均排除旅行者；死后阵营转邪由说书人手动标记
 
@@ -59,6 +65,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 | `game_end` | 结局登记 | winningTeam, reason? |
 
 设计约束：
+- 事件构造统一走 `lib/events.ts` 的 `createEvent()`（id 来自 `lib/id.ts`，ADR-017），
+  继承对局当时的 round + phase
 - 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
 - `seatNumbers: number[]` 引用涉及座位
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
@@ -70,6 +78,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 
 - **系统步骤**（内置，不来自剧本数据）：`dusk`（黄昏）/ `minion_info`（首夜爪牙信息，≥7 人）/ `demon_info`（首夜恶魔信息，≥7 人）/ `dawn`（黎明）
 - **角色步骤**：按在场角色的 firstNight/otherNight 排序（`nightOrder.ts`）
+- **步骤 key**（ADR-017 进度持久化）：`nightOrder.stepKey()`——system 步骤 →
+  `system:${kind}`，role 步骤 → `role:${roleId}`；夜单打勾进度以此 key 存档
 - 顺序：首夜 = dusk → minion_info → demon_info → 角色 → dawn；其他夜晚 = dusk → 角色 → dawn
 - 角色改写系统步骤（罂粟种植者/魔术师等）：v1 仅展示提示文案，不自动改写
 - 中文百科调整版夜晚顺序为 v2 候选数据源（docs/reference/night-order-cn.md）
