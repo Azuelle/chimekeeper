@@ -21,6 +21,12 @@ interface ScriptState {
   importFromFile(file: File): Promise<boolean>;
   importFromUrl(url: string): Promise<boolean>;
   selectBuiltin(id: BuiltinScriptId): boolean;
+  /**
+   * 从对局快照恢复剧本状态（F-07a 杀后台恢复）：hydrate 后 scriptStore 为空，
+   * App 用 game.scriptSnapshot 重建，预览/抽袋/夜单组件才能拿到角色数据。
+   * 快照不含 jinxes/warnings——展示层仅消费 roles，属可接受降级。
+   */
+  restoreFromSnapshot(snapshot: { name: string; author?: string; roles: Script['roles'] }): void;
   clear(): void;
 }
 
@@ -70,6 +76,10 @@ export const useScriptStore = create<ScriptState>()((set, get) => ({
   selectBuiltin(id) {
     // 与文件导入走同一条解析链路，零特判（ADR-015）
     return get().importFromText(builtinScriptJson(id));
+  },
+
+  restoreFromSnapshot(snapshot) {
+    set({ script: { name: snapshot.name, author: snapshot.author, roles: snapshot.roles, jinxes: [], warnings: [] }, error: null });
   },
 
   clear() {

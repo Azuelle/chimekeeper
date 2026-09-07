@@ -1,7 +1,9 @@
 /**
- * 对局状态（F-02 排座位）：创建对局 + 座位 CRUD。
+ * 对局状态：创建对局 + 座位 CRUD + 启动恢复。
  * 座位操作全部走 lib/seats.ts 原语（ADR-011 红线），store 只做编排
- * 与不变量维护（seatHighWater 只增不减）。M1 不落盘——持久化属 M2（F-07a）。
+ * 与不变量维护（seatHighWater 只增不减）。
+ * 持久化（F-07a，ADR-017）：每次变更经 commit() 写通 Dexie（fire-and-forget）；
+ * hydrate() 启动恢复 + 连带恢复事件流；reset() 删旧局（级联事件）。
  */
 import { create } from 'zustand';
 import {
@@ -15,13 +17,19 @@ import {
   enableAllRetired,
 } from '../lib/seats';
 import { newId } from '../lib/id';
+import { deleteGame, loadCurrentGame, saveGame } from '../persistence/repo';
+import { useEventStore } from './events';
 import type { Game } from '../types/game';
 import type { Script } from '../types/script';
 
 interface GameState {
   game: Game | null;
+  /** 启动恢复是否完成（App 挂载 hydrate 后置 true，防止恢复前误判「无对局」） */
+  hydrated: boolean;
   /** 创建对局并按人数生成编号座位 1..n */
   createGame(script: Script, playerCount: number): void;
+  /** 启动恢复：载入最近对局（含事件流）；无对局时置空 */
+  hydrate(): Promise<void>;
   /** 改昵称；空串 = 清空（纯编号局是合法状态） */
   renameSeat(seatNumber: number, playerName: string): void;
   /** 追加座位（旅行者中途加入等），编号优先取复用池最小号，池空走高水位+1 */
@@ -40,22 +48,30 @@ interface GameState {
    * 其余住户顺延（ABCD 选 A 移到 4 号位 → BCDA）；锚号与位置不动。
    */
   rippleShiftSeat(fromSeat: number, toSeat: number): void;
+  /** 废弃当前对局：删库（级联事件）+ 清内存 */
   reset(): void;
 }
 
-export const useGameStore = create<GameState>()((set, get) => ({
-  game: null,
+export const useGameStore = create<GameState>()((set, get) => {
+  const write = (game: Game): void => {
+    set({ game });
+    void saveGame(game);
+  };
 
-  createGame(script, playerCount) {
-    if (!Number.isInteger(playerCount) || playerCount < 1) return;
-    // 初始座位也走 addSeat 原语：循环 i 恰为当前高水位（0..n-1）
-    let seats: Game['seats'] = [];
-    for (let i = 0; i < playerCount; i++) {
-      seats = addSeat(seats, i, {});
-    }
-    const now = Date.now();
-    set({
-      game: {
+  return {
+    game: null,
+    hydrated: false,
+
+    createGame(script, playerCount) {
+      if (!Number.isInteger(playerCount) || playerCount < 1) return;
+      // 初始座位也走 addSeat 原语：循环 i 恰为当前高水位（0..n-1）
+      let seats: Game['seats'] = [];
+      for (let i = 0; i < playerCount; i++) {
+        seats = addSeat(seats, i, {});
+      }
+      const now = Date.now();
+      useEventStore.getState().clear();
+      write({
         id: newId(),
         scriptSnapshot: { name: script.name, author: script.author, roles: script.roles },
         seats,
@@ -67,91 +83,93 @@ export const useGameStore = create<GameState>()((set, get) => ({
         round: 0,
         createdAt: now,
         updatedAt: now,
-      },
-    });
-  },
+      });
+    },
 
-  renameSeat(seatNumber, playerName) {
-    const game = get().game;
-    if (!game) return;
-    const name = playerName.trim();
-    const seats = game.seats.map((s) =>
-      s.seatNumber === seatNumber ? { ...s, playerName: name.length > 0 ? name : undefined } : s,
-    );
-    set({ game: { ...game, seats, updatedAt: Date.now() } });
-  },
+    async hydrate() {
+      const game = await loadCurrentGame();
+      if (game) await useEventStore.getState().hydrate(game.id);
+      else useEventStore.getState().clear();
+      set({ game, hydrated: true });
+    },
 
-  addSeat() {
-    const game = get().game;
-    if (!game) return;
-    // 复用池优先（ADR-011 修订）：取最小号；池空走高水位
-    const pooled = takePooledSeatNumber(game.reusePool);
-    const seatNumber = pooled?.seatNumber ?? nextSeatNumber(game.seats, game.seatHighWater);
-    const seats = addSeatWithNumber(game.seats, seatNumber, {});
-    set({
-      game: {
+    renameSeat(seatNumber, playerName) {
+      const game = get().game;
+      if (!game) return;
+      const name = playerName.trim();
+      const seats = game.seats.map((s) =>
+        s.seatNumber === seatNumber ? { ...s, playerName: name.length > 0 ? name : undefined } : s,
+      );
+      write({ ...game, seats, updatedAt: Date.now() });
+    },
+
+    addSeat() {
+      const game = get().game;
+      if (!game) return;
+      // 复用池优先（ADR-011 修订）：取最小号；池空走高水位
+      const pooled = takePooledSeatNumber(game.reusePool);
+      const seatNumber = pooled?.seatNumber ?? nextSeatNumber(game.seats, game.seatHighWater);
+      const seats = addSeatWithNumber(game.seats, seatNumber, {});
+      write({
         ...game,
         seats,
         reusePool: pooled?.pool ?? game.reusePool,
         // 高水位只增不减：池中取号（可能 < 高水位）不影响，新号则推进
         seatHighWater: Math.max(game.seatHighWater, seatNumber),
         updatedAt: Date.now(),
-      },
-    });
-  },
-
-  removeSeat(seatNumber, reuse = false) {
-    const game = get().game;
-    if (!game) return;
-    const seats = removeSeat(game.seats, seatNumber);
-    if (!seats) return;
-    if (reuse) {
-      // 入复用池：编号不进退役表（ADR-011 修订），可被下一个 addSeat 消费
-      set({
-        game: { ...game, seats, reusePool: [...game.reusePool, seatNumber], updatedAt: Date.now() },
       });
-      return;
-    }
-    set({
-      game: {
+    },
+
+    removeSeat(seatNumber, reuse = false) {
+      const game = get().game;
+      if (!game) return;
+      const seats = removeSeat(game.seats, seatNumber);
+      if (!seats) return;
+      if (reuse) {
+        // 入复用池：编号不进退役表（ADR-011 修订），可被下一个 addSeat 消费
+        write({ ...game, seats, reusePool: [...game.reusePool, seatNumber], updatedAt: Date.now() });
+        return;
+      }
+      write({
         ...game,
         seats,
         retiredSeatNumbers: [...game.retiredSeatNumbers, seatNumber],
         updatedAt: Date.now(),
-      },
-    });
-  },
+      });
+    },
 
-  enableAllRetiredSeats() {
-    const game = get().game;
-    if (!game || game.retiredSeatNumbers.length === 0) return;
-    set({
-      game: {
+    enableAllRetiredSeats() {
+      const game = get().game;
+      if (!game || game.retiredSeatNumbers.length === 0) return;
+      write({
         ...game,
         reusePool: enableAllRetired(game.retiredSeatNumbers, game.reusePool),
         retiredSeatNumbers: [],
         updatedAt: Date.now(),
-      },
-    });
-  },
+      });
+    },
 
-  swapSeats(seatA, seatB) {
-    const game = get().game;
-    if (!game) return;
-    const seats = swapOccupants(game.seats, seatA, seatB);
-    if (!seats) return;
-    set({ game: { ...game, seats, updatedAt: Date.now() } });
-  },
+    swapSeats(seatA, seatB) {
+      const game = get().game;
+      if (!game) return;
+      const seats = swapOccupants(game.seats, seatA, seatB);
+      if (!seats) return;
+      write({ ...game, seats, updatedAt: Date.now() });
+    },
 
-  rippleShiftSeat(fromSeat, toSeat) {
-    const game = get().game;
-    if (!game) return;
-    const seats = rippleShift(game.seats, fromSeat, toSeat);
-    if (!seats) return;
-    set({ game: { ...game, seats, updatedAt: Date.now() } });
-  },
+    rippleShiftSeat(fromSeat, toSeat) {
+      const game = get().game;
+      if (!game) return;
+      const seats = rippleShift(game.seats, fromSeat, toSeat);
+      if (!seats) return;
+      write({ ...game, seats, updatedAt: Date.now() });
+    },
 
-  reset() {
-    set({ game: null });
-  },
-}));
+    reset() {
+      const old = get().game;
+      useEventStore.getState().clear();
+      set({ game: null });
+      if (old) void deleteGame(old.id);
+    },
+  };
+});

@@ -90,6 +90,13 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 表 `events`：GameEvent，主键 id，索引 [gameId+round]
 - 表 `scripts`：收藏/历史的剧本（v1.5 F-14 启用，v1 仅当前对局快照）
 - 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
+- **读写封装**（`src/persistence/repo.ts`，ADR-017）：saveGame / loadCurrentGame
+  （按 updatedAt 取最新一条，单一当前局）/ saveEvent / deleteEvent / loadEvents
+  （createdAt 升序，时间线渲染序）/ deleteGame（**级联删除该局全部事件**）/
+  clearAll；环境无 indexedDB 时静默跳过（部分测试环境）
+- **store 写通**：gameStore 每次变更 `set()` 后 fire-and-forget `saveGame`（双写，
+  一致性由 store 层保证）；事件在独立 `stores/events.ts`（append/remove 写通，
+  hydrate 随 gameStore.hydrate 连带执行）；reset = 删库级联 + 清内存
 
 ## 6. 明确不建模的东西
 
