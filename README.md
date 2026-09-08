@@ -7,7 +7,7 @@
 
 ## 为什么做这个
 
-现有工具各有所缺（详见[文档站](docs/)）：
+现有工具各有所缺（详见[文档站](https://azuelle.github.io/chimekeeper)）：
 
 - **Pocket Grimoire**：模拟实体魔典出色，但无过程记录、无玩家编号、内地访问不便、剧本 JSON 解析严格
 - **官方 botc.app**：面向线上对局，不适合线下说书
