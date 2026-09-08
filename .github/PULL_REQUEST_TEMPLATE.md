@@ -1,24 +1,17 @@
 ## 变更摘要
 
-<!-- 用 1-3 句话说清改了什么、为什么 -->
+<!-- 1-3 句话说明：改了什么、为什么改、怎么验证的 -->
 
-## 验收
+## 关联
 
-- [ ] 对应 PRD 条款：<!-- 引用 docs/PRD.md 中的功能编号，如 F-03 -->
-- [ ] 新增/更新了 Vitest 单测（lib 层）
-- [ ] 关键流程已更新 e2e（如涉及 导入→分配→夜晚→导出 主链路）
-- [ ] CI 全绿（test / build / docs-guard）
+<!-- 关联的 issue / PRD 条款 / ADR；没有就写"无" -->
+- 关联 issue：
+- PRD 条款：<!-- 如 F-03 -->
 
-## 文档同步（必填）
+## 检查清单
 
-- [ ] 本次改动**无需**更新文档
-- [ ] 已更新：`docs/____`
+- [ ] 本地 `pnpm run ci` 通过
+- [ ] 新增/更新了对应单测（如改动涉及 lib/stores/components）
+- [ ] 文档已同步（如改动涉及 `src/types/`、`src/stores/` 或用户可见行为）
 
-> ⚠ 若改动了 `src/types/` 或 `src/stores/`，CI 会强制要求 `docs/` 有对应更新（见 docs-guard job）。
-> 若改动了 `src/types/`，必须先在 `docs/DATA-MODEL.md` 更新模型定义（AGENTS.md 规则）。
-
-## 手机上验收步骤（供作者移动端检查）
-
-1.
-2.
-3.
+<!-- 若改动了 src/types/ 或 src/stores/，CI 会强制要求 docs/ 有对应更新。 -->
