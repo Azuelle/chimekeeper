@@ -4,6 +4,7 @@ export default defineConfig({
   title: '司钟',
   description: '血染钟楼线下说书辅助 · 过程记录 · 复盘导出',
   lang: 'zh-CN',
+  base: '/chimekeeper/',
   themeConfig: {
     nav: [
       { text: '需求', link: '/PRD' },
