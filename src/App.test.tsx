@@ -19,6 +19,8 @@ describe('App 主流程（M1 验收链路）', () => {
   it('导入官方工具导出的纯 ID 剧本 → 角色列表 → 排 7 人座位（填昵称）', async () => {
     const user = userEvent.setup();
     render(<App />);
+    // 挂载 hydrate（F-07a）完成后才渲染流程页
+    await screen.findByPlaceholderText('把剧本 JSON 粘贴到这里…');
 
     // 1. 粘贴导入（官方 script tool 纯 ID 格式 → 注水库补全）
     fireEvent.change(screen.getByPlaceholderText('把剧本 JSON 粘贴到这里…'), {
@@ -46,6 +48,7 @@ describe('App 主流程（M1 验收链路）', () => {
   it('换个剧本：清空对局回到导入页', async () => {
     const user = userEvent.setup();
     render(<App />);
+    await screen.findByRole('button', { name: '暗流涌动' });
     await user.click(screen.getByRole('button', { name: '暗流涌动' }));
     await user.click(screen.getByRole('button', { name: '排座位' }));
     await user.click(screen.getByRole('button', { name: '生成座位' }));

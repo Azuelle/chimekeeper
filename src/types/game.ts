@@ -79,6 +79,16 @@ export interface Game {
   reusePool: number[];
   /** 恶魔的三个伪装（不在场的善良角色，说书人设置） */
   demonBluffs: string[];
+  /**
+   * 说书人手动 +/- 确认后的袋内构成（M2 F-03，ADR-008：不做自动 setup 计算）。
+   * undefined = 尚未抽袋。
+   */
+  composition?: TeamComposition;
+  /**
+   * 夜单打勾进度（ADR-017）：checked 存 stepKey（lib/nightOrder.stepKey），
+   * 进入新的一夜整体重置。
+   */
+  nightProgress?: { round: number; checked: string[] };
   phase: GamePhase;
   /** 当前是第几个白天/夜晚（首夜为 night 0） */
   round: number;

@@ -386,6 +386,16 @@ button:focus-visible {
   height: 1.15rem;
   border-radius: 50%;
   background: color-mix(in srgb, var(--bg-input) 70%, var(--border) 30%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--text);
+  text-align: center;
+  word-break: break-all;
+  padding: 0.05rem;
 }
 
 .seat-face__name {
@@ -614,4 +624,223 @@ button:focus-visible {
 
 .retired-bar__text {
   overflow-wrap: anywhere;
+}
+
+/* ===== M2 角色分配（F-03 抽袋） ===== */
+
+.drawing-base {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.drawing-hints {
+  border: 1px solid var(--accent);
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  margin-block: 0.6rem;
+}
+
+.drawing-hints h3 {
+  margin: 0 0 0.3rem;
+}
+
+.drawing-hints ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+}
+
+.drawing-hints li + li {
+  margin-top: 0.2rem;
+}
+
+.drawing-stepper {
+  display: grid;
+  gap: 0.35rem;
+  margin-block: 0.6rem;
+}
+
+.drawing-stepper__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.drawing-stepper__label {
+  flex: 1;
+}
+
+.drawing-stepper__count {
+  min-width: 1.4rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.drawing-total {
+  margin: 0.3rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.drawing-total.is-mismatch {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.drawing-result {
+  list-style: none;
+  margin: 0.3rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.drawing-result.is-flashing {
+  animation: drawing-flash 0.5s ease-out;
+}
+
+@keyframes drawing-flash {
+  from {
+    opacity: 0.15;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.drawing-result__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.drawing-result__seat {
+  flex: 0 0 auto;
+  min-width: 3.2rem;
+  font-size: 0.85rem;
+}
+
+.drawing-result__role,
+.drawing-bluffs__slot {
+  flex: 1;
+  min-width: 0;
+}
+
+.drawing-bluff-hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.drawing-bluffs {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* ===== M2 夜晚行动顺序（F-04 夜单） ===== */
+
+.night-progress {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.night-hints {
+  border: 1px solid var(--accent);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+.night-steps {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.night-step {
+  display: grid;
+  gap: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  padding: 0.45rem 0.55rem;
+}
+
+.night-step.is-done {
+  opacity: 0.62;
+}
+
+.night-step__main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.night-step__main input {
+  accent-color: var(--accent);
+  flex: 0 0 auto;
+}
+
+.night-step__name {
+  font-weight: 600;
+}
+
+.night-step__seats {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.night-step__reminder {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.night-step__info {
+  font-size: 0.82rem;
+}
+
+.night-finish-hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* ===== M2 白天占位 ===== */
+
+.day-placeholder-note {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+/* ===== M2 时间线（F-06b 事件日志） ===== */
+
+.timeline__section + .timeline__section {
+  margin-top: 0.7rem;
+}
+
+.timeline__section h3 {
+  margin: 0 0 0.25rem;
+}
+
+.timeline__section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.timeline__event {
+  font-size: 0.85rem;
+  padding-left: 0.7rem;
+  position: relative;
+}
+
+.timeline__event::before {
+  content: '·';
+  position: absolute;
+  left: 0;
+  color: var(--text-dim);
 }

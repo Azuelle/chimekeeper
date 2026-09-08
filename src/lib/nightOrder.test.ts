@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseScript } from './scriptParser';
-import { buildNightOrder, buildRoleSteps, systemStepOverrideHints } from './nightOrder';
+import { buildNightOrder, buildRoleSteps, stepKey, systemStepOverrideHints } from './nightOrder';
 
 const fixture = (name: string) => readFileSync(join(__dirname, '../../fixtures', name), 'utf-8');
 
@@ -50,6 +50,18 @@ describe('buildNightOrder（ADR-006 系统锚点步骤）', () => {
     expect(
       steps.some((s) => s.kind === 'system' && (s.system === 'minion_info' || s.system === 'demon_info')),
     ).toBe(false);
+  });
+});
+
+describe('stepKey（ADR-017 进度持久化）', () => {
+  it('system → system:${kind}，role → role:${roleId}，全场唯一', () => {
+    const steps = buildNightOrder(roles, true, 7);
+    const keys = steps.map(stepKey);
+    expect(keys).toContain('system:dusk');
+    expect(keys).toContain('system:minion_info');
+    expect(keys).toContain('system:dawn');
+    expect(keys.some((k) => k.startsWith('role:'))).toBe(true);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
 

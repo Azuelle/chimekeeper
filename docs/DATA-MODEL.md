@@ -35,8 +35,18 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
   `Game.reusePool: number[]`（待复用）。高水位依旧只增不减
 - 玩家昵称可选——纯编号局是合法状态
 - **scriptSnapshot 存完整剧本快照**而非引用：剧本之后被删改不影响历史对局复盘
-- phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round 从首夜 0 开始计
+- phase 状态机：`setup → firstNight → (day ⇄ night)* → ended`；round = 已完成夜数——
+  首夜 0、第一个白天 1、夜 n（n≥2）= n-1（夜 n 与其前的白天 n-1 同 round）。
+  支持 `rewindPhase` 返回上一阶段：day→上一夜、night→day、firstNight→setup；
+  回退到夜阶段时从 `night_action` 事件恢复 `nightProgress.checked`
+- 抽袋写入（F-03c，ADR-011 #5）：`assignRoleDraw` 单一事务写全部座位 roleId +
+  实际阵营 + composition + demonBluffs；手动换角 `changeSeatRole` 单座改写
 - demonBluffs：3 个不在场善良角色 id
+- `Game.composition?: TeamComposition`（M2 F-03）：说书人手动 +/- 确认后的袋内构成；
+  undefined = 尚未抽袋。ADR-008：构成是手动结果，不做自动 setup 计算
+- `Game.nightProgress?: { round: number; checked: string[] }`（ADR-017）：夜单打勾进度。
+  `checked` 存步骤 key（`nightOrder.stepKey()`：system→`system:${kind}`、role→`role:${roleId}`）；
+  进入新的一夜整体重置（round 对齐，checked 清空）
 - `Seat.isTraveler?: boolean`（v0.5 预留，ADR-009）：旅行者座位；阵营计算（共情者邻座
   邪恶计数、存活人数、票数门槛）均排除旅行者；死后阵营转邪由说书人手动标记
 
@@ -46,7 +56,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 
 | 类型 | 何时产生 | 关键 payload |
 |---|---|---|
-| `night_action` | 夜晚面板打勾某角色行动 | roleId, info? |
+| `night_action` | 夜晚面板打勾某角色行动；爪牙/恶魔信息步骤复用此类型（roleId=`system:minion_info`/`system:demon_info`，ADR-017） | roleId, stepKey, info? |
 | `death` | 夜晚结算/任意时间死亡登记 | cause?, announced |
 | `nomination` | 白天提名 | nominatorSeat, nominatedSeat |
 | `vote` | 投票计票 | votesFor, votesNeeded, passed |
@@ -59,6 +69,10 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 | `game_end` | 结局登记 | winningTeam, reason? |
 
 设计约束：
+- 事件构造统一走 `lib/events.ts` 的 `createEvent()`（id 来自 `lib/id.ts`，ADR-017），
+  继承对局当时的 round + phase
+- **seat_* 事件只在非 setup 阶段产生**（初次摆桌的反复调整不记流水，ADR-011 #4）；
+  涟漪平移记一条 `seat_swap`，payload 附加 `ripple: true`
 - 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
 - `seatNumbers: number[]` 引用涉及座位
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
@@ -70,6 +84,8 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 
 - **系统步骤**（内置，不来自剧本数据）：`dusk`（黄昏）/ `minion_info`（首夜爪牙信息，≥7 人）/ `demon_info`（首夜恶魔信息，≥7 人）/ `dawn`（黎明）
 - **角色步骤**：按在场角色的 firstNight/otherNight 排序（`nightOrder.ts`）
+- **步骤 key**（ADR-017 进度持久化）：`nightOrder.stepKey()`——system 步骤 →
+  `system:${kind}`，role 步骤 → `role:${roleId}`；夜单打勾进度以此 key 存档
 - 顺序：首夜 = dusk → minion_info → demon_info → 角色 → dawn；其他夜晚 = dusk → 角色 → dawn
 - 角色改写系统步骤（罂粟种植者/魔术师等）：v1 仅展示提示文案，不自动改写
 - 中文百科调整版夜晚顺序为 v2 候选数据源（docs/reference/night-order-cn.md）
@@ -80,6 +96,13 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 表 `events`：GameEvent，主键 id，索引 [gameId+round]
 - 表 `scripts`：收藏/历史的剧本（v1.5 F-14 启用，v1 仅当前对局快照）
 - 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
+- **读写封装**（`src/persistence/repo.ts`，ADR-017）：saveGame / loadCurrentGame
+  （按 updatedAt 取最新一条，单一当前局）/ saveEvent / deleteEvent / loadEvents
+  （createdAt 升序，时间线渲染序）/ deleteGame（**级联删除该局全部事件**）/
+  clearAll；环境无 indexedDB 时静默跳过（部分测试环境）
+- **store 写通**：gameStore 每次变更 `set()` 后 fire-and-forget `saveGame`（双写，
+  一致性由 store 层保证）；事件在独立 `stores/events.ts`（append/remove 写通，
+  hydrate 随 gameStore.hydrate 连带执行）；reset = 删库级联 + 清内存
 
 ## 6. 明确不建模的东西
 

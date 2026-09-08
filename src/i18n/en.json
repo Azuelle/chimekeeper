@@ -98,11 +98,77 @@
     "demonBluffs": "Demon bluffs",
     "errorPoolTooSmall": "Script role pool is too small for {{count}} players"
   },
+  "drawing": {
+    "title": "Role assignment (bag draw)",
+    "cta": "Assign roles",
+    "baseComposition": "Official default composition ({{count}} players)",
+    "baseUnavailable": "{{count}} players is outside the official table (5–15); set the composition manually per the script",
+    "bagTotal": "{{total}} tokens in bag / {{players}} players",
+    "totalMismatch": "Bag total ({{total}}) does not match player count ({{players}}); check setup adjustments",
+    "setupHintsTitle": "Setup adjustments",
+    "draw": "Draw & assign",
+    "redraw": "Redraw",
+    "redrawConfirm": "Redrawing overwrites all assigned roles. Continue?",
+    "resultTitle": "Assignments",
+    "resultSeat": "Seat",
+    "resultRole": "Role",
+    "bluffTitle": "Demon bluffs",
+    "bluffHint": "Three good roles not in play, shown to the demon (default 2 townsfolk + 1 outsider)",
+    "bluffEmpty": "Not enough good roles in the script for bluffs",
+    "enterNight": "Enter the first night",
+    "enterNightConfirm": "Entering the night locks role assignments. Continue?"
+  },
   "nightOrder": {
     "firstNight": "First night",
     "otherNight": "Night {{round}}",
     "wakePlayer": "Wake",
-    "done": "Done"
+    "done": "Done",
+    "hint": {
+      "poppyGrower": "Poppy Grower in play: skip minion info and demon info steps (while ability is active)",
+      "magician": "Magician in play: adjust minion/demon info content per its ability",
+      "snitch": "Snitch in play: show three not-in-play good roles to the minions during minion info"
+    }
+  },
+  "nightPanel": {
+    "title": "Night order",
+    "progress": "{{done}} / {{total}}",
+    "rewind": "Go back",
+    "rewindToSetup": "Back to setup",
+    "system": {
+      "dusk": "Dusk",
+      "minion_info": "Minion info",
+      "demon_info": "Demon info",
+      "dawn": "Dawn"
+    },
+    "seatsLabel": "Seat {{seats}}",
+    "infoPlaceholder": "Info note (optional)",
+    "finishHint": "Ticking “Dawn” automatically moves to the day",
+    "reminderShow": "Reminder",
+    "reminderHide": "Hide"
+  },
+  "phase": {
+    "setup": "Setup",
+    "day": "Day {{round}}"
+  },
+  "dayPanel": {
+    "enterNight": "Enter the night",
+    "enterNightConfirm": "Enter night {{round}}?",
+    "rewind": "Go back",
+    "m3Placeholder": "Daytime flow (nomination / voting / execution) arrives in the next release"
+  },
+  "timeline": {
+    "title": "Event log",
+    "empty": "No events yet",
+    "event": {
+      "phaseToFirstNight": "Night falls (first night)",
+      "phaseToDay": "Day breaks",
+      "phaseToNight": "Night falls",
+      "seatAdd": "Seat {{seat}} added",
+      "seatRemove": "Seat {{seat}} removed",
+      "seatSwap": "Swap: {{a}} ⇄ {{b}}",
+      "seatRipple": "Move: {{a}} → {{b}}",
+      "unknown": "[{{type}}]"
+    }
   },
   "day": {
     "nominate": "Nominate",

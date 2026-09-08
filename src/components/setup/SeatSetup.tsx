@@ -11,7 +11,13 @@ import { SeatGrid } from './SeatGrid';
 const MIN_COUNT = 5;
 const MAX_COUNT = 99;
 
-export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
+export function SeatSetup({
+  onChangeScript,
+  onAssign,
+}: {
+  onChangeScript: () => void;
+  onAssign: () => void;
+}) {
   const { t } = useTranslation();
   const script = useScriptStore((s) => s.script);
   const game = useGameStore((s) => s.game);
@@ -84,6 +90,9 @@ export function SeatSetup({ onChangeScript }: { onChangeScript: () => void }) {
           <div className="btn-row">
             <button type="button" className="btn" onClick={onChangeScript}>
               {t('seats.changeScript')}
+            </button>
+            <button type="button" className="btn btn--primary" onClick={onAssign}>
+              {t('drawing.cta')}
             </button>
           </div>
         </>

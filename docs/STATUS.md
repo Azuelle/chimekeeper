@@ -32,25 +32,47 @@
   - F-22 锚号原语已接入：换位 / 涟漪平移 / 增删座位 / 复用池（M1 已实现并测试）
   - F-10 i18n 初始化（zh-CN 默认 + en fallback）+ 移动优先样式
   - 测试 105 个全绿；`pnpm run ci`（tsc + vitest --coverage + build + docs 构建）通过；构建达标（N-01）
+- **M2 入夜完成**（feature/m2 分支，Issue #5，待线下验收）：
+  - F-07(a) 持久化（ADR-017）：`persistence/repo.ts`（saveGame/loadCurrentGame 单一当前局/
+    saveEvent/deleteEvent/loadEvents/deleteGame 级联/clearAll，无 IDB 环境静默跳过）；
+    gameStore 全 action 写通双写 + `hydrate()` 启动恢复 + reset 删库级联；
+    独立 `stores/events.ts`；恢复后从 `game.scriptSnapshot` 重建剧本状态
+  - F-03 抽袋 `components/setup/Drawing.tsx`：官方默认构成 + setup 角色调整提示高亮
+    （ADR-008 只提示不自动算）+ 手动 +/-（总数不符醒目警告不阻止）+ 随机分配 +
+    手动换角下拉 + 恶魔伪装（默认 2 镇民 + 1 外来者，`recommendDemonBluffs`）+ 入夜确认
+  - F-04 夜单 `components/night/NightPanel.tsx`：系统锚点（黄昏/爪牙信息/恶魔信息/黎明，
+    ≥7 人才含信息步骤）+ 角色步骤清单（官方 reminder 提示词）+ 逐项打勾进
+    `nightProgress`（stepKey 持久化）+ info 自由文本；角色/信息步骤记 `night_action`
+    事件（`system:*` 复用，取消勾选删事件）；勾「黎明」自动进白天（round+1）；
+    白天占位 `DayPlaceholder`（M3 计票落地）+ 入夜入口
+  - F-06(a)(b) 流水：座位操作记 seat_* 事件（setup 阶段摆桌不记；涟漪带 ripple 标记）；
+    `components/Timeline.tsx` 按 round+phase 分组时间线（system:* 特判显示爪牙/恶魔信息）
+  - 阶段回退（UX 补完）：NightPanel / DayPlaceholder 提供「返回上一阶段」按钮；
+    `rewindPhase` 还原阶段/round，删除对应 phase_change 事件，并从 night_action 事件恢复夜单进度
+  - 阶段机：setup → firstNight(0) → day(1) ⇄ night(1) → day(2)…（round=已完成夜数），
+    各跳转记 phase_change 事件；App 按 `game.phase` 路由（ADR-017 #4）
+  - 测试 144 个全绿（+39）；覆盖率 95/87/93/95
 - **工程化**：pnpm（`pnpm-lock.yaml`，`packageManager`，esbuild build 放行）；vitest 覆盖率阈值
   （`vitest.config.ts`：lines 65 / funcs 70 / branches 75，CI 强制）；Dependabot（npm weekly + vitest 分组）；docs-guard
 - 17 条已接受 ADR（编号 ADR-001 至 ADR-017，无跳号），24 项 F- 需求（编号 F-01 至 F-26，有跳号）
 
-## 已知边界（M1）
+## 已知边界（M2）
 
 - 内置三版角色名显示英文——中文显示名映射层是 v1.5 F-14（ADR-015 既定路线）
-- 对局状态不落盘——F-07(a) 持久化属 M2，当前仅内存态
 - URL 导入受 CORS 限制（raw.githubusercontent 等直链可用），失败引导粘贴/上传兜底
-- 排座位页玩家卡：角色未分配（M1 全程），token 内芯空白、首夜/非首夜徽记、
-  提示标记与阵营着色均待 M2 抽袋后生效；「入夜/白天」菜单项置灰即此原因
+- 夜单 info 文本勾选后不可再编辑（事件修正属 M3 F-06d）
+- 白天占位页无计票功能（M3 F-05）；F-06(c)(d) 自由备注/事件修正同属 M3
+- 提示标记（reminder token）挂接、菜单角色类操作（更换角色/设置阵营/记录夜晚行动）
+  仍是置灰占位——M4 补全
+- docs/adr/ 存在两个 ADR-016 文件（016-deal-qr.md / 016-assign-draw.md，同号同主题），
+  待人工去重
 
 ## 当前里程碑
 
-**M2 入夜** = F-03 抽袋 + F-04 夜单 + F-06(a)(b) 流水 + F-07(a) 持久化。
-验收：完整跑完首夜流程，杀后台可恢复。
+**M2 验收** = 线下实测完整首夜流程 + 杀后台恢复（代码已就绪，见上）。
+通过后进入 **M3 天亮**（F-05 计票 + F-06(c)(d) + F-07(b) 多局列表 + F-08 战报 → v0.5 内测）。
 
-- **任务分解（WIP）**：见 GitHub Issue「M2 入夜」(#5)——任务分解放在 Issue 而非本文件，
-  避免并行分支同时改 STATUS 造成 merge 冲突。
+- **M2 任务分解**：GitHub Issue #5（已按分解实施完毕）。
 - **已拍板决策**：ADR-017（持久化/事件/阶段机/夜单进度）+ ADR-006（夜单系统步骤）
   + ADR-008（抽袋只提示不自动算）+ ADR-011（锚号/seat 事件）。
 

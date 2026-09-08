@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseScript } from './scriptParser';
-import { baseComposition, assignRoles, recommendDemonBluffs, setupRoleHints } from './setup';
+import { baseComposition, alignmentForRole, assignRoles, recommendDemonBluffs, setupRoleHints } from './setup';
 import type { TeamComposition } from '../types/game';
 import type { Role } from '../types/script';
 
@@ -48,6 +48,21 @@ describe('setupRoleHints（ADR-008）', () => {
   });
 });
 
+describe('alignmentForRole（M2 抽袋阵营写入）', () => {
+  it('四袋内阵营：镇民/外来者→good，爪牙/恶魔→evil', () => {
+    expect(alignmentForRole('townsfolk')).toBe('good');
+    expect(alignmentForRole('outsider')).toBe('good');
+    expect(alignmentForRole('minion')).toBe('evil');
+    expect(alignmentForRole('demon')).toBe('evil');
+  });
+
+  it('非袋内阵营（旅行者/传奇/奇遇）返回 null，留给说书人手动指定', () => {
+    expect(alignmentForRole('traveler')).toBeNull();
+    expect(alignmentForRole('fabled')).toBeNull();
+    expect(alignmentForRole('loric')).toBeNull();
+  });
+});
+
 describe('assignRoles', () => {
   it('分配数量等于玩家人数，阵营构成正确', () => {
     const assigned = assignRoles(tbRoles, baseComposition(7)!, fixedRng);
@@ -65,14 +80,33 @@ describe('assignRoles', () => {
   });
 });
 
-describe('recommendDemonBluffs', () => {
-  it('推荐 3 个不在场的善良角色', () => {
+describe('recommendDemonBluffs（F-03e 默认策略）', () => {
+  it('默认 2 镇民 + 1 外来者，全部不在场', () => {
     const assigned = assignRoles(tbRoles, baseComposition(7)!, fixedRng)!;
     const bluffs = recommendDemonBluffs(tbRoles, assigned, fixedRng);
+    expect(bluffs).toHaveLength(3);
+    expect(bluffs.filter((b) => b.team === 'townsfolk')).toHaveLength(2);
+    expect(bluffs.filter((b) => b.team === 'outsider')).toHaveLength(1);
     const assignedIds = new Set(assigned.map((r) => r.id));
     for (const b of bluffs) {
       expect(['townsfolk', 'outsider']).toContain(b.team);
       expect(assignedIds.has(b.id)).toBe(false);
     }
+  });
+
+  it('外来者池不足时从镇民补足；善良角色不足 3 返回实际数量', () => {
+    // 6 角色小剧本：3 镇民 + 1 外来者 + 1 爪牙 + 1 恶魔，抽 5 人（0 外来者出局）
+    const mini: Role[] = [
+      { id: 'tf1', name: '镇民一', team: 'townsfolk', firstNight: 0, otherNight: 0 },
+      { id: 'tf2', name: '镇民二', team: 'townsfolk', firstNight: 0, otherNight: 0 },
+      { id: 'tf3', name: '镇民三', team: 'townsfolk', firstNight: 0, otherNight: 0 },
+      { id: 'os1', name: '外来一', team: 'outsider', firstNight: 0, otherNight: 0 },
+      { id: 'mn1', name: '爪牙一', team: 'minion', firstNight: 0, otherNight: 0 },
+      { id: 'dm1', name: '恶魔一', team: 'demon', firstNight: 0, otherNight: 0 },
+    ];
+    const assigned = [mini[0]!, mini[1]!, mini[3]!, mini[4]!, mini[5]!]; // tf3 留在场外
+    const bluffs = recommendDemonBluffs(mini, assigned, fixedRng);
+    // 剩余善良只有 tf3：返回 1 个
+    expect(bluffs.map((b) => b.id)).toEqual(['tf3']);
   });
 });
