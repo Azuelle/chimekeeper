@@ -12,13 +12,13 @@ export default defineConfig({
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.test.{ts,tsx}', 'src/main.tsx'],
       reporter: ['text', 'text-summary'],
-      // 阈值 = 当前基线下方留余量（M1 基线 lines≈71/funcs≈84/branches≈87）。
-      // 随 M2 补测试后再逐步上调，避免本机/CI 波动误杀。
+      // 阈值 = 当前覆盖基线下方留余量（当前 lines≈94/branches≈89/funcs≈93）。
+      // 后续补测试时继续上调，保持 80+ 的硬门槛。
       thresholds: {
-        statements: 65,
-        lines: 65,
-        functions: 70,
-        branches: 75,
+        statements: 90,
+        lines: 90,
+        functions: 90,
+        branches: 85,
       },
     },
   },
