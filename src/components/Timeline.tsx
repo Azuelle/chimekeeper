@@ -9,7 +9,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import { createEvent } from '../lib/events';
 import { roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
 import type { GameEvent } from '../types/events';
@@ -23,11 +22,15 @@ interface Section {
 /** 删除/撤销仅限不触碰 Game 状态的事件；状态变更事件删了会造成双写失同步 */
 const DELETABLE_TYPES = new Set<GameEvent['type']>(['note', 'nomination', 'vote', 'execution']);
 
+/** 时间线里不单独渲染的进度/元事件：section 标题已表达阶段 */
+const HIDDEN_EVENT_TYPES = new Set<GameEvent['type']>(['phase_change']);
+
 export function Timeline() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
   const events = useEventStore((s) => s.events);
   const remove = useEventStore((s) => s.remove);
+  const update = useEventStore((s) => s.update);
   const append = useEventStore((s) => s.append);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -42,6 +45,7 @@ export function Timeline() {
   const sections = useMemo<Section[]>(() => {
     const out: Section[] = [];
     for (const e of events) {
+      if (HIDDEN_EVENT_TYPES.has(e.type)) continue;
       const key = `${String(e.round)}:${e.phase}`;
       let section = out.at(-1);
       if (!section || section.key !== key) {
@@ -86,21 +90,16 @@ export function Timeline() {
     const old = events.find((e) => e.id === editingId);
     if (!old) return;
     const text = editText.trim();
-    const base = { id: old.gameId, round: old.round, phase: old.phase };
 
     if (old.type === 'note') {
       if (!text) return; // 空备注不保存，保持编辑态
-      remove(editingId);
-      append(createEvent(base, 'note', { payload: { text } }));
+      update(editingId, { payload: { text } });
     } else if (old.type === 'night_action') {
       // F-06d：只改 info 自由文本，保留 stepKey/roleId/座位（清空 = 移除 info）
       const payload = { ...old.payload };
       if (text) payload.info = text;
       else delete payload.info;
-      remove(editingId);
-      append(
-        createEvent(base, 'night_action', { seatNumbers: old.seatNumbers, payload }),
-      );
+      update(editingId, { payload });
     }
 
     setEditingId(null);
@@ -125,46 +124,53 @@ export function Timeline() {
           </button>
         </div>
       )}
-      {sections.map((section) => (
-        <div key={section.key} className="timeline__section">
-          <h3>{section.label}</h3>
-          <ul>
-            {section.events.map((e) => (
-              <li key={e.id} className="timeline__event">
-                {editingId === e.id ? (
-                  <div className="timeline__edit">
-                    <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
-                    <div className="btn-row">
-                      <button type="button" className="btn btn--small" onClick={saveEdit}>
-                        {t('timeline.save')}
-                      </button>
-                      <button type="button" className="btn btn--small" onClick={cancelEdit}>
-                        {t('timeline.cancel')}
-                      </button>
+      {sections.map((section) => {
+        const isDay = section.key.endsWith(':day');
+        const hasExecution = section.events.some((e) => e.type === 'execution');
+        return (
+          <div key={section.key} className="timeline__section">
+            <h3>{section.label}</h3>
+            <ul>
+              {section.events.map((e) => (
+                <li key={e.id} className="timeline__event">
+                  {editingId === e.id ? (
+                    <div className="timeline__edit">
+                      <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
+                      <div className="btn-row">
+                        <button type="button" className="btn btn--small" onClick={saveEdit}>
+                          {t('timeline.save')}
+                        </button>
+                        <button type="button" className="btn btn--small" onClick={cancelEdit}>
+                          {t('timeline.cancel')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                    <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
-                    <span className="timeline__actions">
-                      {(e.type === 'note' || e.type === 'night_action') && (
-                        <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
-                          {t('timeline.edit')}
-                        </button>
-                      )}
-                      {DELETABLE_TYPES.has(e.type) && (
-                        <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
-                          {t('timeline.delete')}
-                        </button>
-                      )}
-                    </span>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+                  ) : (
+                    <>
+                      <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
+                      <span className="timeline__actions">
+                        {(e.type === 'note' || e.type === 'night_action') && (
+                          <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
+                            {t('timeline.edit')}
+                          </button>
+                        )}
+                        {DELETABLE_TYPES.has(e.type) && (
+                          <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
+                            {t('timeline.delete')}
+                          </button>
+                        )}
+                      </span>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+            {isDay && !hasExecution && (
+              <p className="timeline__hint">{t('timeline.noExecutionSuggestion')}</p>
+            )}
+          </div>
+        );
+      })}
     </section>
   );
 }

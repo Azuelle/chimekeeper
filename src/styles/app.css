@@ -335,6 +335,24 @@ button:focus-visible {
   box-shadow: 0 0 0 2px var(--ring);
 }
 
+.seat-face.is-dead .token-ring {
+  filter: grayscale(100%);
+  opacity: 0.55;
+}
+
+.seat-face.is-dead .seat-face__name {
+  opacity: 0.6;
+}
+
+.seat-face__dead {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.35rem;
+  font-size: 0.9rem;
+  line-height: 1;
+  z-index: 1;
+}
+
 .seat-face__number {
   position: absolute;
   top: 0.28rem;

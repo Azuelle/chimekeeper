@@ -98,7 +98,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
 - **读写封装**（`src/persistence/repo.ts`，ADR-017）：saveGame / loadCurrentGame
   （按 updatedAt 取最新一条，单一当前局）/ listGames（按 updatedAt 倒序，F-07b）/
-  saveEvent / deleteEvent / loadEvents（createdAt 升序，时间线渲染序）/
+  saveEvent / deleteEvent / updateEvent / loadEvents（createdAt 升序，时间线渲染序）/
   deleteGame（**级联删除该局全部事件**）/ clearAll；
   环境无 indexedDB 时静默跳过（部分测试环境）
 - **store 写通**：gameStore 每次变更 `set()` 后 fire-and-forget `saveGame`（双写，

@@ -114,14 +114,14 @@ describe('DayPanel（白天面板）', () => {
     render(<DayPanel />);
 
     await user.click(screen.getByRole('button', { name: '登记死亡' }));
-    await user.selectOptions(screen.getByLabelText('被提名者'), '4');
+    await user.selectOptions(screen.getByLabelText('目标座位'), '4');
     await user.selectOptions(screen.getByLabelText('原因'), 'night');
     await user.click(screen.getAllByRole('button', { name: '登记死亡' })[1]!);
 
     expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 4)?.alive).toBe(false);
 
     await user.click(screen.getByRole('button', { name: '登记复活' }));
-    await user.selectOptions(screen.getByLabelText('被提名者'), '4');
+    await user.selectOptions(screen.getByLabelText('目标座位'), '4');
     await user.click(screen.getAllByRole('button', { name: '登记复活' })[1]!);
 
     expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 4)?.alive).toBe(true);
@@ -196,7 +196,7 @@ describe('DayPanel（白天面板）', () => {
     render(<DayPanel />);
 
     await user.click(screen.getByRole('button', { name: '切换投票权' }));
-    await user.selectOptions(screen.getByLabelText('被提名者'), '1');
+    await user.selectOptions(screen.getByLabelText('目标座位'), '1');
     await user.click(screen.getAllByRole('button', { name: '切换投票权' })[1]!);
 
     const after = useGameStore.getState().game!.seats.find((s) => s.seatNumber === 1)!.hasVoteToken;

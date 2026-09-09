@@ -43,13 +43,15 @@ describe('Timeline（F-06b 时间线）', () => {
       }),
     );
     store.finishNight();
+    useEventStore.getState().append(createEvent(useGameStore.getState().game!, 'note', { payload: { text: '白天备注' } }));
 
     render(<Timeline />);
     expect(screen.getByText('首夜')).toBeTruthy();
     expect(screen.getByText('第 1 个白天')).toBeTruthy();
     expect(screen.getByText(/爪牙信息/)).toBeTruthy();
     expect(screen.getByText(/洗衣妇（座位 1）：3 5 之中有洗衣妇/)).toBeTruthy();
-    expect(screen.getByText('进入白天')).toBeTruthy();
+    expect(screen.queryByText('进入白天')).toBeNull();
+    expect(screen.getByText('白天备注')).toBeTruthy();
   });
 
   it('座位事件：换位/平移/增删渲染中文描述；setup 阶段操作不入流水', async () => {
@@ -85,6 +87,33 @@ describe('Timeline（F-06b 时间线）', () => {
 
     expect(screen.getByText('新备注')).toBeTruthy();
     expect(screen.queryByText('旧备注')).toBeNull();
+  });
+
+  it('编辑事件原地更新，不改变顺序、id 与 createdAt', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '第一条' } }));
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '第二条' } }));
+    const beforeEvents = useEventStore.getState().events;
+    const firstNote = beforeEvents.find((e) => e.type === 'note')!;
+
+    render(<Timeline />);
+    const editButtons = screen.getAllByRole('button', { name: '编辑' });
+    await user.click(editButtons[0]!);
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '第一条已编辑');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    const afterEvents = useEventStore.getState().events;
+    expect(afterEvents.length).toBe(beforeEvents.length);
+    const updated = afterEvents.find((e) => e.id === firstNote.id)!;
+    expect(updated.createdAt).toBe(firstNote.createdAt);
+    expect(updated.payload.text).toBe('第一条已编辑');
+    expect(afterEvents.filter((e) => e.type === 'note').map((e) => e.payload.text)).toEqual([
+      '第一条已编辑',
+      '第二条',
+    ]);
   });
 
   it('可删除用户事件并撤销', async () => {
