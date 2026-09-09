@@ -28,7 +28,9 @@ describe('App M2 链路（抽袋 → 夜单 → 白天 → 恢复）', () => {
     const user = userEvent.setup();
     const { unmount } = render(<App />);
 
-    // 开桌：内置剧本 → 排座位 → 7 人生成
+    // 开桌：首页 → 内置剧本 → 排座位 → 7 人生成
+    await screen.findByRole('button', { name: '新建对局' });
+    await user.click(screen.getByRole('button', { name: '新建对局' }));
     await screen.findByRole('button', { name: '暗流涌动' });
     await user.click(screen.getByRole('button', { name: '暗流涌动' }));
     await user.click(screen.getByRole('button', { name: '排座位' }));

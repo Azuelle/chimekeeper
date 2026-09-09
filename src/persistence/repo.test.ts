@@ -8,6 +8,7 @@ import {
   loadEvents,
   deleteGame,
   clearAll,
+  listGames,
 } from './repo';
 import { createEvent } from '../lib/events';
 import type { Game } from '../types/game';
@@ -43,6 +44,14 @@ describe('repo（F-07a，fake-indexeddb）', () => {
 
   it('库空时 loadCurrentGame 返回 null', async () => {
     expect(await loadCurrentGame()).toBeNull();
+  });
+
+  it('listGames 按 updatedAt 倒序返回全部对局（F-07b）', async () => {
+    await saveGame(makeGame({ id: 'g1', updatedAt: 100 }));
+    await saveGame(makeGame({ id: 'g2', updatedAt: 300 }));
+    await saveGame(makeGame({ id: 'g3', updatedAt: 200 }));
+    const games = await listGames();
+    expect(games.map((g) => g.id)).toEqual(['g2', 'g3', 'g1']);
   });
 
   it('saveEvent → loadEvents 按 createdAt 升序（时间线渲染序）', async () => {

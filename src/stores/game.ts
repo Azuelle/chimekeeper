@@ -19,9 +19,10 @@ import {
 import { newId } from '../lib/id';
 import { createEvent } from '../lib/events';
 import { alignmentForRole } from '../lib/setup';
-import { deleteGame, loadCurrentGame, saveGame } from '../persistence/repo';
+import { votesNeeded } from '../lib/vote';
+import { deleteGame as deleteGameById, listGames as listGamesById, loadCurrentGame, loadGame as loadGameById, saveGame } from '../persistence/repo';
 import { useEventStore } from './events';
-import type { Game, TeamComposition } from '../types/game';
+import type { DeathCause, Game, TeamComposition } from '../types/game';
 import type { Script } from '../types/script';
 
 /** 抽袋结果：座位 → 角色 */
@@ -94,7 +95,38 @@ interface GameState {
   /** 返回上一阶段（说书人误操作回退）：阶段/round 还原，夜单进度从事件恢复，删除最近一次 phase_change */
   rewindPhase(): void;
   /** 夜单步骤打勾/取消（ADR-017：nightProgress 持久化；事件由夜单面板维护） */
-  toggleNightStep(key: string, checked: boolean): void;
+  setNightStepChecked(key: string, checked: boolean): void;
+
+  // F-05 白天流程
+  /** 登记提名（nominatorSeat → nominatedSeat） */
+  registerNomination(nominatorSeat: number, nominatedSeat: number): void;
+  /** 登记投票结果；votesFor 为空时只记录事件不显示票数 */
+  registerVote(nominatedSeat: number, votesFor?: number): void;
+  /** 登记处决；died 表示是否因此死亡（弄臣/茶艺师等可存活） */
+  registerExecution(seatNumber: number, died: boolean): void;
+  /** QoL：处决并死亡，生成 execution + death(cause='execution') 两个事件 */
+  registerExecutionAndDeath(seatNumber: number): void;
+  /** 登记死亡（任意原因），默认保留一票投票权 */
+  registerDeath(seatNumber: number, cause?: DeathCause): void;
+  /** 登记复活 */
+  registerRevival(seatNumber: number): void;
+  /** 切换某座位的投票权状态（死后一票用完等） */
+  toggleVoteToken(seatNumber: number): void;
+  /** 添加自由备注 */
+  addNote(text: string): void;
+  /** 结束游戏并登记结局 */
+  endGame(winningTeam: 'good' | 'evil', reason?: string): void;
+
+  // F-07b 多局管理
+  /** 列出全部历史对局（最近更新倒序） */
+  listGames(): Promise<Game[]>;
+  /** 载入指定对局为当前对局（继续历史对局） */
+  loadGame(gameId: string): Promise<void>;
+  /** 删除指定历史对局（级联删事件） */
+  deleteGame(gameId: string): Promise<void>;
+  /** 离开当前对局回首页：不删库，仅清内存态（对局仍可经列表继续） */
+  closeGame(): void;
+
   /** 废弃当前对局：删库（级联事件）+ 清内存 */
   reset(): void;
 }
@@ -319,22 +351,30 @@ export const useGameStore = create<GameState>()((set, get) => {
       const lastPhaseChange = events.filter((e) => e.type === 'phase_change').at(-1);
       if (lastPhaseChange) useEventStore.getState().remove(lastPhaseChange.id);
 
-      // 若回退到夜阶段，从已记录的 night_action 事件恢复打勾进度
-      const nightProgress =
-        target.phase === 'firstNight' || target.phase === 'night'
-          ? {
-              round: target.round,
-              checked: events
-                .filter(
-                  (e) =>
-                    e.type === 'night_action' &&
-                    e.round === target.round &&
-                    e.phase === target.phase &&
-                    typeof e.payload.stepKey === 'string',
-                )
-                .map((e) => e.payload.stepKey as string),
-            }
-          : undefined;
+      // 若回退到夜阶段，从已记录的 night_action 事件恢复打勾进度。
+      // dusk/dawn 不产生事件（ADR-017）但完成一夜必然打过勾——回退只可能发生在
+      // 该夜被黎明收尾（finishNight 已清 nightProgress）之后，故补回这两枚锚点。
+      const isNightTarget = target.phase === 'firstNight' || target.phase === 'night';
+      const nightProgress = isNightTarget
+        ? {
+            round: target.round,
+            checked: [
+              ...new Set([
+                ...events
+                  .filter(
+                    (e) =>
+                      e.type === 'night_action' &&
+                      e.round === target.round &&
+                      e.phase === target.phase &&
+                      typeof e.payload.stepKey === 'string',
+                  )
+                  .map((e) => e.payload.stepKey as string),
+                'system:dusk',
+                'system:dawn',
+              ]),
+            ],
+          }
+        : undefined;
 
       const next: Game = {
         ...game,
@@ -346,24 +386,139 @@ export const useGameStore = create<GameState>()((set, get) => {
       write(next);
     },
 
-    toggleNightStep(key, checked) {
+    setNightStepChecked(key, checked) {
       const game = get().game;
       if (!game || (game.phase !== 'firstNight' && game.phase !== 'night')) return;
       const cur =
         game.nightProgress && game.nightProgress.round === game.round
           ? game.nightProgress
           : { round: game.round, checked: [] };
-      const set = new Set(cur.checked);
-      if (checked) set.add(key);
-      else set.delete(key);
-      write({ ...game, nightProgress: { round: cur.round, checked: [...set] }, updatedAt: Date.now() });
+      const checkedSet = new Set(cur.checked);
+      if (checked) checkedSet.add(key);
+      else checkedSet.delete(key);
+      write({ ...game, nightProgress: { round: cur.round, checked: [...checkedSet] }, updatedAt: Date.now() });
+    },
+
+    registerNomination(nominatorSeat, nominatedSeat) {
+      const game = get().game;
+      if (!game || game.phase !== 'day') return;
+      // 提名有两个语义不对称的座位（提名者 ≠ 被提名者），以 payload 为唯一真相源；
+      // 不写入通用 seatNumbers，避免同一对数字双写漂移（DATA-MODEL 以 payload 为 schema）
+      useEventStore
+        .getState()
+        .append(
+          createEvent(game, 'nomination', { payload: { nominatorSeat, nominatedSeat } }),
+        );
+    },
+
+    registerVote(nominatedSeat, votesFor) {
+      const game = get().game;
+      if (!game || game.phase !== 'day') return;
+      const aliveCount = game.seats.filter((s) => s.alive).length;
+      const needed = votesNeeded(aliveCount);
+      const passed = votesFor !== undefined ? votesFor >= needed : undefined;
+      useEventStore
+        .getState()
+        .append(
+          createEvent(game, 'vote', {
+            seatNumbers: [nominatedSeat],
+            payload: { votesFor, votesNeeded: needed, passed },
+          }),
+        );
+    },
+
+    registerExecution(seatNumber, died) {
+      const game = get().game;
+      if (!game || game.phase !== 'day') return;
+      useEventStore
+        .getState()
+        .append(createEvent(game, 'execution', { seatNumbers: [seatNumber], payload: { died } }));
+    },
+
+    registerExecutionAndDeath(seatNumber) {
+      const game = get().game;
+      if (!game || game.phase !== 'day') return;
+      get().registerExecution(seatNumber, true);
+      get().registerDeath(seatNumber, 'execution');
+    },
+
+    registerDeath(seatNumber, cause) {
+      const game = get().game;
+      if (!game) return;
+      const seats = game.seats.map((s) =>
+        s.seatNumber === seatNumber ? { ...s, alive: false, hasVoteToken: true } : s,
+      );
+      const next = { ...game, seats, updatedAt: Date.now() };
+      write(next);
+      useEventStore
+        .getState()
+        .append(createEvent(next, 'death', { seatNumbers: [seatNumber], payload: { cause } }));
+    },
+
+    registerRevival(seatNumber) {
+      const game = get().game;
+      if (!game) return;
+      const seats = game.seats.map((s) =>
+        s.seatNumber === seatNumber ? { ...s, alive: true, hasVoteToken: true } : s,
+      );
+      const next = { ...game, seats, updatedAt: Date.now() };
+      write(next);
+      useEventStore.getState().append(createEvent(next, 'revival', { seatNumbers: [seatNumber] }));
+    },
+
+    toggleVoteToken(seatNumber) {
+      const game = get().game;
+      if (!game) return;
+      const seats = game.seats.map((s) =>
+        s.seatNumber === seatNumber ? { ...s, hasVoteToken: !s.hasVoteToken } : s,
+      );
+      write({ ...game, seats, updatedAt: Date.now() });
+    },
+
+    addNote(text) {
+      const game = get().game;
+      if (!game) return;
+      useEventStore.getState().append(createEvent(game, 'note', { payload: { text: text.trim() } }));
+    },
+
+    endGame(winningTeam, reason) {
+      const game = get().game;
+      if (!game) return;
+      const next: Game = { ...game, phase: 'ended', outcome: { winningTeam, reason }, updatedAt: Date.now() };
+      write(next);
+      useEventStore.getState().append(createEvent(next, 'game_end', { payload: { winningTeam, reason } }));
+    },
+
+    async loadGame(gameId) {
+      const game = await loadGameById(gameId);
+      if (!game) return;
+      await useEventStore.getState().hydrate(game.id);
+      set({ game, hydrated: true });
+    },
+
+    async listGames() {
+      return listGamesById();
+    },
+
+    async deleteGame(gameId) {
+      await deleteGameById(gameId);
+      // 删的是当前局时同步清内存态
+      if (get().game?.id === gameId) {
+        useEventStore.getState().clear();
+        set({ game: null });
+      }
+    },
+
+    closeGame() {
+      useEventStore.getState().clear();
+      set({ game: null });
     },
 
     reset() {
       const old = get().game;
       useEventStore.getState().clear();
       set({ game: null });
-      if (old) void deleteGame(old.id);
+      if (old) void deleteGameById(old.id);
     },
   };
 });

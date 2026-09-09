@@ -236,23 +236,23 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(changes.map((e) => e.round)).toEqual([0, 1, 1, 2]);
   });
 
-  it('toggleNightStep：打勾/取消写 nightProgress；仅夜阶段可用', () => {
+  it('setNightStepChecked：打勾/取消写 nightProgress；仅夜阶段可用', () => {
     store().createGame(script, 5);
-    store().toggleNightStep('system:dusk', true);
+    store().setNightStepChecked('system:dusk', true);
     expect(store().game?.nightProgress).toBeUndefined();
 
     store().enterFirstNight();
-    store().toggleNightStep('system:dusk', true);
-    store().toggleNightStep('role:poisoner', true);
+    store().setNightStepChecked('system:dusk', true);
+    store().setNightStepChecked('role:poisoner', true);
     expect(store().game?.nightProgress?.checked.sort()).toEqual(['role:poisoner', 'system:dusk']);
-    store().toggleNightStep('system:dusk', false);
+    store().setNightStepChecked('system:dusk', false);
     expect(store().game?.nightProgress?.checked).toEqual(['role:poisoner']);
   });
 
   it('rewindPhase：day→上一夜恢复进度并删除 phase_change；night→day；firstNight→setup', () => {
     store().createGame(script, 5);
     store().enterFirstNight();
-    store().toggleNightStep('role:poisoner', true);
+    store().setNightStepChecked('role:poisoner', true);
     // 进度恢复从 night_action 事件读取，需先造一条事件
     useEventStore.getState().append(
       createEvent(store().game!, 'night_action', {
@@ -269,6 +269,9 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(game.phase).toBe('firstNight');
     expect(game.round).toBe(0);
     expect(game.nightProgress?.checked).toContain('role:poisoner');
+    // dusk/dawn 不产生事件，但完成一夜必然打过勾——rewind 必须补回（M2 回归修复）
+    expect(game.nightProgress?.checked).toContain('system:dusk');
+    expect(game.nightProgress?.checked).toContain('system:dawn');
     expect(useEventStore.getState().events.filter((e) => e.type === 'phase_change')).toHaveLength(1);
 
     store().finishNight();
@@ -285,6 +288,8 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(game.round).toBe(0);
     // 该夜的 night_action 事件仍在，进度继续恢复
     expect(game.nightProgress?.checked).toContain('role:poisoner');
+    expect(game.nightProgress?.checked).toContain('system:dusk');
+    expect(game.nightProgress?.checked).toContain('system:dawn');
   });
 
   it('createGame 清空上一局事件内存', () => {
@@ -309,5 +314,104 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(seatEvents[0]?.payload).toEqual({ seatA: 1, seatB: 2 });
     expect(seatEvents[1]?.payload).toEqual({ seatA: 2, seatB: 4, ripple: true });
     expect(seatEvents.every((e) => e.phase === 'firstNight' && e.round === 0)).toBe(true);
+  });
+});
+
+describe('gameStore 白天流程（F-05 / F-06c）', () => {
+  beforeEach(() => {
+    useGameStore.getState().reset();
+    useEventStore.getState().clear();
+  });
+
+  it('registerNomination / registerVote / registerExecution：生成对应事件', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight(); // day 1, round 1
+
+    store().registerNomination(2, 4);
+    store().registerVote(4, 3);
+    store().registerExecution(4, false);
+
+    const events = useEventStore.getState().events;
+    const nom = events.find((e) => e.type === 'nomination');
+    const vote = events.find((e) => e.type === 'vote');
+    const exec = events.find((e) => e.type === 'execution');
+
+    expect(nom?.payload).toEqual({ nominatorSeat: 2, nominatedSeat: 4 });
+    // 方案 A：seatNumbers 不再重复（nomination 以 payload 为唯一真相源）
+    expect(nom?.seatNumbers).toEqual([]);
+    expect(vote?.payload).toMatchObject({ votesFor: 3, votesNeeded: 3, passed: true });
+    expect(exec?.payload).toEqual({ died: false });
+  });
+
+  it('registerVote 允许不填票数，passed 为 undefined', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().registerVote(3);
+    const vote = useEventStore.getState().events.find((e) => e.type === 'vote');
+    expect(vote?.payload).toMatchObject({ votesFor: undefined, votesNeeded: 3, passed: undefined });
+  });
+
+  it('registerExecutionAndDeath 生成两个事件并登记死亡', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().registerExecutionAndDeath(3);
+
+    const exec = useEventStore.getState().events.find((e) => e.type === 'execution');
+    const death = useEventStore.getState().events.find((e) => e.type === 'death');
+    expect(exec?.payload).toEqual({ died: true });
+    expect(death?.payload).toEqual({ cause: 'execution' });
+    expect(store().game?.seats.find((s) => s.seatNumber === 3)?.alive).toBe(false);
+    expect(store().game?.seats.find((s) => s.seatNumber === 3)?.hasVoteToken).toBe(true);
+  });
+
+  it('registerDeath / registerRevival 切换生死状态', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+    const death = useEventStore.getState().events.find((e) => e.type === 'death');
+    expect(death?.payload).toEqual({ cause: 'night' });
+
+    store().registerRevival(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
+    expect(useEventStore.getState().events.some((e) => e.type === 'revival')).toBe(true);
+  });
+
+  it('toggleVoteToken 手动切换投票权', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.hasVoteToken).toBe(true);
+    store().toggleVoteToken(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.hasVoteToken).toBe(false);
+  });
+
+  it('addNote 生成 note 事件并去除首尾空格', () => {
+    store().createGame(script, 5);
+    store().addNote('  小杜因为小明（哲学家）醉酒了  ');
+    const note = useEventStore.getState().events.find((e) => e.type === 'note');
+    expect(note?.payload).toEqual({ text: '小杜因为小明（哲学家）醉酒了' });
+  });
+
+  it('endGame 进入 ended 阶段并生成 game_end 事件', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().endGame('evil', '恶魔存活到最后');
+    expect(store().game?.phase).toBe('ended');
+    expect(store().game?.outcome).toEqual({ winningTeam: 'evil', reason: '恶魔存活到最后' });
+    const end = useEventStore.getState().events.find((e) => e.type === 'game_end');
+    expect(end?.payload).toEqual({ winningTeam: 'evil', reason: '恶魔存活到最后' });
+  });
+
+  it('白天相关 action 在非 day 阶段为 no-op', () => {
+    store().createGame(script, 5);
+    // setup
+    store().registerNomination(1, 2);
+    store().registerVote(1, 2);
+    store().registerExecution(1, true);
+    store().registerExecutionAndDeath(1);
+    expect(useEventStore.getState().events.filter((e) => ['nomination', 'vote', 'execution'].includes(e.type))).toEqual([]);
   });
 });

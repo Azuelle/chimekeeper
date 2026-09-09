@@ -144,7 +144,7 @@ describe('DayPlaceholder（M3 前占位）', () => {
     const user = userEvent.setup();
     useGameStore.getState().finishNight();      // day 1
     useGameStore.getState().enterNextNight();   // night 1
-    useGameStore.getState().toggleNightStep('role:poisoner', true);
+    useGameStore.getState().setNightStepChecked('role:poisoner', true);
     useEventStore.getState().append(
       createEvent(useGameStore.getState().game!, 'night_action', {
         seatNumbers: [3],

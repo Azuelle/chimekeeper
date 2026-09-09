@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import '../i18n';
@@ -68,6 +69,114 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(screen.getByText('平移：2 → 5')).toBeTruthy();
     expect(screen.getByText('新增座位 8')).toBeTruthy();
     expect(screen.getByText('移除座位 6')).toBeTruthy();
+  });
+
+  it('note 可编辑并保存', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '旧备注' } }));
+
+    render(<Timeline />);
+    await user.click(screen.getByRole('button', { name: '编辑' }));
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '新备注');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    expect(screen.getByText('新备注')).toBeTruthy();
+    expect(screen.queryByText('旧备注')).toBeNull();
+  });
+
+  it('可删除用户事件并撤销', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '待删除' } }));
+
+    render(<Timeline />);
+    expect(screen.getByText('待删除')).toBeTruthy();
+    await user.click(screen.getByRole('button', { name: '删除' }));
+    expect(screen.queryByText('待删除')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: '撤销' }));
+    expect(screen.getByText('待删除')).toBeTruthy();
+  });
+
+  it('取消确认时不删除事件', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '保留' } }));
+
+    render(<Timeline />);
+    await user.click(screen.getByRole('button', { name: '删除' }));
+    expect(screen.getByText('保留')).toBeTruthy();
+  });
+
+  it('保存空备注不修改事件且停留在编辑态', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '原备注' } }));
+
+    render(<Timeline />);
+    await user.click(screen.getByRole('button', { name: '编辑' }));
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    const before = useEventStore.getState().events.length;
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    expect(useEventStore.getState().events.length).toBe(before);
+    expect(screen.getByRole('textbox')).toBeTruthy();
+  });
+
+  it('取消编辑不修改备注', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '原备注' } }));
+
+    render(<Timeline />);
+    await user.click(screen.getByRole('button', { name: '编辑' }));
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '未保存');
+    await user.click(screen.getByRole('button', { name: '取消' }));
+
+    expect(screen.getByText('原备注')).toBeTruthy();
+    expect(screen.queryByText('未保存')).toBeNull();
+  });
+
+  it('night_action 的 info 可编辑（F-06d）', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(
+      createEvent(game, 'night_action', {
+        seatNumbers: [1],
+        payload: { stepKey: 'role:washerwoman', roleId: 'washerwoman', info: '3 5 之中有洗衣妇' },
+      }),
+    );
+
+    render(<Timeline />);
+    expect(screen.getByText(/3 5 之中有洗衣妇/)).toBeTruthy();
+    await user.click(screen.getAllByRole('button', { name: '编辑' })[0]!);
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '修正后的信息');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    expect(screen.getByText(/修正后的信息/)).toBeTruthy();
+    const ev = useEventStore.getState().events.find((e) => e.type === 'night_action');
+    expect(ev?.payload.info).toBe('修正后的信息');
+    expect(ev?.payload.stepKey).toBe('role:washerwoman');
+  });
+
+  it('death 事件不开放删除（状态双写，避免日志与 Game 失同步）', () => {
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(
+      createEvent(game, 'death', { seatNumbers: [1], payload: { cause: 'night' } }),
+    );
+
+    render(<Timeline />);
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
   });
 
   it('无事件时不渲染', () => {
