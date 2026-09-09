@@ -23,7 +23,7 @@ const game: Game = {
 
 const events: GameEvent[] = [
   { id: 'e1', gameId: 'g1', type: 'night_action', round: 0, phase: 'firstNight', seatNumbers: [1], payload: { roleId: 'monk' }, createdAt: 1 },
-  { id: 'e2', gameId: 'g1', type: 'nomination', round: 1, phase: 'day', seatNumbers: [1, 2], payload: { nominatorSeat: 1, nominatedSeat: 2 }, createdAt: 2 },
+  { id: 'e2', gameId: 'g1', type: 'nomination', round: 1, phase: 'day', seatNumbers: [], payload: { nominatorSeat: 1, nominatedSeat: 2 }, createdAt: 2 },
   { id: 'e3', gameId: 'g1', type: 'game_end', round: 2, phase: 'ended', seatNumbers: [], payload: { winningTeam: 'good' }, createdAt: 3 },
   // 别的对局的事件不应混入
   { id: 'e4', gameId: 'other', type: 'note', round: 0, phase: 'setup', seatNumbers: [], payload: { text: 'x' }, createdAt: 4 },

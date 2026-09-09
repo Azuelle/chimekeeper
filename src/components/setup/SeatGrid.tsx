@@ -14,6 +14,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ringLayout } from '../../lib/ringLayout';
+import { roleNameById as buildRoleNameMap } from '../../lib/roleMap';
 import { useGameStore } from '../../stores/game';
 import type { Seat } from '../../types/game';
 import { ringSkinFor } from '../../ui/tokenSkin';
@@ -68,11 +69,7 @@ export function SeatGrid({ seats }: SeatGridProps) {
   const rippleShiftSeat = useGameStore((s) => s.rippleShiftSeat);
   // 角色名展示（M2 抽袋后 token 内芯显示角色）；DIY 快照缺失的角色留空
   const snapshotRoles = useGameStore((s) => s.game?.scriptSnapshot.roles);
-  const roleNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const r of snapshotRoles ?? []) map.set(r.id, r.name);
-    return map;
-  }, [snapshotRoles]);
+  const roleNameById = useMemo(() => buildRoleNameMap(snapshotRoles ?? []), [snapshotRoles]);
 
   const ringRef = useRef<HTMLOListElement | null>(null);
   const [cols, setCols] = useState<number>(FALLBACK_COLS);

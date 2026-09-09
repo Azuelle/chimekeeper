@@ -1,9 +1,9 @@
 /**
- * 真首页（M3）：新建对局 / 继续最近对局 / 历史对局列表（F-07b）
+ * 真首页（M3）：新建对局 / 继续最近对局 / 历史对局列表（F-07b）。
+ * 数据一律经 gameStore（组件不直连 persistence，见 ARCHITECTURE 分层）。
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { deleteGame, listGames } from '../../persistence/repo';
 import { useGameStore } from '../../stores/game';
 import type { Game } from '../../types/game';
 
@@ -14,6 +14,8 @@ export interface HomeProps {
 export function Home({ onNewGame }: HomeProps) {
   const { t } = useTranslation();
   const loadGame = useGameStore((s) => s.loadGame);
+  const listGames = useGameStore((s) => s.listGames);
+  const deleteGame = useGameStore((s) => s.deleteGame);
   const [games, setGames] = useState<Game[]>([]);
 
   const refreshHistory = async () => {
@@ -22,7 +24,7 @@ export function Home({ onNewGame }: HomeProps) {
 
   useEffect(() => {
     void refreshHistory();
-  }, []);
+  }, [listGames]);
 
   const handleContinue = async (gameId: string) => {
     await loadGame(gameId);

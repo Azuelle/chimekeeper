@@ -1,7 +1,8 @@
 /**
  * 持久化仓库（F-07a，ADR-017）：Dexie 读写的一层薄封装。
  *
- * - 单一当前局：loadCurrentGame 按 updatedAt 取最新一条（多局列表属 M4 F-07b）
+ * - 单一当前局：hydrate 用 loadCurrentGame 按 updatedAt 取最新一条；
+ *   F-07b 多局列表（M3 提前落地）经 listGames/loadGame/deleteGame 触达
  * - deleteGame 级联删除该局全部事件（v1 单局模型防脏数据）
  * - 环境无 indexedDB（部分测试环境）时静默跳过，不产生未处理拒绝
  */

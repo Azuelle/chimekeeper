@@ -87,4 +87,28 @@ describe('gameStore 写通持久化（ADR-017 双写）', () => {
     expect(useGameStore.getState().game?.seats).toHaveLength(5);
     expect(useEventStore.getState().events.map((e) => e.payload.text)).toEqual(['g1 note']);
   });
+
+  it('listGames/closeGame/deleteGame：多局列表、离开当前局与删局（F-07b）', async () => {
+    useGameStore.getState().createGame(script, 5);
+    const g1 = useGameStore.getState().game!.id;
+
+    // closeGame：不删库只清内存，回首页后可经列表继续
+    useGameStore.getState().closeGame();
+    expect(useGameStore.getState().game).toBeNull();
+    expect(useEventStore.getState().events).toEqual([]);
+    const afterClose = await useGameStore.getState().listGames();
+    expect(afterClose.map((g) => g.id)).toContain(g1);
+
+    // 造第二局并恢复 g1 为当前局
+    useGameStore.getState().createGame(script, 7);
+    const g2 = useGameStore.getState().game!.id;
+    await useGameStore.getState().loadGame(g1);
+    expect(useGameStore.getState().game?.id).toBe(g1);
+
+    // 删除当前局：内存清空，库中仅剩 g2
+    await useGameStore.getState().deleteGame(g1);
+    expect(useGameStore.getState().game).toBeNull();
+    const games = await useGameStore.getState().listGames();
+    expect(games.map((g) => g.id)).toEqual([g2]);
+  });
 });

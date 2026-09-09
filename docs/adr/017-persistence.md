@@ -11,8 +11,11 @@ M2 引入对局状态持久化（F-07a，杀后台可恢复）与夜晚流程（
 
 ## 决定
 
-1. **单一当前局（v1）**：`loadCurrentGame()` 按 `updatedAt` 取最新一条；多局列表
-   /只读历史是 M4 F-07b 的事。schema 已含 `updatedAt` 索引，无需迁移。
+1. **单一当前局（v1）**：`hydrate()` 按 `loadCurrentGame()` 取最新一条恢复。多局列表
+   /只读历史原本排期 M4 F-07b，**M3 提前落地**（PRD M3 里程碑行已含 F-07(b)）：
+   repo 增加 `listGames`/`loadGame`/`deleteGame`，gameStore 暴露同面 action + Home 列表。
+   注意：hydrate 仍只恢复"最新一局"，多局列表不是首页缺省态，需显式返回首页（`closeGame`）触达。
+   schema 已含 `updatedAt` 索引，无需迁移。
 2. **写通双写（write-through）**：gameStore 每次变更 `set()` 后 `void saveGame(newGame)`
    （fire-and-forget）；不引入事件溯源，保持 v1 简单。一致性由 store 层保证
    （DATA-MODEL §3 同款约定）。

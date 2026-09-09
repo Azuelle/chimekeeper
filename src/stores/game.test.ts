@@ -236,23 +236,23 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(changes.map((e) => e.round)).toEqual([0, 1, 1, 2]);
   });
 
-  it('toggleNightStep：打勾/取消写 nightProgress；仅夜阶段可用', () => {
+  it('setNightStepChecked：打勾/取消写 nightProgress；仅夜阶段可用', () => {
     store().createGame(script, 5);
-    store().toggleNightStep('system:dusk', true);
+    store().setNightStepChecked('system:dusk', true);
     expect(store().game?.nightProgress).toBeUndefined();
 
     store().enterFirstNight();
-    store().toggleNightStep('system:dusk', true);
-    store().toggleNightStep('role:poisoner', true);
+    store().setNightStepChecked('system:dusk', true);
+    store().setNightStepChecked('role:poisoner', true);
     expect(store().game?.nightProgress?.checked.sort()).toEqual(['role:poisoner', 'system:dusk']);
-    store().toggleNightStep('system:dusk', false);
+    store().setNightStepChecked('system:dusk', false);
     expect(store().game?.nightProgress?.checked).toEqual(['role:poisoner']);
   });
 
   it('rewindPhase：day→上一夜恢复进度并删除 phase_change；night→day；firstNight→setup', () => {
     store().createGame(script, 5);
     store().enterFirstNight();
-    store().toggleNightStep('role:poisoner', true);
+    store().setNightStepChecked('role:poisoner', true);
     // 进度恢复从 night_action 事件读取，需先造一条事件
     useEventStore.getState().append(
       createEvent(store().game!, 'night_action', {
@@ -269,6 +269,9 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(game.phase).toBe('firstNight');
     expect(game.round).toBe(0);
     expect(game.nightProgress?.checked).toContain('role:poisoner');
+    // dusk/dawn 不产生事件，但完成一夜必然打过勾——rewind 必须补回（M2 回归修复）
+    expect(game.nightProgress?.checked).toContain('system:dusk');
+    expect(game.nightProgress?.checked).toContain('system:dawn');
     expect(useEventStore.getState().events.filter((e) => e.type === 'phase_change')).toHaveLength(1);
 
     store().finishNight();
@@ -285,6 +288,8 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(game.round).toBe(0);
     // 该夜的 night_action 事件仍在，进度继续恢复
     expect(game.nightProgress?.checked).toContain('role:poisoner');
+    expect(game.nightProgress?.checked).toContain('system:dusk');
+    expect(game.nightProgress?.checked).toContain('system:dawn');
   });
 
   it('createGame 清空上一局事件内存', () => {
@@ -333,7 +338,8 @@ describe('gameStore 白天流程（F-05 / F-06c）', () => {
     const exec = events.find((e) => e.type === 'execution');
 
     expect(nom?.payload).toEqual({ nominatorSeat: 2, nominatedSeat: 4 });
-    expect(nom?.seatNumbers).toEqual([2, 4]);
+    // 方案 A：seatNumbers 不再重复（nomination 以 payload 为唯一真相源）
+    expect(nom?.seatNumbers).toEqual([]);
     expect(vote?.payload).toMatchObject({ votesFor: 3, votesNeeded: 3, passed: true });
     expect(exec?.payload).toEqual({ died: false });
   });

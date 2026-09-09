@@ -49,8 +49,15 @@ body {
 }
 
 .app-header {
+  position: relative;
   text-align: center;
   padding: 1.25rem 1rem 0.5rem;
+}
+
+.app-header__home {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
 }
 
 .app-header h1 {

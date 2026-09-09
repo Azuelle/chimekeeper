@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "BotC Grimoire",
-    "communityNotice": "Unofficial community creation · Not affiliated with The Pandemonium Institute"
+    "communityNotice": "Unofficial community creation · Not affiliated with The Pandemonium Institute",
+    "home": "Home"
   },
   "home": {
     "title": "BotC Grimoire",
@@ -189,6 +190,9 @@
     "cause.execution": "Execution",
     "cause.night": "Night death",
     "cause.other": "Other",
+    "voteTokenAction": "Toggle vote token",
+    "voteToken.has": "has vote",
+    "voteToken.none": "no vote",
     "notePlaceholder": "Note...",
     "enterNight": "Enter the night",
     "enterNightConfirm": "Enter night {{round}}?",

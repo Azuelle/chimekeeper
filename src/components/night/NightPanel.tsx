@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
 import { useEventStore } from '../../stores/events';
 import { buildNightOrder, stepKey, systemStepOverrideHints } from '../../lib/nightOrder';
+import { roleById as buildRoleById } from '../../lib/roleMap';
 import { createEvent } from '../../lib/events';
 import type { Role } from '../../types/script';
 import type { Game, Seat } from '../../types/game';
@@ -17,7 +18,7 @@ import type { NightStep } from '../../lib/nightOrder';
 export function NightPanel() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
-  const toggleNightStep = useGameStore((s) => s.toggleNightStep);
+  const setNightStepChecked = useGameStore((s) => s.setNightStepChecked);
   const finishNight = useGameStore((s) => s.finishNight);
   const rewindPhase = useGameStore((s) => s.rewindPhase);
   const events = useEventStore((s) => s.events);
@@ -27,7 +28,7 @@ export function NightPanel() {
   const [infoDrafts, setInfoDrafts] = useState<Record<string, string>>({});
 
   const roleById = useMemo(
-    () => new Map((game?.scriptSnapshot.roles ?? []).map((r) => [r.id, r])),
+    () => buildRoleById(game?.scriptSnapshot.roles ?? []),
     [game],
   );
 
@@ -73,7 +74,7 @@ export function NightPanel() {
 
   const handleToggle = (step: NightStep, next: boolean): void => {
     const key = stepKey(step);
-    toggleNightStep(key, next);
+    setNightStepChecked(key, next);
 
     if (step.kind === 'system' && (step.system === 'dusk' || step.system === 'dawn')) {
       // 黄昏/黎明不产生事件（ADR-017）；黎明 = 夜晚收尾，自动进入白天

@@ -1,7 +1,8 @@
 {
   "app": {
     "title": "司钟",
-    "communityNotice": "非官方社区创作 · 与 The Pandemonium Institute 无关"
+    "communityNotice": "非官方社区创作 · 与 The Pandemonium Institute 无关",
+    "home": "首页"
   },
   "home": {
     "title": "司钟",
@@ -189,6 +190,9 @@
     "cause.execution": "处决",
     "cause.night": "夜晚死亡",
     "cause.other": "其他",
+    "voteTokenAction": "切换投票权",
+    "voteToken.has": "有投票权",
+    "voteToken.none": "无投票权",
     "notePlaceholder": "备注内容…",
     "enterNight": "入夜",
     "enterNightConfirm": "进入第 {{round}} 夜？",

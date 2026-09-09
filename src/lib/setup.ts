@@ -122,6 +122,13 @@ export function assignRoles(
   return shuffle([...demons, ...minions, ...outsiders, ...townsfolk], rng);
 }
 
+/** 不在场且属善良阵营的角色（恶魔伪装推荐与抽袋页伪装下拉共用同一谓词，防两者漂移） */
+export function goodRolesNotInPlay(scriptRoles: Role[], inPlayIds: ReadonlySet<string>): Role[] {
+  return scriptRoles.filter(
+    (r) => (r.team === 'townsfolk' || r.team === 'outsider') && !inPlayIds.has(r.id),
+  );
+}
+
 /**
  * 推荐恶魔伪装（F-03e）：默认策略 2 镇民 + 1 外来者（PRD）。
  * 对应池不足时从另一善良阵营补足；善良角色合计不足 3 个时返回实际可得数量
@@ -133,11 +140,8 @@ export function recommendDemonBluffs(
   rng: () => number = Math.random,
 ): Role[] {
   const assignedIds = new Set(assigned.map((r) => r.id));
-  const pool = (team: Team) =>
-    shuffle(
-      scriptRoles.filter((r) => r.team === team && !assignedIds.has(r.id)),
-      rng,
-    );
+  const good = goodRolesNotInPlay(scriptRoles, assignedIds);
+  const pool = (team: Team) => shuffle(good.filter((r) => r.team === team), rng);
   const townsfolk = pool('townsfolk');
   const outsiders = pool('outsider');
   return [...townsfolk.slice(0, 2), ...outsiders.slice(0, 1), ...townsfolk.slice(2), ...outsiders.slice(1)].slice(0, 3);

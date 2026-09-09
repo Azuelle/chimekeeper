@@ -12,6 +12,9 @@ import type { Role } from './script';
 /** 游戏阶段 */
 export type GamePhase = 'setup' | 'firstNight' | 'day' | 'night' | 'ended';
 
+/** 死亡原因（F-05d）：夜晚死亡 / 处决 / 其他 */
+export type DeathCause = 'night' | 'execution' | 'other';
+
 /** 实际阵营（单一真相源）：token/皮肤等一律引用此类型（ADR-005） */
 export type Alignment = 'good' | 'evil';
 

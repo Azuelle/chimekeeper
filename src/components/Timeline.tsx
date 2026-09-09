@@ -1,14 +1,16 @@
 /**
- * 时间线 / 事件日志（F-06b + F-06c）：按 round + phase 分组渲染事件流。
- * - note 可编辑
- * - 用户创建的事件（note/nomination/vote/execution/death/revival）可删除并撤销
- * - night_action / phase_change / seat_* / game_end 不开放删除
+ * 时间线 / 事件日志（F-06b + F-06c + F-06d）：按 round + phase 分组渲染事件流。
+ * - note 全文可编辑；night_action 的 info 自由文本可编辑（F-06d，STATUS M2 已知边界）
+ * - 可删除 = 不改写 Game 状态的事件（note/nomination/vote/execution）：
+ *   death/revival 会双写 seat 状态，删除会导致日志与状态失同步（DATA-MODEL 双写一致性），
+ *   说书人纠错走白天面板的登记死亡/复活反向动作；night_action/phase_change/seat 事件/game_end 不开放删除
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
 import { createEvent } from '../lib/events';
+import { roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
 import type { GameEvent } from '../types/events';
 
@@ -18,7 +20,8 @@ interface Section {
   events: GameEvent[];
 }
 
-const DELETABLE_TYPES = new Set<GameEvent['type']>(['note', 'nomination', 'vote', 'execution', 'death', 'revival']);
+/** 删除/撤销仅限不触碰 Game 状态的事件；状态变更事件删了会造成双写失同步 */
+const DELETABLE_TYPES = new Set<GameEvent['type']>(['note', 'nomination', 'vote', 'execution']);
 
 export function Timeline() {
   const { t } = useTranslation();
@@ -31,11 +34,10 @@ export function Timeline() {
   const [editText, setEditText] = useState('');
   const [lastDeleted, setLastDeleted] = useState<GameEvent | null>(null);
 
-  const roleNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const r of game?.scriptSnapshot.roles ?? []) map.set(r.id, r.name);
-    return map;
-  }, [game]);
+  const roleNameById = useMemo(
+    () => buildRoleNameMap(game?.scriptSnapshot.roles ?? []),
+    [game],
+  );
 
   const sections = useMemo<Section[]>(() => {
     const out: Section[] = [];
@@ -68,17 +70,39 @@ export function Timeline() {
 
   const startEdit = (e: GameEvent) => {
     setEditingId(e.id);
-    setEditText(typeof e.payload.text === 'string' ? e.payload.text : '');
+    const value =
+      e.type === 'night_action'
+        ? typeof e.payload.info === 'string'
+          ? e.payload.info
+          : ''
+        : typeof e.payload.text === 'string'
+          ? e.payload.text
+          : '';
+    setEditText(value);
   };
 
   const saveEdit = () => {
     if (!editingId || !game) return;
-    const text = editText.trim();
-    if (!text) return;
     const old = events.find((e) => e.id === editingId);
     if (!old) return;
-    remove(editingId);
-    append(createEvent({ id: old.gameId, round: old.round, phase: old.phase }, 'note', { payload: { text } }));
+    const text = editText.trim();
+    const base = { id: old.gameId, round: old.round, phase: old.phase };
+
+    if (old.type === 'note') {
+      if (!text) return; // 空备注不保存，保持编辑态
+      remove(editingId);
+      append(createEvent(base, 'note', { payload: { text } }));
+    } else if (old.type === 'night_action') {
+      // F-06d：只改 info 自由文本，保留 stepKey/roleId/座位（清空 = 移除 info）
+      const payload = { ...old.payload };
+      if (text) payload.info = text;
+      else delete payload.info;
+      remove(editingId);
+      append(
+        createEvent(base, 'night_action', { seatNumbers: old.seatNumbers, payload }),
+      );
+    }
+
     setEditingId(null);
     setEditText('');
   };
@@ -123,7 +147,7 @@ export function Timeline() {
                   <>
                     <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
                     <span className="timeline__actions">
-                      {e.type === 'note' && (
+                      {(e.type === 'note' || e.type === 'night_action') && (
                         <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
                           {t('timeline.edit')}
                         </button>
@@ -186,9 +210,10 @@ function eventText(
     case 'note':
       return typeof e.payload.text === 'string' ? e.payload.text : '';
     case 'nomination':
+      // 提名以 payload 为唯一真相源（seatNumbers 不再重复写入，ADR/评论见 registerNomination）
       return t('timeline.event.nomination', {
-        nominator: String(e.payload.nominatorSeat ?? e.seatNumbers[0] ?? ''),
-        nominated: String(e.payload.nominatedSeat ?? e.seatNumbers[1] ?? ''),
+        nominator: String(e.payload.nominatorSeat ?? ''),
+        nominated: String(e.payload.nominatedSeat ?? ''),
       });
     case 'vote': {
       const votesFor = e.payload.votesFor;

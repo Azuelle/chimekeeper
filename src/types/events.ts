@@ -21,7 +21,7 @@ export type EventType =
   | 'night_action'
   /** 夜晚死亡结算。payload: cause(来源角色id或"execution"等), announced(黎明公布) */
   | 'death'
-  /** 白天提名。payload: nominatorSeat, nominatedSeat */
+  /** 白天提名。payload: nominatorSeat, nominatedSeat（唯一真相源，seatNumbers 不再重复写） */
   | 'nomination'
   /** 投票。payload: votesFor(票数), votesNeeded, passed */
   | 'vote'

@@ -188,4 +188,18 @@ describe('DayPanel（白天面板）', () => {
 
     expect(useEventStore.getState().events.length).toBe(before);
   });
+
+  it('切换投票权（F-05d）：选择座位后翻转 hasVoteToken', async () => {
+    const user = userEvent.setup();
+    setupDayGame();
+    const before = useGameStore.getState().game!.seats.find((s) => s.seatNumber === 1)!.hasVoteToken;
+    render(<DayPanel />);
+
+    await user.click(screen.getByRole('button', { name: '切换投票权' }));
+    await user.selectOptions(screen.getByLabelText('被提名者'), '1');
+    await user.click(screen.getAllByRole('button', { name: '切换投票权' })[1]!);
+
+    const after = useGameStore.getState().game!.seats.find((s) => s.seatNumber === 1)!.hasVoteToken;
+    expect(after).toBe(!before);
+  });
 });

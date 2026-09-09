@@ -145,6 +145,40 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(screen.queryByText('未保存')).toBeNull();
   });
 
+  it('night_action 的 info 可编辑（F-06d）', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(
+      createEvent(game, 'night_action', {
+        seatNumbers: [1],
+        payload: { stepKey: 'role:washerwoman', roleId: 'washerwoman', info: '3 5 之中有洗衣妇' },
+      }),
+    );
+
+    render(<Timeline />);
+    expect(screen.getByText(/3 5 之中有洗衣妇/)).toBeTruthy();
+    await user.click(screen.getAllByRole('button', { name: '编辑' })[0]!);
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '修正后的信息');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    expect(screen.getByText(/修正后的信息/)).toBeTruthy();
+    const ev = useEventStore.getState().events.find((e) => e.type === 'night_action');
+    expect(ev?.payload.info).toBe('修正后的信息');
+    expect(ev?.payload.stepKey).toBe('role:washerwoman');
+  });
+
+  it('death 事件不开放删除（状态双写，避免日志与 Game 失同步）', () => {
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(
+      createEvent(game, 'death', { seatNumbers: [1], payload: { cause: 'night' } }),
+    );
+
+    render(<Timeline />);
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
+  });
+
   it('无事件时不渲染', () => {
     useEventStore.getState().clear();
     const { container } = render(<Timeline />);

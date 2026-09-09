@@ -8,8 +8,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
 import { RecapExport } from '../recap/RecapExport';
+import { votesNeeded } from '../../lib/vote';
+import type { DeathCause } from '../../types/game';
 
-type FormMode = 'nominate' | 'death' | 'revive' | 'note' | 'end' | null;
+type FormMode = 'nominate' | 'death' | 'revive' | 'voteToken' | 'note' | 'end' | null;
 
 function seatLabel(seat: { seatNumber: number; playerName?: string }): string {
   return seat.playerName ? `${seat.seatNumber} 号（${seat.playerName}）` : `${seat.seatNumber} 号`;
@@ -24,6 +26,7 @@ export function DayPanel() {
   const registerExecutionAndDeath = useGameStore((s) => s.registerExecutionAndDeath);
   const registerDeath = useGameStore((s) => s.registerDeath);
   const registerRevival = useGameStore((s) => s.registerRevival);
+  const toggleVoteToken = useGameStore((s) => s.toggleVoteToken);
   const addNote = useGameStore((s) => s.addNote);
   const endGame = useGameStore((s) => s.endGame);
   const enterNextNight = useGameStore((s) => s.enterNextNight);
@@ -34,7 +37,7 @@ export function DayPanel() {
   const [nominatedSeat, setNominatedSeat] = useState<number | ''>('');
   const [votesFor, setVotesFor] = useState<string>('');
   const [targetSeat, setTargetSeat] = useState<number | ''>('');
-  const [deathCause, setDeathCause] = useState<'night' | 'execution' | 'other'>('other');
+  const [deathCause, setDeathCause] = useState<DeathCause>('other');
   const [noteText, setNoteText] = useState('');
   const [winningTeam, setWinningTeam] = useState<'good' | 'evil'>('good');
   const [reason, setReason] = useState('');
@@ -45,7 +48,7 @@ export function DayPanel() {
   const isEnded = game.phase === 'ended';
 
   const aliveCount = game.seats.filter((s) => s.alive).length;
-  const needed = aliveCount > 0 ? Math.ceil(aliveCount / 2) : 0;
+  const needed = votesNeeded(aliveCount);
 
   const resetNomination = () => {
     setNominatorSeat('');
@@ -90,6 +93,13 @@ export function DayPanel() {
   const handleRevive = () => {
     if (targetSeat === '') return;
     registerRevival(Number(targetSeat));
+    setTargetSeat('');
+    setMode(null);
+  };
+
+  const handleVoteToken = () => {
+    if (targetSeat === '') return;
+    toggleVoteToken(Number(targetSeat));
     setTargetSeat('');
     setMode(null);
   };
@@ -148,6 +158,9 @@ export function DayPanel() {
             </button>
             <button type="button" className="btn" onClick={() => setMode('revive')}>
               {t('dayPanel.revive')}
+            </button>
+            <button type="button" className="btn" onClick={() => setMode('voteToken')}>
+              {t('dayPanel.voteTokenAction')}
             </button>
             <button type="button" className="btn" onClick={() => setMode('note')}>
               {t('dayPanel.note')}
@@ -260,6 +273,31 @@ export function DayPanel() {
               <div className="btn-row">
                 <button type="button" className="btn btn--primary" onClick={handleRevive}>
                   {t('dayPanel.revive')}
+                </button>
+                <button type="button" className="btn" onClick={() => setMode(null)}>
+                  {t('seats.cancel')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {mode === 'voteToken' && (
+            <div className="day-form">
+              <label>
+                {t('dayPanel.nominated')}
+                <select value={targetSeat} onChange={(e) => setTargetSeat(Number(e.target.value) || '')}>
+                  <option value="">--</option>
+                  {allOptions.map((s) => (
+                    <option key={s.seatNumber} value={s.seatNumber}>
+                      {`${seatLabel(s)}（${s.hasVoteToken ? t('dayPanel.voteToken.has') : t('dayPanel.voteToken.none')}）`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="day-hint">{t('dayPanel.voteTokenHint')}</p>
+              <div className="btn-row">
+                <button type="button" className="btn" onClick={handleVoteToken}>
+                  {t('dayPanel.voteTokenAction')}
                 </button>
                 <button type="button" className="btn" onClick={() => setMode(null)}>
                   {t('seats.cancel')}

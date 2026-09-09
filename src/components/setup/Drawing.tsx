@@ -7,7 +7,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
-import { assignRoles, baseComposition, recommendDemonBluffs, setupRoleHints } from '../../lib/setup';
+import { assignRoles, baseComposition, goodRolesNotInPlay, recommendDemonBluffs, setupRoleHints } from '../../lib/setup';
 import type { TeamComposition } from '../../types/game';
 import type { Role } from '../../types/script';
 
@@ -49,10 +49,10 @@ export function Drawing({ onBack }: { onBack: () => void }) {
 
   const goodNotInPlay = useMemo(() => {
     if (!drawn) return [];
-    const inPlay = new Set(seats.map((s) => s.roleId));
-    return bagRoles.filter(
-      (r) => (r.team === 'townsfolk' || r.team === 'outsider') && !inPlay.has(r.id),
+    const inPlay = new Set(
+      seats.map((s) => s.roleId).filter((id): id is string => id !== undefined),
     );
+    return goodRolesNotInPlay(bagRoles, inPlay);
   }, [bagRoles, seats, drawn]);
 
   if (!game) return null;

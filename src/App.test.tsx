@@ -98,4 +98,20 @@ describe('App 主流程（M1 验收链路）', () => {
     await user.click(screen.getByRole('button', { name: '角色分配' }));
     expect(screen.getByRole('heading', { name: '角色分配（盲抽袋）' })).toBeTruthy();
   });
+
+  it('对局进行中可经顶栏「首页」离开回首页（不删库）', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await screen.findByRole('button', { name: '新建对局' });
+    await user.click(screen.getByRole('button', { name: '新建对局' }));
+    await screen.findByRole('button', { name: '暗流涌动' });
+    await user.click(screen.getByRole('button', { name: '暗流涌动' }));
+    await user.click(screen.getByRole('button', { name: '排座位' }));
+    await user.click(screen.getByRole('button', { name: '生成座位' }));
+    expect(useGameStore.getState().game).not.toBeNull();
+
+    await user.click(screen.getByRole('button', { name: '首页' }));
+    await screen.findByRole('button', { name: '新建对局' });
+    expect(useGameStore.getState().game).toBeNull();
+  });
 });
