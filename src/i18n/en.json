@@ -3,6 +3,21 @@
     "title": "BotC Grimoire",
     "communityNotice": "Unofficial community creation · Not affiliated with The Pandemonium Institute"
   },
+  "home": {
+    "title": "BotC Grimoire",
+    "subtitle": "Offline storyteller assistant for Blood on the Clocktower",
+    "newGame": "New game",
+    "continueGame": "Continue latest game",
+    "history": "Game history",
+    "emptyHistory": "No game history",
+    "scriptName": "Script: {{name}}",
+    "createdAt": "Created {{date}}",
+    "phase": "Phase: {{phase}}",
+    "outcome": "Outcome: {{team}} wins",
+    "load": "Continue",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this game record? This cannot be undone."
+  },
   "scriptImport": {
     "title": "Import Script",
     "fromFile": "Upload JSON file",
@@ -148,17 +163,50 @@
   },
   "phase": {
     "setup": "Setup",
-    "day": "Day {{round}}"
+    "firstNight": "First night",
+    "night": "Night {{round}}",
+    "day": "Day {{round}}",
+    "ended": "Ended"
   },
   "dayPanel": {
+    "title": "Day {{round}}",
+    "aliveCount": "{{count}} alive",
+    "votesNeeded": "{{count}} votes needed to pass",
+    "nominate": "Nominate",
+    "vote": "Vote",
+    "execution": "Execute",
+    "executionAndDeath": "Execute & die",
+    "death": "Mark dead",
+    "revive": "Mark revived",
+    "note": "Free note",
+    "endGame": "End game",
+    "nominator": "Nominator",
+    "nominated": "Nominated",
+    "votesFor": "Votes for (optional)",
+    "died": "Died",
+    "survived": "Survived",
+    "cause": "Cause",
+    "cause.execution": "Execution",
+    "cause.night": "Night death",
+    "cause.other": "Other",
+    "notePlaceholder": "Note...",
     "enterNight": "Enter the night",
     "enterNightConfirm": "Enter night {{round}}?",
     "rewind": "Go back",
-    "m3Placeholder": "Daytime flow (nomination / voting / execution) arrives in the next release"
+    "voteTokenHint": "Dead players keep one vote; toggle manually",
+    "outcome.good": "Good team",
+    "outcome.evil": "Evil team"
   },
   "timeline": {
     "title": "Event log",
     "empty": "No events yet",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "undo": "Undo",
+    "deleted": "Event deleted",
+    "deleteConfirm": "Delete this event?",
     "event": {
       "phaseToFirstNight": "Night falls (first night)",
       "phaseToDay": "Day breaks",
@@ -167,6 +215,16 @@
       "seatRemove": "Seat {{seat}} removed",
       "seatSwap": "Swap: {{a}} ⇄ {{b}}",
       "seatRipple": "Move: {{a}} → {{b}}",
+      "nomination": "{{nominator}} nominated {{nominated}}",
+      "vote": "Vote: {{votesFor}} / {{votesNeeded}}",
+      "voteNoCount": "Vote: no count recorded ({{votesNeeded}} needed)",
+      "execution": "Seat {{seat}} executed",
+      "executionDied": "(died)",
+      "executionSurvived": "(survived)",
+      "death": "Seat {{seat}} died",
+      "deathCause": "Cause: {{cause}}",
+      "revival": "Seat {{seat}} revived",
+      "gameEnd": "Game ended: {{team}} wins",
       "unknown": "[{{type}}]"
     }
   },
@@ -179,8 +237,10 @@
     "survived": "Survived"
   },
   "recap": {
+    "title": "Recap",
     "export": "Export recap",
     "copyMarkdown": "Copy Markdown",
-    "download": "Download file"
+    "download": "Download .md",
+    "copied": "Copied"
   }
 }

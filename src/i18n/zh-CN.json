@@ -3,6 +3,21 @@
     "title": "司钟",
     "communityNotice": "非官方社区创作 · 与 The Pandemonium Institute 无关"
   },
+  "home": {
+    "title": "司钟",
+    "subtitle": "线下血染钟楼说书辅助工具",
+    "newGame": "新建对局",
+    "continueGame": "继续最近对局",
+    "history": "历史对局",
+    "emptyHistory": "暂无历史对局",
+    "scriptName": "剧本：{{name}}",
+    "createdAt": "创建于 {{date}}",
+    "phase": "阶段：{{phase}}",
+    "outcome": "结局：{{team}} 获胜",
+    "load": "继续",
+    "delete": "删除",
+    "deleteConfirm": "确定删除这条对局记录？删除后无法恢复。"
+  },
   "scriptImport": {
     "title": "导入剧本",
     "fromFile": "上传 JSON 文件",
@@ -148,17 +163,50 @@
   },
   "phase": {
     "setup": "准备阶段",
-    "day": "第 {{round}} 个白天"
+    "firstNight": "首夜",
+    "night": "第 {{round}} 夜",
+    "day": "第 {{round}} 个白天",
+    "ended": "已结束"
   },
   "dayPanel": {
+    "title": "第 {{round}} 个白天",
+    "aliveCount": "存活 {{count}} 人",
+    "votesNeeded": "过半需要 {{count}} 票",
+    "nominate": "提名",
+    "vote": "投票",
+    "execution": "处决",
+    "executionAndDeath": "处决并死亡",
+    "death": "登记死亡",
+    "revive": "登记复活",
+    "note": "自由备注",
+    "endGame": "登记结局",
+    "nominator": "提名者",
+    "nominated": "被提名者",
+    "votesFor": "得票数（可选）",
+    "died": "因此死亡",
+    "survived": "未死亡",
+    "cause": "原因",
+    "cause.execution": "处决",
+    "cause.night": "夜晚死亡",
+    "cause.other": "其他",
+    "notePlaceholder": "备注内容…",
     "enterNight": "入夜",
     "enterNightConfirm": "进入第 {{round}} 夜？",
     "rewind": "返回上一阶段",
-    "m3Placeholder": "白天流程（提名 / 投票 / 处决）将在下个版本上线"
+    "voteTokenHint": "死后保留一票，可手动切换",
+    "outcome.good": "善良阵营",
+    "outcome.evil": "邪恶阵营"
   },
   "timeline": {
     "title": "事件日志",
     "empty": "暂无事件",
+    "delete": "删除",
+    "edit": "编辑",
+    "save": "保存",
+    "cancel": "取消",
+    "undo": "撤销",
+    "deleted": "事件已删除",
+    "deleteConfirm": "确定删除这条事件？",
     "event": {
       "phaseToFirstNight": "入夜（首夜）",
       "phaseToDay": "进入白天",
@@ -167,6 +215,16 @@
       "seatRemove": "移除座位 {{seat}}",
       "seatSwap": "换位：{{a}} ⇄ {{b}}",
       "seatRipple": "平移：{{a}} → {{b}}",
+      "nomination": "{{nominator}} 号提名 {{nominated}} 号",
+      "vote": "投票：{{votesFor}} / {{votesNeeded}} 票",
+      "voteNoCount": "投票：未记票数（过半需要 {{votesNeeded}} 票）",
+      "execution": "{{seat}} 号被处决",
+      "executionDied": "（死亡）",
+      "executionSurvived": "（未死亡）",
+      "death": "{{seat}} 号死亡",
+      "deathCause": "原因：{{cause}}",
+      "revival": "{{seat}} 号复活",
+      "gameEnd": "游戏结束：{{team}} 获胜",
       "unknown": "［{{type}}］"
     }
   },
@@ -179,8 +237,10 @@
     "survived": "未死亡"
   },
   "recap": {
+    "title": "复盘",
     "export": "导出复盘",
     "copyMarkdown": "复制 Markdown",
-    "download": "下载文件"
+    "download": "下载 .md",
+    "copied": "已复制"
   }
 }

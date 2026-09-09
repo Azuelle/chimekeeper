@@ -844,3 +844,196 @@ button:focus-visible {
   left: 0;
   color: var(--text-dim);
 }
+
+.timeline__event {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.timeline__text {
+  flex: 1;
+  word-break: break-word;
+}
+
+.timeline__actions {
+  display: flex;
+  gap: 0.3rem;
+  flex: 0 0 auto;
+}
+
+.timeline__edit {
+  flex: 1;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.timeline__edit textarea {
+  min-height: 3rem;
+}
+
+.timeline__undo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.btn--small {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* ===== M3 首页 ===== */
+
+.home-panel {
+  text-align: center;
+}
+
+.home-subtitle {
+  color: var(--text-dim);
+  margin: 0 0 1rem;
+}
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.home-history-title {
+  text-align: left;
+}
+
+.home-empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.game-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.game-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  text-align: left;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.game-history-info {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.game-history-info small {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+}
+
+.game-history-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.game-history-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex: 0 0 auto;
+}
+
+/* ===== M3 白天面板 ===== */
+
+.day-panel h2 {
+  margin-bottom: 0.5rem;
+}
+
+.day-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+}
+
+.day-outcome {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-outcome p {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+}
+
+.day-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-form {
+  display: grid;
+  gap: 0.5rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.day-form select,
+.day-form input,
+.day-form textarea {
+  width: 100%;
+}
+
+.day-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* ===== M3 战报导出 ===== */
+
+.recap-export {
+  border: 1px dashed var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.recap-export h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}

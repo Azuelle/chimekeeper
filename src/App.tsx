@@ -12,8 +12,9 @@ import { SeatSetup } from './components/setup/SeatSetup';
 import { SeatGrid } from './components/setup/SeatGrid';
 import { Drawing } from './components/setup/Drawing';
 import { NightPanel } from './components/night/NightPanel';
-import { DayPlaceholder } from './components/DayPlaceholder';
+import { DayPanel } from './components/day/DayPanel';
 import { Timeline } from './components/Timeline';
+import { Home } from './components/home/Home';
 import { useScriptStore } from './stores/script';
 import { useGameStore } from './stores/game';
 
@@ -22,6 +23,7 @@ type Step = 'import' | 'preview' | 'seats' | 'drawing';
 export function App() {
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>('import');
+  const [showSetup, setShowSetup] = useState(false);
   const script = useScriptStore((s) => s.script);
   const clearScript = useScriptStore((s) => s.clear);
   const restoreScript = useScriptStore((s) => s.restoreFromSnapshot);
@@ -49,14 +51,22 @@ export function App() {
     if (!hydrated || stepInited.current) return;
     stepInited.current = true;
     if (game && game.phase === 'setup') {
+      setShowSetup(true);
       setStep(game.composition !== undefined ? 'drawing' : 'seats');
     }
   }, [hydrated, game]);
+
+  const startNewGame = () => {
+    clearScript();
+    setStep('import');
+    setShowSetup(true);
+  };
 
   const handleChangeScript = () => {
     clearScript();
     resetGame();
     setStep('import');
+    setShowSetup(true);
   };
 
   // 剧本未导入一律回导入页，防止状态漂移；导入成功自动从 import 进入 preview
@@ -72,27 +82,43 @@ export function App() {
         <small>{t('app.communityNotice')}</small>
       </header>
       <main className="app-main">
-        {!hydrated ? null : nightView ? (
-          <>
-            <SeatGrid seats={seats} />
-            <NightPanel />
-            <Timeline />
-          </>
-        ) : phase === 'day' || phase === 'ended' ? (
-          <>
-            <SeatGrid seats={seats} />
-            <DayPlaceholder />
-            <Timeline />
-          </>
-        ) : setupStep === 'import' ? (
-          <ScriptImport />
-        ) : setupStep === 'preview' ? (
-          <ScriptPreview onArrange={() => setStep('seats')} />
-        ) : setupStep === 'seats' ? (
-          <SeatSetup onChangeScript={handleChangeScript} onAssign={() => setStep('drawing')} />
-        ) : (
-          <Drawing onBack={() => setStep('seats')} />
-        )}
+        {!hydrated
+          ? null
+          : game?.phase === 'setup'
+            ? setupStep === 'import' ? (
+                <ScriptImport />
+              ) : setupStep === 'preview' ? (
+                <ScriptPreview onArrange={() => setStep('seats')} />
+              ) : setupStep === 'seats' ? (
+                <SeatSetup onChangeScript={handleChangeScript} onAssign={() => setStep('drawing')} />
+              ) : (
+                <Drawing onBack={() => setStep('seats')} />
+              )
+            : game
+              ? nightView ? (
+                <>
+                  <SeatGrid seats={seats} />
+                  <NightPanel />
+                  <Timeline />
+                </>
+              ) : (
+                <>
+                  <SeatGrid seats={seats} />
+                  <DayPanel />
+                  <Timeline />
+                </>
+              )
+            : showSetup
+              ? setupStep === 'import' ? (
+                  <ScriptImport />
+                ) : setupStep === 'preview' ? (
+                  <ScriptPreview onArrange={() => setStep('seats')} />
+                ) : setupStep === 'seats' ? (
+                  <SeatSetup onChangeScript={handleChangeScript} onAssign={() => setStep('drawing')} />
+                ) : (
+                  <Drawing onBack={() => setStep('seats')} />
+                )
+              : <Home onNewGame={startNewGame} />}
       </main>
       <footer className="app-footer">
         <small>{t('app.communityNotice')}</small>

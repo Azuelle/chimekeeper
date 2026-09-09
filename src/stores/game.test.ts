@@ -311,3 +311,101 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(seatEvents.every((e) => e.phase === 'firstNight' && e.round === 0)).toBe(true);
   });
 });
+
+describe('gameStore 白天流程（F-05 / F-06c）', () => {
+  beforeEach(() => {
+    useGameStore.getState().reset();
+    useEventStore.getState().clear();
+  });
+
+  it('registerNomination / registerVote / registerExecution：生成对应事件', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight(); // day 1, round 1
+
+    store().registerNomination(2, 4);
+    store().registerVote(4, 3);
+    store().registerExecution(4, false);
+
+    const events = useEventStore.getState().events;
+    const nom = events.find((e) => e.type === 'nomination');
+    const vote = events.find((e) => e.type === 'vote');
+    const exec = events.find((e) => e.type === 'execution');
+
+    expect(nom?.payload).toEqual({ nominatorSeat: 2, nominatedSeat: 4 });
+    expect(nom?.seatNumbers).toEqual([2, 4]);
+    expect(vote?.payload).toMatchObject({ votesFor: 3, votesNeeded: 3, passed: true });
+    expect(exec?.payload).toEqual({ died: false });
+  });
+
+  it('registerVote 允许不填票数，passed 为 undefined', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().registerVote(3);
+    const vote = useEventStore.getState().events.find((e) => e.type === 'vote');
+    expect(vote?.payload).toMatchObject({ votesFor: undefined, votesNeeded: 3, passed: undefined });
+  });
+
+  it('registerExecutionAndDeath 生成两个事件并登记死亡', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().registerExecutionAndDeath(3);
+
+    const exec = useEventStore.getState().events.find((e) => e.type === 'execution');
+    const death = useEventStore.getState().events.find((e) => e.type === 'death');
+    expect(exec?.payload).toEqual({ died: true });
+    expect(death?.payload).toEqual({ cause: 'execution' });
+    expect(store().game?.seats.find((s) => s.seatNumber === 3)?.alive).toBe(false);
+    expect(store().game?.seats.find((s) => s.seatNumber === 3)?.hasVoteToken).toBe(true);
+  });
+
+  it('registerDeath / registerRevival 切换生死状态', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+    const death = useEventStore.getState().events.find((e) => e.type === 'death');
+    expect(death?.payload).toEqual({ cause: 'night' });
+
+    store().registerRevival(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
+    expect(useEventStore.getState().events.some((e) => e.type === 'revival')).toBe(true);
+  });
+
+  it('toggleVoteToken 手动切换投票权', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.hasVoteToken).toBe(true);
+    store().toggleVoteToken(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.hasVoteToken).toBe(false);
+  });
+
+  it('addNote 生成 note 事件并去除首尾空格', () => {
+    store().createGame(script, 5);
+    store().addNote('  小杜因为小明（哲学家）醉酒了  ');
+    const note = useEventStore.getState().events.find((e) => e.type === 'note');
+    expect(note?.payload).toEqual({ text: '小杜因为小明（哲学家）醉酒了' });
+  });
+
+  it('endGame 进入 ended 阶段并生成 game_end 事件', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    store().finishNight();
+    store().endGame('evil', '恶魔存活到最后');
+    expect(store().game?.phase).toBe('ended');
+    expect(store().game?.outcome).toEqual({ winningTeam: 'evil', reason: '恶魔存活到最后' });
+    const end = useEventStore.getState().events.find((e) => e.type === 'game_end');
+    expect(end?.payload).toEqual({ winningTeam: 'evil', reason: '恶魔存活到最后' });
+  });
+
+  it('白天相关 action 在非 day 阶段为 no-op', () => {
+    store().createGame(script, 5);
+    // setup
+    store().registerNomination(1, 2);
+    store().registerVote(1, 2);
+    store().registerExecution(1, true);
+    store().registerExecutionAndDeath(1);
+    expect(useEventStore.getState().events.filter((e) => ['nomination', 'vote', 'execution'].includes(e.type))).toEqual([]);
+  });
+});
