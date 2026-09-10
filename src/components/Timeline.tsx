@@ -19,8 +19,19 @@ interface Section {
   events: GameEvent[];
 }
 
-/** 删除/撤销仅限不触碰 Game 状态的事件；状态变更事件删了会造成双写失同步 */
-const DELETABLE_TYPES = new Set<GameEvent['type']>(['note', 'nomination', 'vote', 'execution']);
+/**
+ * 可删除/撤销的事件。
+ * - note/nomination/vote/execution 本身不双写 Game 状态，直接删除即可。
+ * - death/revival 双写 seat 状态，删除时需同步调用 gameStore 的 undo 方法恢复座位状态。
+ */
+const DELETABLE_TYPES = new Set<GameEvent['type']>([
+  'note',
+  'nomination',
+  'vote',
+  'execution',
+  'death',
+  'revival',
+]);
 
 /** 时间线里不单独渲染的进度/元事件：section 标题已表达阶段 */
 const HIDDEN_EVENT_TYPES = new Set<GameEvent['type']>(['phase_change']);
@@ -28,6 +39,8 @@ const HIDDEN_EVENT_TYPES = new Set<GameEvent['type']>(['phase_change']);
 export function Timeline() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
+  const undoDeath = useGameStore((s) => s.undoDeath);
+  const undoRevival = useGameStore((s) => s.undoRevival);
   const events = useEventStore((s) => s.events);
   const remove = useEventStore((s) => s.remove);
   const update = useEventStore((s) => s.update);
@@ -60,6 +73,13 @@ export function Timeline() {
   const handleDelete = (e: GameEvent) => {
     if (!window.confirm(t('timeline.deleteConfirm'))) return;
     remove(e.id);
+    if (e.type === 'death') {
+      const seat = e.seatNumbers[0];
+      if (seat !== undefined) undoDeath(seat);
+    } else if (e.type === 'revival') {
+      const seat = e.seatNumbers[0];
+      if (seat !== undefined) undoRevival(seat);
+    }
     setLastDeleted(e);
     window.setTimeout(() => {
       setLastDeleted((cur) => (cur?.id === e.id ? null : cur));

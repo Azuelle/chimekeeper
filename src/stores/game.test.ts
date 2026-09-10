@@ -249,6 +249,15 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(store().game?.nightProgress?.checked).toEqual(['role:poisoner']);
   });
 
+  it('setNightStepChecked 在夜阶段但 nightProgress 轮次不匹配时重置进度', () => {
+    store().createGame(script, 5);
+    store().enterFirstNight();
+    const game = store().game!;
+    useGameStore.setState({ game: { ...game, nightProgress: { round: 99, checked: [] } } });
+    store().setNightStepChecked('system:dusk', true);
+    expect(store().game?.nightProgress).toEqual({ round: 0, checked: ['system:dusk'] });
+  });
+
   it('rewindPhase：day→上一夜恢复进度并删除 phase_change；night→day；firstNight→setup', () => {
     store().createGame(script, 5);
     store().enterFirstNight();
@@ -290,6 +299,18 @@ describe('gameStore 抽袋与阶段机（M2）', () => {
     expect(game.nightProgress?.checked).toContain('role:poisoner');
     expect(game.nightProgress?.checked).toContain('system:dusk');
     expect(game.nightProgress?.checked).toContain('system:dawn');
+  });
+
+  it('rewindPhase 在 setup / ended 阶段为 no-op', () => {
+    store().createGame(script, 5);
+    store().rewindPhase();
+    expect(store().game?.phase).toBe('setup');
+
+    store().enterFirstNight();
+    store().finishNight();
+    store().endGame('good');
+    store().rewindPhase();
+    expect(store().game?.phase).toBe('ended');
   });
 
   it('createGame 清空上一局事件内存', () => {
@@ -377,6 +398,17 @@ describe('gameStore 白天流程（F-05 / F-06c）', () => {
     store().registerRevival(2);
     expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
     expect(useEventStore.getState().events.some((e) => e.type === 'revival')).toBe(true);
+  });
+
+  it('undoDeath / undoRevival 恢复对应座位状态', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    store().undoDeath(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
+
+    store().registerRevival(2);
+    store().undoRevival(2);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
   });
 
   it('toggleVoteToken 手动切换投票权', () => {

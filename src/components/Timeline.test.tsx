@@ -198,19 +198,44 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(ev?.payload.stepKey).toBe('role:washerwoman');
   });
 
-  it('death 事件不开放删除（状态双写，避免日志与 Game 失同步）', () => {
-    const game = useGameStore.getState().game!;
-    useEventStore.getState().append(
-      createEvent(game, 'death', { seatNumbers: [1], payload: { cause: 'night' } }),
-    );
+  it('death 事件可删除并撤销对应座位的死亡状态', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
 
     render(<Timeline />);
-    expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: '删除' }));
+    expect(useEventStore.getState().events.some((e) => e.type === 'death')).toBe(false);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(true);
   });
 
   it('无事件时不渲染', () => {
     useEventStore.getState().clear();
     const { container } = render(<Timeline />);
     expect(container.querySelector('.timeline')).toBeNull();
+  });
+
+  it('白天 section 无 execution 时给出 suggestion；有 execution 时不显示', async () => {
+    useGameStore.getState().finishNight();
+    const dayGame = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(dayGame, 'nomination', { payload: { nominatorSeat: 1, nominatedSeat: 2 } }));
+
+    const { unmount } = render(<Timeline />);
+    expect(screen.getByText('本白天尚未登记处决')).toBeTruthy();
+
+    useEventStore.getState().append(createEvent(dayGame, 'execution', { seatNumbers: [2], payload: { died: true } }));
+    unmount();
+    render(<Timeline />);
+    expect(screen.queryByText('本白天尚未登记处决')).toBeNull();
+  });
+
+  it('非白天 section 不显示 execution suggestion', () => {
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'night_action', { seatNumbers: [1], payload: { roleId: 'imp' } }));
+
+    render(<Timeline />);
+    expect(screen.queryByText('本白天尚未登记处决')).toBeNull();
   });
 });

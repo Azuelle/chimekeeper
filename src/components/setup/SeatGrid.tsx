@@ -307,11 +307,6 @@ function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
           {seat.seatNumber}
         </span>
       </span>
-      {!seat.alive && (
-        <span className="seat-face__dead" aria-hidden="true" title={t('seats.deadLabel')}>
-          ☠️
-        </span>
-      )}
       <span className="seat-face__mid">
         <span className="seat-face__token">
           <span
@@ -322,6 +317,11 @@ function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
             aria-hidden="true"
           >
             <span className="token-ring__core">{roleName}</span>
+            {!seat.alive && (
+              <span className="token-ring__shroud" aria-hidden="true" title={t('seats.deadLabel')}>
+                ☠️
+              </span>
+            )}
           </span>
         </span>
         <span className="reminder-rail" aria-hidden="true">

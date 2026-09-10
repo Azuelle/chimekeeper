@@ -39,9 +39,27 @@ export function RecapExport() {
       await navigator.clipboard.writeText(markdown);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      return;
+    } catch {
+      // 非 HTTPS / 无权限时降级到 execCommand
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = markdown;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      const ok = document.execCommand('copy');
+      if (ok) {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
     } catch {
       // ignore
     }
+    document.body.removeChild(textarea);
   };
 
   const handleDownload = () => {
