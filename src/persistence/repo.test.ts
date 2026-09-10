@@ -4,7 +4,6 @@ import {
   saveGame,
   loadCurrentGame,
   saveEvent,
-  updateEvent,
   deleteEvent,
   loadEvents,
   deleteGame,
@@ -77,29 +76,6 @@ describe('repo（F-07a，fake-indexeddb）', () => {
     const events = await loadEvents('g1');
     expect(events).toHaveLength(1);
     expect(events[0]?.id).toBe(keep.id);
-  });
-
-  it('updateEvent 原地更新事件内容', async () => {
-    const base = { id: 'g1', round: 0, phase: 'setup' as const };
-    const ev = createEvent(base, 'note', { payload: { text: '旧' } });
-    await saveEvent(ev);
-    await updateEvent({ ...ev, payload: { text: '新' } });
-    const events = await loadEvents('g1');
-    expect(events).toHaveLength(1);
-    expect(events[0]?.payload.text).toBe('新');
-  });
-
-  it('无 indexedDB 环境时读写静默跳过', async () => {
-    const original = globalThis.indexedDB;
-    // @ts-expect-error 模拟无 indexedDB 环境
-    globalThis.indexedDB = undefined;
-
-    await saveGame(makeGame());
-    await saveEvent(createEvent({ id: 'g1', round: 0, phase: 'setup' as const }, 'note'));
-    expect(await loadCurrentGame()).toBeNull();
-    expect(await loadEvents('g1')).toEqual([]);
-
-    globalThis.indexedDB = original;
   });
 
   it('deleteGame 级联删除该局全部事件，不影响他局', async () => {

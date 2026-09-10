@@ -76,7 +76,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
 - `seatNumbers: number[]` 引用涉及座位
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
-- `death`/`revival` 事件允许从时间线删除，删除时同步调用 `gameStore.undoDeath`/`undoRevival` 恢复对应座位的 `alive` 状态
+- `death`/`revival` 事件允许从时间线删除/撤销；增删后由剩余事件流经 `lib/events.resolveSeatAlive` 推导最新生死状态，再调用 `gameStore.setSeatAlive` 回写（只改 `alive`，不动 `hasVoteToken`）
 - **v2 玩家统计（F-15）的兼容性承诺**：事件粒度足以支撑"某玩家拿过哪些角色/胜率/同队关系"的聚合，座位编号与角色 id 不可从 payload 中移除
 
 ## 4. 夜晚面板步骤（NightStep）— ADR-006
@@ -99,7 +99,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 版本迁移走 Dexie `version(n).stores()`，schema 变更须在本文件登记
 - **读写封装**（`src/persistence/repo.ts`，ADR-017）：saveGame / loadCurrentGame
   （按 updatedAt 取最新一条，单一当前局）/ listGames（按 updatedAt 倒序，F-07b）/
-  saveEvent / deleteEvent / updateEvent / loadEvents（createdAt 升序，时间线渲染序）/
+  saveEvent / deleteEvent / loadEvents（createdAt 升序，时间线渲染序）/
   deleteGame（**级联删除该局全部事件**）/ clearAll；
   环境无 indexedDB 时静默跳过（部分测试环境）
 - **store 写通**：gameStore 每次变更 `set()` 后 fire-and-forget `saveGame`（双写，

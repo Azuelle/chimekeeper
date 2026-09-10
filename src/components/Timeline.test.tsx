@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -198,7 +198,7 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(ev?.payload.stepKey).toBe('role:washerwoman');
   });
 
-  it('death 事件可删除并撤销对应座位的死亡状态', async () => {
+  it('death 事件可删除并恢复座位存活；撤销删除后再次死亡', async () => {
     const user = userEvent.setup();
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     useGameStore.getState().registerDeath(1, 'night');
@@ -209,6 +209,30 @@ describe('Timeline（F-06b 时间线）', () => {
     await user.click(screen.getByRole('button', { name: '删除' }));
     expect(useEventStore.getState().events.some((e) => e.type === 'death')).toBe(false);
     expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(true);
+
+    await user.click(screen.getByRole('button', { name: '撤销' }));
+    expect(useEventStore.getState().events.some((e) => e.type === 'death')).toBe(true);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
+  it('删除较早的死亡事件不会复活已被后续死亡事件覆盖的座位', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
+    useGameStore.getState().registerRevival(1);
+    useGameStore.getState().registerDeath(1, 'other');
+
+    render(<Timeline />);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+
+    // 删除 DOM 中最早的一条死亡事件
+    await user.click(screen.getAllByRole('button', { name: '删除' })[0]!);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
+  it('某阶段只有 phase_change 时显示空态文案', () => {
+    render(<Timeline />);
+    expect(screen.getByText('暂无事件')).toBeTruthy();
   });
 
   it('无事件时不渲染', () => {
@@ -225,7 +249,9 @@ describe('Timeline（F-06b 时间线）', () => {
     const { unmount } = render(<Timeline />);
     expect(screen.getByText('本白天尚未登记处决')).toBeTruthy();
 
-    useEventStore.getState().append(createEvent(dayGame, 'execution', { seatNumbers: [2], payload: { died: true } }));
+    act(() => {
+      useEventStore.getState().append(createEvent(dayGame, 'execution', { seatNumbers: [2], payload: { died: true } }));
+    });
     unmount();
     render(<Timeline />);
     expect(screen.queryByText('本白天尚未登记处决')).toBeNull();

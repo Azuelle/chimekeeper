@@ -53,12 +53,6 @@ export async function deleteEvent(id: string): Promise<void> {
   await db.events.delete(id);
 }
 
-/** 更新单条事件（编辑备注/信息时不改变顺序） */
-export async function updateEvent(event: GameEvent): Promise<void> {
-  if (!hasIdb()) return;
-  await db.events.put(event);
-}
-
 /** 按时间顺序载入某局全部事件（时间线渲染顺序） */
 export async function loadEvents(gameId: string): Promise<GameEvent[]> {
   if (!hasIdb()) return [];

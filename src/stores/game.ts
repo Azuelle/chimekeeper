@@ -108,12 +108,10 @@ interface GameState {
   registerExecutionAndDeath(seatNumber: number): void;
   /** 登记死亡（任意原因），默认保留一票投票权 */
   registerDeath(seatNumber: number, cause?: DeathCause): void;
-  /** 撤销最近一次死亡登记（把对应座位恢复存活） */
-  undoDeath(seatNumber: number): void;
   /** 登记复活 */
   registerRevival(seatNumber: number): void;
-  /** 撤销最近一次复活登记（把对应座位恢复死亡） */
-  undoRevival(seatNumber: number): void;
+  /** 仅改写某座位的生死状态（事件删除/撤销后由事件流推导回写；不动投票权） */
+  setSeatAlive(seatNumber: number, alive: boolean): void;
   /** 切换某座位的投票权状态（死后一票用完等） */
   toggleVoteToken(seatNumber: number): void;
   /** 添加自由备注 */
@@ -459,15 +457,6 @@ export const useGameStore = create<GameState>()((set, get) => {
         .append(createEvent(next, 'death', { seatNumbers: [seatNumber], payload: { cause } }));
     },
 
-    undoDeath(seatNumber) {
-      const game = get().game;
-      if (!game) return;
-      const seats = game.seats.map((s) =>
-        s.seatNumber === seatNumber ? { ...s, alive: true, hasVoteToken: true } : s,
-      );
-      write({ ...game, seats, updatedAt: Date.now() });
-    },
-
     registerRevival(seatNumber) {
       const game = get().game;
       if (!game) return;
@@ -479,12 +468,10 @@ export const useGameStore = create<GameState>()((set, get) => {
       useEventStore.getState().append(createEvent(next, 'revival', { seatNumbers: [seatNumber] }));
     },
 
-    undoRevival(seatNumber) {
+    setSeatAlive(seatNumber, alive) {
       const game = get().game;
       if (!game) return;
-      const seats = game.seats.map((s) =>
-        s.seatNumber === seatNumber ? { ...s, alive: false, hasVoteToken: true } : s,
-      );
+      const seats = game.seats.map((s) => (s.seatNumber === seatNumber ? { ...s, alive } : s));
       write({ ...game, seats, updatedAt: Date.now() });
     },
 

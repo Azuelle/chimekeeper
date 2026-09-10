@@ -309,13 +309,7 @@ function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
       </span>
       <span className="seat-face__mid">
         <span className="seat-face__token">
-          <span
-            className="token-ring"
-            data-alignment={seat.alignment}
-            data-alive={seat.alive}
-            style={ringSkin}
-            aria-hidden="true"
-          >
+          <span className="token-ring" data-alignment={seat.alignment} style={ringSkin} aria-hidden="true">
             <span className="token-ring__core">{roleName}</span>
             {!seat.alive && (
               <span className="token-ring__shroud" aria-hidden="true" title={t('seats.deadLabel')}>

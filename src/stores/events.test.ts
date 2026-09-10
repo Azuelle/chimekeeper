@@ -21,7 +21,7 @@ describe('events store', () => {
     useEventStore.getState().append(ev);
     useEventStore.getState().append({ ...ev, id: 'b', payload: { text: 'other' }, createdAt: 124 });
 
-    useEventStore.getState().update('a', { payload: { text: 'new' } });
+    useEventStore.getState().update('a', { text: 'new' });
 
     const events = useEventStore.getState().events;
     expect(events.length).toBe(2);
