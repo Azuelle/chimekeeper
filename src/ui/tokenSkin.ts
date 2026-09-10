@@ -81,6 +81,9 @@ export function tokenIconStyle(
  */
 export const TOKEN_ARC_PATH = 'M 15.36 30 A 40 40 0 1 0 84.64 30';
 
+/** `TOKEN_ARC_PATH` 的坐标系统（SVG `viewBox`），与路径成对改动 */
+export const TOKEN_MARK_VIEWBOX = '0 0 100 100';
+
 /**
  * 弧形角色名（ADR-018 #4）：全大写 + 按字符数动态缩字号，避免长名绕成半圆。
  * 无名返回 `null`，调用方不渲染 `<text>`。

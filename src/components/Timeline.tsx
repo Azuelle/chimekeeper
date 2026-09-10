@@ -9,8 +9,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import { createEvent, realRoleId } from '../lib/events';
-import { SYSTEM_ROLE_PREFIX } from '../lib/nightOrder';
+import { createEvent, nightActionRoleId, realRoleId } from '../lib/events';
+import { systemStepKind } from '../lib/nightOrder';
 import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
 import { RoleIcon } from '../ui/RoleIcon';
@@ -194,9 +194,10 @@ function eventText(
 ): string {
   switch (e.type) {
     case 'night_action': {
-      const roleId = typeof e.payload.roleId === 'string' ? e.payload.roleId : '';
-      const name = roleId.startsWith(SYSTEM_ROLE_PREFIX)
-        ? t(`nightPanel.system.${roleId.slice(SYSTEM_ROLE_PREFIX.length)}`)
+      const roleId = nightActionRoleId(e) ?? '';
+      const kind = systemStepKind(roleId);
+      const name = kind
+        ? t(`nightPanel.system.${kind}`)
         : (roleNameById.get(roleId) ?? roleId);
       const seats = e.seatNumbers.length > 0 ? `（${t('nightPanel.seatsLabel', { seats: e.seatNumbers.join('、') })}）` : '';
       const info = typeof e.payload.info === 'string' && e.payload.info ? `：${e.payload.info}` : '';

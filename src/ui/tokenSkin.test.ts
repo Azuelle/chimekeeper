@@ -4,6 +4,7 @@ import {
   TEAM_RING_COLOR,
   TEAM_TINT_COLOR,
   TOKEN_ARC_PATH,
+  TOKEN_MARK_VIEWBOX,
   resolveTint,
   tokenIconStyle,
   tokenLabel,
@@ -79,7 +80,8 @@ describe('tokenLabel（ADR-018 #4：全大写 + 动态字号）', () => {
     expect(tokenLabel('')).toBeNull();
   });
 
-  it('弧线路径非空', () => {
+  it('弧线路径与坐标系统成对存在', () => {
     expect(TOKEN_ARC_PATH.length).toBeGreaterThan(0);
+    expect(TOKEN_MARK_VIEWBOX).toBe('0 0 100 100');
   });
 });

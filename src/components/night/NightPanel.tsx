@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
 import { useEventStore } from '../../stores/events';
-import { SYSTEM_ROLE_PREFIX, buildNightOrder, stepKey, systemStepOverrideHints } from '../../lib/nightOrder';
+import { buildNightOrder, stepKey, systemRoleId, systemStepOverrideHints } from '../../lib/nightOrder';
 import { roleById as buildRoleById } from '../../lib/roleMap';
 import { RoleIcon } from '../../ui/RoleIcon';
 import { createEvent } from '../../lib/events';
@@ -89,7 +89,7 @@ export function NightPanel() {
       return;
     }
 
-    const roleId = step.kind === 'role' ? step.roleId : `${SYSTEM_ROLE_PREFIX}${step.system}`;
+    const roleId = step.kind === 'role' ? step.roleId : systemRoleId(step.system);
     const info = (infoDrafts[key] ?? '').trim();
     appendEvent(
       createEvent(game, 'night_action', {

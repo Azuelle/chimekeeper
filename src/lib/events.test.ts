@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createEvent, realRoleId } from './events';
+import { createEvent, nightActionRoleId, realRoleId } from './events';
 import type { Game } from '../types/game';
 
 const game: Pick<Game, 'id' | 'round' | 'phase'> = {
@@ -47,5 +47,11 @@ describe('realRoleId（night_action 真实角色 id）', () => {
   it('非 night_action 或缺失 roleId 返回 undefined', () => {
     expect(realRoleId(createEvent(game, 'note', { payload: { text: 'x' } }))).toBeUndefined();
     expect(realRoleId(createEvent(game, 'night_action'))).toBeUndefined();
+  });
+
+  it('nightActionRoleId 保留 system:* 原始伪 id（供文本层解析）', () => {
+    const e = createEvent(game, 'night_action', { payload: { roleId: 'system:demon_info' } });
+    expect(nightActionRoleId(e)).toBe('system:demon_info');
+    expect(realRoleId(e)).toBeUndefined();
   });
 });

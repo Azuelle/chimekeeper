@@ -18,7 +18,7 @@ import { roleById as buildRoleById } from '../../lib/roleMap';
 import { useGameStore } from '../../stores/game';
 import type { Seat } from '../../types/game';
 import type { Role } from '../../types/script';
-import { TOKEN_ARC_PATH, ringSkinFor, tokenIconStyle, tokenLabel } from '../../ui/tokenSkin';
+import { TOKEN_ARC_PATH, TOKEN_MARK_VIEWBOX, ringSkinFor, tokenIconStyle, tokenLabel } from '../../ui/tokenSkin';
 import { SeatGlyph, type SeatGlyphName } from '../../ui/icons';
 
 interface SeatGridProps {
@@ -324,7 +324,7 @@ function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
               title={roleName ?? undefined}
             >
               {iconStyle && <span className="token-ring__icon" style={iconStyle} aria-hidden="true" />}
-              <svg className="token-ring__arc" viewBox="0 0 100 100" aria-hidden="true">
+              <svg className="token-ring__arc" viewBox={TOKEN_MARK_VIEWBOX} aria-hidden="true">
                 <defs>
                   {/* 沿下半环（官方 token 规范：名字在底部），逆时针走向让字正立 */}
                   <path id={arcId} d={TOKEN_ARC_PATH} fill="none" />
