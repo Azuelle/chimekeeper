@@ -10,8 +10,9 @@ import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
 import { createEvent } from '../lib/events';
-import { roleNameById as buildRoleNameMap } from '../lib/roleMap';
+import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
+import { RoleIcon } from '../ui/RoleIcon';
 import type { GameEvent } from '../types/events';
 
 interface Section {
@@ -36,6 +37,10 @@ export function Timeline() {
 
   const roleNameById = useMemo(
     () => buildRoleNameMap(game?.scriptSnapshot.roles ?? []),
+    [game],
+  );
+  const roleById = useMemo(
+    () => buildRoleById(game?.scriptSnapshot.roles ?? []),
     [game],
   );
 
@@ -129,39 +134,48 @@ export function Timeline() {
         <div key={section.key} className="timeline__section">
           <h3>{section.label}</h3>
           <ul>
-            {section.events.map((e) => (
-              <li key={e.id} className="timeline__event">
-                {editingId === e.id ? (
-                  <div className="timeline__edit">
-                    <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
-                    <div className="btn-row">
-                      <button type="button" className="btn btn--small" onClick={saveEdit}>
-                        {t('timeline.save')}
-                      </button>
-                      <button type="button" className="btn btn--small" onClick={cancelEdit}>
-                        {t('timeline.cancel')}
-                      </button>
+            {section.events.map((e) => {
+              const roleId =
+                e.type === 'night_action' &&
+                typeof e.payload.roleId === 'string' &&
+                !e.payload.roleId.startsWith('system:')
+                  ? e.payload.roleId
+                  : null;
+              return (
+                <li key={e.id} className="timeline__event">
+                  {editingId === e.id ? (
+                    <div className="timeline__edit">
+                      <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
+                      <div className="btn-row">
+                        <button type="button" className="btn btn--small" onClick={saveEdit}>
+                          {t('timeline.save')}
+                        </button>
+                        <button type="button" className="btn btn--small" onClick={cancelEdit}>
+                          {t('timeline.cancel')}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                    <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
-                    <span className="timeline__actions">
-                      {(e.type === 'note' || e.type === 'night_action') && (
-                        <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
-                          {t('timeline.edit')}
-                        </button>
-                      )}
-                      {DELETABLE_TYPES.has(e.type) && (
-                        <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
-                          {t('timeline.delete')}
-                        </button>
-                      )}
-                    </span>
-                  </>
-                )}
-              </li>
-            ))}
+                  ) : (
+                    <>
+                      {roleId && <RoleIcon roleId={roleId} team={roleById.get(roleId)?.team} size="1rem" />}
+                      <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
+                      <span className="timeline__actions">
+                        {(e.type === 'note' || e.type === 'night_action') && (
+                          <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
+                            {t('timeline.edit')}
+                          </button>
+                        )}
+                        {DELETABLE_TYPES.has(e.type) && (
+                          <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
+                            {t('timeline.delete')}
+                          </button>
+                        )}
+                      </span>
+                    </>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
       ))}

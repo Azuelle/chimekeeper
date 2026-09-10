@@ -27,7 +27,8 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: 'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', Georgia,
+    'Times New Roman', serif;
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
 }
@@ -263,6 +264,13 @@ button:focus-visible {
   border-color: color-mix(in srgb, var(--evil) 55%, var(--border));
 }
 
+/* 角色剪影（ADR-018）：单色 SVG mask + 内联背景色，尺寸由组件 inline 下发 */
+.role-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  vertical-align: -0.15em;
+}
+
 .badge-setup {
   font-size: 0.68rem;
   color: var(--accent);
@@ -318,7 +326,7 @@ button:focus-visible {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
   width: 100%;
   text-align: left;
   font: inherit;
@@ -326,7 +334,7 @@ button:focus-visible {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 0.85rem;
-  padding: 0.55rem 0.55rem 0.5rem;
+  padding: 0.7rem 0.75rem 0.6rem;
   cursor: pointer;
 }
 
@@ -349,8 +357,17 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  margin-top: 0.1rem;
+  gap: 0.6rem;
+  margin-top: 0.15rem;
+}
+
+/* 左列：角色 token（上）+ 玩家名（下，若有）；右侧为提示标记区（ADR-005 分组） */
+.seat-face__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
 }
 
 .seat-face__token {
@@ -361,8 +378,8 @@ button:focus-visible {
 /* token 圆环：占位灰环，阵营着色由 ui/tokenSkin 提供内联主色 */
 .token-ring {
   position: relative;
-  width: 3.1rem;
-  height: 3.1rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 50%;
   border: 0.32rem solid var(--border);
   background: color-mix(in srgb, var(--bg-input) 88%, #fff 12%);
@@ -372,48 +389,42 @@ button:focus-visible {
   transition: border-color 0.15s ease;
 }
 
-/* 自绘金属高光（无外部素材） */
-.token-ring::after {
-  content: '';
+/* 自绘金属高光已移除（用户：radial/conic 渐变圈丑） */
+
+/* 角色剪影：单色 SVG 作 mask + 背景色赋色（ADR-018），颜色由 ui/tokenSkin 内联下发 */
+.token-ring__icon {
+  width: 70%;
+  height: 70%;
+  display: block;
+  /* 名字在底部，剪影整体上移一点让视觉重心居中 */
+  transform: translateY(-7%);
+}
+
+/* 角色名弧形贴环内侧（类 clocktower.online），纯装饰 */
+.token-ring__arc {
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background: conic-gradient(
-    from 210deg,
-    rgba(255, 255, 255, 0.18),
-    transparent 38%,
-    rgba(255, 255, 255, 0.05) 66%,
-    transparent
-  );
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
-.token-ring__core {
-  width: 1.15rem;
-  height: 1.15rem;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--bg-input) 70%, var(--border) 30%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  font-size: 0.5rem;
-  line-height: 1;
-  color: var(--text);
-  text-align: center;
-  word-break: break-all;
-  padding: 0.05rem;
+.token-ring__label {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.6);
+  stroke-width: 2.5px;
 }
 
 .seat-face__name {
-  min-height: 1rem;
+  max-width: 100%;
   font-size: 0.8rem;
   line-height: 1.15;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 0.1rem;
 }
 
 /* 提示标记区：堆叠 tokens；空时竖排占位 */
@@ -791,7 +802,10 @@ button:focus-visible {
 }
 
 .night-step__name {
-  font-weight: 600;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .night-step__seats {
