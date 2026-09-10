@@ -846,13 +846,6 @@ button:focus-visible {
   color: var(--text-dim);
 }
 
-/* ===== M2 白天占位 ===== */
-
-.day-placeholder-note {
-  font-size: 0.85rem;
-  color: var(--text-dim);
-}
-
 /* ===== M2 时间线（F-06b 事件日志） ===== */
 
 .timeline__section + .timeline__section {
