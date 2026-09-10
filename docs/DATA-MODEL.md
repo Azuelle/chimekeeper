@@ -76,7 +76,7 @@ Script JSON = [ ScriptMeta?, (Role | ScriptJinxes)... ]
 - 每条事件携带 `round + phase`，时间线由事件流直接渲染，无需额外状态
 - `seatNumbers: number[]` 引用涉及座位
 - 事件可删除/修正，但**不做事件溯源（event sourcing）**——v1 保留简单性，Game 状态与事件流双写，一致性由 store 层保证
-- `death`/`revival` 事件允许从时间线删除/撤销；增删后由剩余事件流经 `lib/events.resolveSeatAlive` 推导最新生死状态，再调用 `gameStore.setSeatAlive` 回写（只改 `alive`，不动 `hasVoteToken`）
+- `death`/`revival` 事件允许从时间线删除/撤销（撤销按原 index 原位插回、保留 createdAt）；增删后由 `gameStore.reconcileLifeState` 用剩余事件流经 `lib/events.resolveSeatAlive` 推导最新生死状态并回写（只改 `alive`，不动 `hasVoteToken`）
 - **v2 玩家统计（F-15）的兼容性承诺**：事件粒度足以支撑"某玩家拿过哪些角色/胜率/同队关系"的聚合，座位编号与角色 id 不可从 payload 中移除
 
 ## 4. 夜晚面板步骤（NightStep）— ADR-006

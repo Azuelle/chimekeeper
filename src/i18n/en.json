@@ -205,7 +205,7 @@
   },
   "timeline": {
     "title": "Event log",
-    "empty": "No events yet",
+    "empty": "No events recorded",
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",

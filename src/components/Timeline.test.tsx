@@ -230,9 +230,31 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
   });
 
+  it('撤销删除较早的死亡事件原位插回，且不改错生死状态', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
+    useGameStore.getState().registerRevival(1);
+    useGameStore.getState().registerDeath(1, 'other');
+    const before = useEventStore.getState().events;
+    const earliest = before.find((e) => e.type === 'death')!;
+    const originalIndex = before.findIndex((e) => e.id === earliest.id);
+
+    render(<Timeline />);
+    await user.click(screen.getAllByRole('button', { name: '删除' })[0]!);
+    await user.click(screen.getByRole('button', { name: '撤销' }));
+
+    const after = useEventStore.getState().events;
+    const restored = after.find((e) => e.id === earliest.id)!;
+    expect(after.findIndex((e) => e.id === earliest.id)).toBe(originalIndex);
+    expect(restored.createdAt).toBe(earliest.createdAt);
+    // 后续的死亡事件仍是最新 → 不应因撤销较早死亡而复活
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
   it('某阶段只有 phase_change 时显示空态文案', () => {
     render(<Timeline />);
-    expect(screen.getByText('暂无事件')).toBeTruthy();
+    expect(screen.getByText('未记录事件')).toBeTruthy();
   });
 
   it('无事件时不渲染', () => {

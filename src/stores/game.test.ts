@@ -379,6 +379,27 @@ describe('gameStore 白天流程（F-05 / F-06c）', () => {
     expect(useEventStore.getState().events.some((e) => e.type === 'revival')).toBe(true);
   });
 
+  it('reconcileLifeState 依剩余事件流回写生死；非生死事件 no-op', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    const death = useEventStore.getState().events.find((e) => e.type === 'death')!;
+
+    // 事件仍在 → 保持死亡
+    store().reconcileLifeState(death);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+
+    // 删除该死亡事件后 → 恢复存活
+    useEventStore.getState().remove(death.id);
+    store().reconcileLifeState(death);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
+
+    // 非生死事件不改动
+    store().registerDeath(2, 'other');
+    const note = createEvent(store().game!, 'note', { payload: { text: 'x' } });
+    store().reconcileLifeState(note);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+  });
+
   it('setSeatAlive 只改生死、不动投票权', () => {
     store().createGame(script, 5);
     store().registerDeath(2, 'night');

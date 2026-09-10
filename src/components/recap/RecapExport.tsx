@@ -34,11 +34,15 @@ export function RecapExport() {
   };
   const markdown = recapToMarkdown(recap, roleName);
 
+  const flashCopied = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(markdown);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      flashCopied();
       return;
     } catch {
       // 非 HTTPS / 无权限时降级到 execCommand
@@ -49,17 +53,14 @@ export function RecapExport() {
     textarea.style.position = 'fixed';
     textarea.style.opacity = '0';
     document.body.appendChild(textarea);
-    textarea.select();
     try {
-      const ok = document.execCommand('copy');
-      if (ok) {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
+      textarea.select();
+      if (document.execCommand('copy')) flashCopied();
     } catch {
       // ignore
+    } finally {
+      document.body.removeChild(textarea);
     }
-    document.body.removeChild(textarea);
   };
 
   const handleDownload = () => {

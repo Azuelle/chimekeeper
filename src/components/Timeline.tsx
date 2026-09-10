@@ -2,22 +2,16 @@
  * 时间线 / 事件日志（F-06b + F-06c + F-06d）：按 round + phase 分组渲染事件流。
  * - note 全文可编辑；night_action 的 info 自由文本可编辑（F-06d，STATUS M2 已知边界）
  * - 可删除/撤销 = note/nomination/vote/execution + death/revival；
- *   death/revival 双写 seat 状态，删除或撤销后由事件流重新推导生死状态回写
- *   （lib/events.resolveSeatAlive）；phase_change 折叠、night_action/seat/game_end 不开放删除
+ *   death/revival 双写 seat 状态，删除或撤销后调 gameStore.reconcileLifeState 回写；
+ *   phase_change 折叠、night_action/seat/game_end 不开放删除
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import {
-  HIDDEN_EVENT_TYPES,
-  nightActionRoleId,
-  realRoleId,
-  resolveSeatAlive,
-} from '../lib/events';
+import { HIDDEN_EVENT_TYPES, nightActionRoleId, realRoleId } from '../lib/events';
 import { systemStepKind } from '../lib/nightOrder';
 import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
-import { newId } from '../lib/id';
 import { RoleIcon } from '../ui/RoleIcon';
 import type { GameEvent } from '../types/events';
 
@@ -41,15 +35,16 @@ const DELETABLE_TYPES = new Set<GameEvent['type']>([
 export function Timeline() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
-  const setSeatAlive = useGameStore((s) => s.setSeatAlive);
+  const reconcileLifeState = useGameStore((s) => s.reconcileLifeState);
   const events = useEventStore((s) => s.events);
   const remove = useEventStore((s) => s.remove);
+  const restore = useEventStore((s) => s.restore);
   const update = useEventStore((s) => s.update);
-  const append = useEventStore((s) => s.append);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
-  const [lastDeleted, setLastDeleted] = useState<GameEvent | null>(null);
+  /** 最近删除的事件 + 其原位置，供撤销原位插回 */
+  const [lastDeleted, setLastDeleted] = useState<{ event: GameEvent; index: number } | null>(null);
 
   const roleNameById = useMemo(
     () => buildRoleNameMap(game?.scriptSnapshot.roles ?? []),
@@ -74,29 +69,21 @@ export function Timeline() {
     return out;
   }, [events, t]);
 
-  /** 生死事件增删后，用剩余事件流推导并回写座位的 alive（不动投票权） */
-  const syncSeatAlive = (e: GameEvent): void => {
-    if (e.type !== 'death' && e.type !== 'revival') return;
-    const seat = e.seatNumbers[0];
-    if (seat === undefined) return;
-    setSeatAlive(seat, resolveSeatAlive(useEventStore.getState().events, seat));
-  };
-
   const handleDelete = (e: GameEvent) => {
     if (!window.confirm(t('timeline.deleteConfirm'))) return;
+    const index = events.findIndex((x) => x.id === e.id);
     remove(e.id);
-    syncSeatAlive(e);
-    setLastDeleted(e);
+    reconcileLifeState(e);
+    setLastDeleted({ event: e, index });
     window.setTimeout(() => {
-      setLastDeleted((cur) => (cur?.id === e.id ? null : cur));
+      setLastDeleted((cur) => (cur?.event.id === e.id ? null : cur));
     }, 5000);
   };
 
   const handleUndo = () => {
     if (!lastDeleted) return;
-    const restored = { ...lastDeleted, id: newId(), createdAt: Date.now() };
-    append(restored);
-    syncSeatAlive(restored);
+    restore(lastDeleted.event, lastDeleted.index);
+    reconcileLifeState(lastDeleted.event);
     setLastDeleted(null);
   };
 
@@ -235,13 +222,6 @@ function eventText(
       const seats = e.seatNumbers.length > 0 ? `（${t('nightPanel.seatsLabel', { seats: e.seatNumbers.join('、') })}）` : '';
       const info = typeof e.payload.info === 'string' && e.payload.info ? `：${e.payload.info}` : '';
       return `${name}${seats}${info}`;
-    }
-    case 'phase_change': {
-      const to = e.payload.to;
-      if (to === 'firstNight') return t('timeline.event.phaseToFirstNight');
-      if (to === 'day') return t('timeline.event.phaseToDay');
-      if (to === 'night') return t('timeline.event.phaseToNight');
-      return t('timeline.event.unknown', { type: e.type });
     }
     case 'seat_add':
       return t('timeline.event.seatAdd', { seat: String(e.payload.seatNumber ?? '') });
