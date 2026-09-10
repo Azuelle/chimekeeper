@@ -19,6 +19,7 @@ import {
 import { newId } from '../lib/id';
 import { createEvent } from '../lib/events';
 import { alignmentForRole } from '../lib/setup';
+import { roleById as buildRoleById } from '../lib/roleMap';
 import { votesNeeded } from '../lib/vote';
 import { deleteGame as deleteGameById, listGames as listGamesById, loadCurrentGame, loadGame as loadGameById, saveGame } from '../persistence/repo';
 import { useEventStore } from './events';
@@ -257,7 +258,7 @@ export const useGameStore = create<GameState>()((set, get) => {
     assignRoleDraw(seatRoles, composition, demonBluffs) {
       const game = get().game;
       if (!game || game.phase !== 'setup') return;
-      const roleById = new Map(game.scriptSnapshot.roles.map((r) => [r.id, r]));
+      const roleById = buildRoleById(game.scriptSnapshot.roles);
       const bySeat = new Map(seatRoles.map((sr) => [sr.seatNumber, sr.roleId]));
       const seats = game.seats.map((s) => {
         const roleId = bySeat.get(s.seatNumber);
