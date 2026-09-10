@@ -7,6 +7,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useScriptStore } from '../../stores/script';
 import { normalizeRoleId } from '../../lib/roleDb';
+import { RoleIcon } from '../../ui/RoleIcon';
 import type { Role, Team } from '../../types/script';
 
 const TEAM_ORDER: Team[] = ['townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'fabled', 'loric'];
@@ -65,6 +66,7 @@ export function ScriptPreview({ onArrange }: { onArrange: () => void }) {
                 key={role.id}
                 className={EVIL_TEAMS.has(role.team) ? 'role-chip role-chip--evil' : 'role-chip'}
               >
+                <RoleIcon roleId={role.id} team={role.team} size="1.05rem" />
                 {role.name}
                 {role.setup && <span className="badge-setup">{t('scriptPreview.setupBadge')}</span>}
               </span>

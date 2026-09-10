@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createEvent } from './events';
+import { createEvent, nightActionRoleId, realRoleId } from './events';
 import type { Game } from '../types/game';
 
 const game: Pick<Game, 'id' | 'round' | 'phase'> = {
@@ -30,5 +30,28 @@ describe('createEvent（F-06 事件构造）', () => {
     });
     expect(full.seatNumbers).toEqual([3, 7]);
     expect(full.payload.roleId).toBe('fortune_teller');
+  });
+});
+
+describe('realRoleId（night_action 真实角色 id）', () => {
+  it('角色步骤返回 payload.roleId', () => {
+    const e = createEvent(game, 'night_action', { payload: { roleId: 'washerwoman' } });
+    expect(realRoleId(e)).toBe('washerwoman');
+  });
+
+  it('system:* 伪 id 返回 undefined', () => {
+    const e = createEvent(game, 'night_action', { payload: { roleId: 'system:minion_info' } });
+    expect(realRoleId(e)).toBeUndefined();
+  });
+
+  it('非 night_action 或缺失 roleId 返回 undefined', () => {
+    expect(realRoleId(createEvent(game, 'note', { payload: { text: 'x' } }))).toBeUndefined();
+    expect(realRoleId(createEvent(game, 'night_action'))).toBeUndefined();
+  });
+
+  it('nightActionRoleId 保留 system:* 原始伪 id（供文本层解析）', () => {
+    const e = createEvent(game, 'night_action', { payload: { roleId: 'system:demon_info' } });
+    expect(nightActionRoleId(e)).toBe('system:demon_info');
+    expect(realRoleId(e)).toBeUndefined();
   });
 });

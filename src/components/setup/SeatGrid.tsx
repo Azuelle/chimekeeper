@@ -11,13 +11,14 @@
  *   M2 角色类 / M3 白天类项目置灰占位、带单色图标并标注阶段。
  * - 纯渲染 + 事件转发，座位变更全走 gameStore（底层 lib/seats 原语）。
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ringLayout } from '../../lib/ringLayout';
-import { roleNameById as buildRoleNameMap } from '../../lib/roleMap';
+import { roleById as buildRoleById } from '../../lib/roleMap';
 import { useGameStore } from '../../stores/game';
 import type { Seat } from '../../types/game';
-import { ringSkinFor } from '../../ui/tokenSkin';
+import type { Role } from '../../types/script';
+import { TOKEN_ARC_PATH, TOKEN_MARK_VIEWBOX, ringSkinFor, tokenIconStyle, tokenLabel } from '../../ui/tokenSkin';
 import { SeatGlyph, type SeatGlyphName } from '../../ui/icons';
 
 interface SeatGridProps {
@@ -67,9 +68,9 @@ export function SeatGrid({ seats }: SeatGridProps) {
   const swapSeats = useGameStore((s) => s.swapSeats);
   const removeSeat = useGameStore((s) => s.removeSeat);
   const rippleShiftSeat = useGameStore((s) => s.rippleShiftSeat);
-  // 角色名展示（M2 抽袋后 token 内芯显示角色）；DIY 快照缺失的角色留空
+  // 角色展示（M2 抽袋后 token 内芯显示角色剪影 + 弧形名）；DIY 快照缺失的角色留空
   const snapshotRoles = useGameStore((s) => s.game?.scriptSnapshot.roles);
-  const roleNameById = useMemo(() => buildRoleNameMap(snapshotRoles ?? []), [snapshotRoles]);
+  const roleById = useMemo(() => buildRoleById(snapshotRoles ?? []), [snapshotRoles]);
 
   const ringRef = useRef<HTMLOListElement | null>(null);
   const [cols, setCols] = useState<number>(FALLBACK_COLS);
@@ -187,7 +188,7 @@ export function SeatGrid({ seats }: SeatGridProps) {
               >
                 <SeatCard
                   seat={seat}
-                  roleName={seat.roleId !== undefined ? (roleNameById.get(seat.roleId) ?? null) : null}
+                  role={seat.roleId !== undefined ? roleById.get(seat.roleId) : undefined}
                   menuOpen={menu?.seatNumber === seat.seatNumber}
                   onFaceClick={() => handleFaceClick(seat.seatNumber)}
                 />
@@ -282,16 +283,22 @@ export function SeatGrid({ seats }: SeatGridProps) {
 
 interface SeatCardProps {
   seat: Seat;
-  /** 已分配角色的显示名（未分配/快照缺失为 null → token 内芯留空） */
-  roleName: string | null;
+  /** 座位角色（未分配/快照缺失为 undefined → token 内芯留空） */
+  role?: Role;
   menuOpen: boolean;
   onFaceClick: () => void;
 }
 
 /** 单张玩家卡（ADR-005）：token 主体 + 名牌 + 右侧提示标记区；整卡点击弹菜单 */
-function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
+function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
   const { t } = useTranslation();
   const ringSkin = ringSkinFor(seat.alignment);
+  const iconStyle = tokenIconStyle(seat.roleId, seat.alignment, role?.team);
+  const roleName = role?.name ?? null;
+  // 弧形角色名（全大写 + 动态字号）由 ui/tokenSkin 决定，组件只消费（ADR-005/#4）
+  const label = tokenLabel(roleName);
+  // SVG textPath 的 path id 需全局唯一（同页多张卡）
+  const arcId = useId().replace(/:/g, '');
 
   return (
     <button
@@ -308,15 +315,36 @@ function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
         </span>
       </span>
       <span className="seat-face__mid">
-        <span className="seat-face__token">
-          <span className="token-ring" data-alignment={seat.alignment} style={ringSkin} aria-hidden="true">
-            <span className="token-ring__core">{roleName}</span>
-            {!seat.alive && (
-              <span className="token-ring__shroud" aria-hidden="true" title={t('seats.deadLabel')}>
-                ☠️
-              </span>
-            )}
+        <span className="seat-face__body">
+          <span className="seat-face__token">
+            <span
+              className="token-ring"
+              data-alignment={seat.alignment}
+              style={ringSkin}
+              title={roleName ?? undefined}
+            >
+              {iconStyle && <span className="token-ring__icon" style={iconStyle} aria-hidden="true" />}
+              <svg className="token-ring__arc" viewBox={TOKEN_MARK_VIEWBOX} aria-hidden="true">
+                <defs>
+                  {/* 沿下半环（官方 token 规范：名字在底部），逆时针走向让字正立 */}
+                  <path id={arcId} d={TOKEN_ARC_PATH} fill="none" />
+                </defs>
+                {label && (
+                  <text className="token-ring__label" style={{ fontSize: label.fontSize }}>
+                    <textPath href={`#${arcId}`} startOffset="50%" textAnchor="middle">
+                      {label.text}
+                    </textPath>
+                  </text>
+                )}
+              </svg>
+              {!seat.alive && (
+                <span className="token-ring__shroud" aria-hidden="true" title={t('seats.deadLabel')}>
+                  ☠️
+                </span>
+              )}
+            </span>
           </span>
+          {seat.playerName ? <span className="seat-face__name">{seat.playerName}</span> : null}
         </span>
         <span className="reminder-rail" aria-hidden="true">
           {seat.reminderTokens.length > 0 ? (
@@ -330,7 +358,6 @@ function SeatCard({ seat, roleName, menuOpen, onFaceClick }: SeatCardProps) {
           )}
         </span>
       </span>
-      <span className="seat-face__name">{seat.playerName ?? ''}</span>
     </button>
   );
 }

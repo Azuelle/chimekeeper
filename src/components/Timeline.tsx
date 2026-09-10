@@ -9,9 +9,16 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import { HIDDEN_EVENT_TYPES, resolveSeatAlive } from '../lib/events';
-import { roleNameById as buildRoleNameMap } from '../lib/roleMap';
+import {
+  HIDDEN_EVENT_TYPES,
+  nightActionRoleId,
+  realRoleId,
+  resolveSeatAlive,
+} from '../lib/events';
+import { systemStepKind } from '../lib/nightOrder';
+import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
+import { RoleIcon } from '../ui/RoleIcon';
 import type { GameEvent } from '../types/events';
 
 interface Section {
@@ -46,6 +53,10 @@ export function Timeline() {
 
   const roleNameById = useMemo(
     () => buildRoleNameMap(game?.scriptSnapshot.roles ?? []),
+    [game],
+  );
+  const roleById = useMemo(
+    () => buildRoleById(game?.scriptSnapshot.roles ?? []),
     [game],
   );
 
@@ -152,39 +163,43 @@ export function Timeline() {
               <p className="timeline__hint">{t('timeline.empty')}</p>
             ) : (
               <ul>
-                {visible.map((e) => (
-                  <li key={e.id} className="timeline__event">
-                    {editingId === e.id ? (
-                      <div className="timeline__edit">
-                        <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
-                        <div className="btn-row">
-                          <button type="button" className="btn btn--small" onClick={saveEdit}>
-                            {t('timeline.save')}
-                          </button>
-                          <button type="button" className="btn btn--small" onClick={cancelEdit}>
-                            {t('timeline.cancel')}
-                          </button>
+                {visible.map((e) => {
+                  const roleId = realRoleId(e);
+                  return (
+                    <li key={e.id} className="timeline__event">
+                      {editingId === e.id ? (
+                        <div className="timeline__edit">
+                          <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
+                          <div className="btn-row">
+                            <button type="button" className="btn btn--small" onClick={saveEdit}>
+                              {t('timeline.save')}
+                            </button>
+                            <button type="button" className="btn btn--small" onClick={cancelEdit}>
+                              {t('timeline.cancel')}
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <>
-                        <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
-                        <span className="timeline__actions">
-                          {(e.type === 'note' || e.type === 'night_action') && (
-                            <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
-                              {t('timeline.edit')}
-                            </button>
-                          )}
-                          {DELETABLE_TYPES.has(e.type) && (
-                            <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
-                              {t('timeline.delete')}
-                            </button>
-                          )}
-                        </span>
-                      </>
-                    )}
-                  </li>
-                ))}
+                      ) : (
+                        <>
+                          {roleId && <RoleIcon roleId={roleId} team={roleById.get(roleId)?.team} size="1rem" />}
+                          <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
+                          <span className="timeline__actions">
+                            {(e.type === 'note' || e.type === 'night_action') && (
+                              <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
+                                {t('timeline.edit')}
+                              </button>
+                            )}
+                            {DELETABLE_TYPES.has(e.type) && (
+                              <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
+                                {t('timeline.delete')}
+                              </button>
+                            )}
+                          </span>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             )}
             {isDay && !hasExecution && (
@@ -212,9 +227,10 @@ function eventText(
 ): string {
   switch (e.type) {
     case 'night_action': {
-      const roleId = typeof e.payload.roleId === 'string' ? e.payload.roleId : '';
-      const name = roleId.startsWith('system:')
-        ? t(`nightPanel.system.${roleId.slice('system:'.length)}`)
+      const roleId = nightActionRoleId(e) ?? '';
+      const kind = systemStepKind(roleId);
+      const name = kind
+        ? t(`nightPanel.system.${kind}`)
         : (roleNameById.get(roleId) ?? roleId);
       const seats = e.seatNumbers.length > 0 ? `（${t('nightPanel.seatsLabel', { seats: e.seatNumbers.join('、') })}）` : '';
       const info = typeof e.payload.info === 'string' && e.payload.info ? `：${e.payload.info}` : '';

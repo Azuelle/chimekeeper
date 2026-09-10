@@ -52,9 +52,13 @@
   - 阶段机：setup → firstNight(0) → day(1) ⇄ night(1) → day(2)…（round=已完成夜数），
     各跳转记 phase_change 事件；App 按 `game.phase` 路由（ADR-017 #4）
   - 测试 144 个全绿（+39）；覆盖率 95/87/93/95
+- **角色图标接入**（ADR-018，`feat/token-icons`）：botc-icons 单色剪影**运行时外链** +
+  CSS `mask` 着色（实际阵营优先、回落角色队伍色，善良 Imp 渲成蓝色）；座位 token
+  剪影居中 + **弧形角色名**（SVG textPath，类 clocktower.online），剧本预览 / 夜单 /
+  时间线 / 抽袋结果同步接入；取不到图标回落纯文本（不影响主流程）
 - **工程化**：pnpm（`pnpm-lock.yaml`，`packageManager`，esbuild build 放行）；vitest 覆盖率阈值
   （`vitest.config.ts`：lines 65 / funcs 70 / branches 75，CI 强制）；Dependabot（npm weekly + vitest 分组）；docs-guard
-- 17 条已接受 ADR（编号 ADR-001 至 ADR-017，无跳号），24 项 F- 需求（编号 F-01 至 F-26，有跳号）
+- 18 条已接受 ADR（编号 ADR-001 至 ADR-018，无跳号），24 项 F- 需求（编号 F-01 至 F-26，有跳号）
 
 ## 已知边界（M2）
 

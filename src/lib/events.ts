@@ -5,6 +5,7 @@
  * store 层只负责补上下文后写通持久化，不在此拼接字段。
  */
 import { newId } from './id';
+import { systemStepKind } from './nightOrder';
 import type { EventType, GameEvent } from '../types/events';
 import type { Game } from '../types/game';
 
@@ -52,4 +53,21 @@ export function resolveSeatAlive(events: GameEvent[], seatNumber: number): boole
     }
   }
   return latest === undefined || latest.type === 'revival';
+}
+
+/** `night_action` 的原始 `payload.roleId`（含 `system:*` 伪 id）；其他事件或缺失 → undefined */
+export function nightActionRoleId(event: GameEvent): string | undefined {
+  if (event.type !== 'night_action') return undefined;
+  const id = event.payload.roleId;
+  return typeof id === 'string' ? id : undefined;
+}
+
+/**
+ * 从事件取"真实角色 id"（ADR-018 / F-06）：`night_action` 的 `payload.roleId`
+ * 可能是 `system:*` 系统锚点伪 id，不映射任何角色，此时返回 `undefined`。
+ * 渲染层取角色配图用；文本层另用 `nightActionRoleId` + `systemStepKind` 解析显示名。
+ */
+export function realRoleId(event: GameEvent): string | undefined {
+  const id = nightActionRoleId(event);
+  return id !== undefined && systemStepKind(id) === undefined ? id : undefined;
 }

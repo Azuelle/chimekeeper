@@ -46,6 +46,9 @@ describe('App M2 链路（抽袋 → 夜单 → 白天 → 恢复）', () => {
     await screen.findByRole('heading', { level: 2, name: /首夜/ });
     // 魔典/座位表在夜/白天阶段始终可见
     expect(screen.getByRole('button', { name: '座位编号 1' })).toBeTruthy();
+    // ADR-018：已分配角色的座位 token 渲染剪影 + 弧形角色名
+    expect(document.querySelectorAll('.token-ring__icon').length).toBeGreaterThan(0);
+    expect(document.querySelectorAll('.token-ring__arc textPath').length).toBeGreaterThan(0);
     await user.click(screen.getByLabelText('黎明'));
     expect(screen.getByRole('heading', { level: 2, name: '第 1 个白天' })).toBeTruthy();
     expect(useGameStore.getState().game?.round).toBe(1);
