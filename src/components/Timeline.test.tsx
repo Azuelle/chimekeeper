@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -43,13 +43,15 @@ describe('Timeline（F-06b 时间线）', () => {
       }),
     );
     store.finishNight();
+    useEventStore.getState().append(createEvent(useGameStore.getState().game!, 'note', { payload: { text: '白天备注' } }));
 
     render(<Timeline />);
     expect(screen.getByText('首夜')).toBeTruthy();
     expect(screen.getByText('第 1 个白天')).toBeTruthy();
     expect(screen.getByText(/爪牙信息/)).toBeTruthy();
     expect(screen.getByText(/洗衣妇（座位 1）：3 5 之中有洗衣妇/)).toBeTruthy();
-    expect(screen.getByText('进入白天')).toBeTruthy();
+    expect(screen.queryByText('进入白天')).toBeNull();
+    expect(screen.getByText('白天备注')).toBeTruthy();
   });
 
   it('座位事件：换位/平移/增删渲染中文描述；setup 阶段操作不入流水', async () => {
@@ -85,6 +87,33 @@ describe('Timeline（F-06b 时间线）', () => {
 
     expect(screen.getByText('新备注')).toBeTruthy();
     expect(screen.queryByText('旧备注')).toBeNull();
+  });
+
+  it('编辑事件原地更新，不改变顺序、id 与 createdAt', async () => {
+    const user = userEvent.setup();
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '第一条' } }));
+    useEventStore.getState().append(createEvent(game, 'note', { payload: { text: '第二条' } }));
+    const beforeEvents = useEventStore.getState().events;
+    const firstNote = beforeEvents.find((e) => e.type === 'note')!;
+
+    render(<Timeline />);
+    const editButtons = screen.getAllByRole('button', { name: '编辑' });
+    await user.click(editButtons[0]!);
+    const textarea = screen.getByRole('textbox');
+    await user.clear(textarea);
+    await user.type(textarea, '第一条已编辑');
+    await user.click(screen.getByRole('button', { name: '保存' }));
+
+    const afterEvents = useEventStore.getState().events;
+    expect(afterEvents.length).toBe(beforeEvents.length);
+    const updated = afterEvents.find((e) => e.id === firstNote.id)!;
+    expect(updated.createdAt).toBe(firstNote.createdAt);
+    expect(updated.payload.text).toBe('第一条已编辑');
+    expect(afterEvents.filter((e) => e.type === 'note').map((e) => e.payload.text)).toEqual([
+      '第一条已编辑',
+      '第二条',
+    ]);
   });
 
   it('可删除用户事件并撤销', async () => {
@@ -169,19 +198,92 @@ describe('Timeline（F-06b 时间线）', () => {
     expect(ev?.payload.stepKey).toBe('role:washerwoman');
   });
 
-  it('death 事件不开放删除（状态双写，避免日志与 Game 失同步）', () => {
-    const game = useGameStore.getState().game!;
-    useEventStore.getState().append(
-      createEvent(game, 'death', { seatNumbers: [1], payload: { cause: 'night' } }),
-    );
+  it('death 事件可删除并恢复座位存活；撤销删除后再次死亡', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
 
     render(<Timeline />);
-    expect(screen.queryByRole('button', { name: '删除' })).toBeNull();
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+
+    await user.click(screen.getByRole('button', { name: '删除' }));
+    expect(useEventStore.getState().events.some((e) => e.type === 'death')).toBe(false);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(true);
+
+    await user.click(screen.getByRole('button', { name: '撤销' }));
+    expect(useEventStore.getState().events.some((e) => e.type === 'death')).toBe(true);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
+  it('删除较早的死亡事件不会复活已被后续死亡事件覆盖的座位', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
+    useGameStore.getState().registerRevival(1);
+    useGameStore.getState().registerDeath(1, 'other');
+
+    render(<Timeline />);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+
+    // 删除 DOM 中最早的一条死亡事件
+    await user.click(screen.getAllByRole('button', { name: '删除' })[0]!);
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
+  it('撤销删除较早的死亡事件原位插回，且不改错生死状态', async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    useGameStore.getState().registerDeath(1, 'night');
+    useGameStore.getState().registerRevival(1);
+    useGameStore.getState().registerDeath(1, 'other');
+    const before = useEventStore.getState().events;
+    const earliest = before.find((e) => e.type === 'death')!;
+    const originalIndex = before.findIndex((e) => e.id === earliest.id);
+
+    render(<Timeline />);
+    await user.click(screen.getAllByRole('button', { name: '删除' })[0]!);
+    await user.click(screen.getByRole('button', { name: '撤销' }));
+
+    const after = useEventStore.getState().events;
+    const restored = after.find((e) => e.id === earliest.id)!;
+    expect(after.findIndex((e) => e.id === earliest.id)).toBe(originalIndex);
+    expect(restored.createdAt).toBe(earliest.createdAt);
+    // 后续的死亡事件仍是最新 → 不应因撤销较早死亡而复活
+    expect(useGameStore.getState().game?.seats.find((s) => s.seatNumber === 1)?.alive).toBe(false);
+  });
+
+  it('某阶段只有 phase_change 时显示空态文案', () => {
+    render(<Timeline />);
+    expect(screen.getByText('未记录事件')).toBeTruthy();
   });
 
   it('无事件时不渲染', () => {
     useEventStore.getState().clear();
     const { container } = render(<Timeline />);
     expect(container.querySelector('.timeline')).toBeNull();
+  });
+
+  it('白天 section 无 execution 时给出 suggestion；有 execution 时不显示', async () => {
+    useGameStore.getState().finishNight();
+    const dayGame = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(dayGame, 'nomination', { payload: { nominatorSeat: 1, nominatedSeat: 2 } }));
+
+    const { unmount } = render(<Timeline />);
+    expect(screen.getByText('本白天尚未登记处决')).toBeTruthy();
+
+    act(() => {
+      useEventStore.getState().append(createEvent(dayGame, 'execution', { seatNumbers: [2], payload: { died: true } }));
+    });
+    unmount();
+    render(<Timeline />);
+    expect(screen.queryByText('本白天尚未登记处决')).toBeNull();
+  });
+
+  it('非白天 section 不显示 execution suggestion', () => {
+    const game = useGameStore.getState().game!;
+    useEventStore.getState().append(createEvent(game, 'night_action', { seatNumbers: [1], payload: { roleId: 'imp' } }));
+
+    render(<Timeline />);
+    expect(screen.queryByText('本白天尚未登记处决')).toBeNull();
   });
 });

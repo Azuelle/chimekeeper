@@ -17,13 +17,14 @@ import {
   enableAllRetired,
 } from '../lib/seats';
 import { newId } from '../lib/id';
-import { createEvent } from '../lib/events';
+import { createEvent, resolveSeatAlive } from '../lib/events';
 import { alignmentForRole } from '../lib/setup';
 import { roleById as buildRoleById } from '../lib/roleMap';
 import { votesNeeded } from '../lib/vote';
 import { deleteGame as deleteGameById, listGames as listGamesById, loadCurrentGame, loadGame as loadGameById, saveGame } from '../persistence/repo';
 import { useEventStore } from './events';
 import type { DeathCause, Game, TeamComposition } from '../types/game';
+import type { GameEvent } from '../types/events';
 import type { Script } from '../types/script';
 
 /** 抽袋结果：座位 → 角色 */
@@ -111,6 +112,13 @@ interface GameState {
   registerDeath(seatNumber: number, cause?: DeathCause): void;
   /** 登记复活 */
   registerRevival(seatNumber: number): void;
+  /** 仅改写某座位的生死状态（不动投票权） */
+  setSeatAlive(seatNumber: number, alive: boolean): void;
+  /**
+   * 生死事件（death/revival）删除或撤销后，用当前事件流重新推导并回写该座位 alive。
+   * 其余事件类型为 no-op；一致性由 store 层负责（ARCHITECTURE / DATA-MODEL）。
+   */
+  reconcileLifeState(event: GameEvent): void;
   /** 切换某座位的投票权状态（死后一票用完等） */
   toggleVoteToken(seatNumber: number): void;
   /** 添加自由备注 */
@@ -465,6 +473,20 @@ export const useGameStore = create<GameState>()((set, get) => {
       const next = { ...game, seats, updatedAt: Date.now() };
       write(next);
       useEventStore.getState().append(createEvent(next, 'revival', { seatNumbers: [seatNumber] }));
+    },
+
+    setSeatAlive(seatNumber, alive) {
+      const game = get().game;
+      if (!game) return;
+      const seats = game.seats.map((s) => (s.seatNumber === seatNumber ? { ...s, alive } : s));
+      write({ ...game, seats, updatedAt: Date.now() });
+    },
+
+    reconcileLifeState(event) {
+      if (event.type !== 'death' && event.type !== 'revival') return;
+      const seat = event.seatNumbers[0];
+      if (seat === undefined) return;
+      get().setSeatAlive(seat, resolveSeatAlive(useEventStore.getState().events, seat));
     },
 
     toggleVoteToken(seatNumber) {

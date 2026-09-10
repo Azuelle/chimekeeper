@@ -76,6 +76,7 @@
     "seatNumberLabel": "座位编号",
     "cardMenuLabel": "座位 {{seat}} 的操作",
     "nicknamePlaceholder": "昵称（可空）",
+    "deadLabel": "已死亡",
     "reminderPlaceholder": "点击添加提示标记",
     "menu": {
       "swapSeats": "交换座位",
@@ -183,6 +184,7 @@
     "endGame": "登记结局",
     "nominator": "提名者",
     "nominated": "被提名者",
+    "targetSeat": "目标座位",
     "votesFor": "得票数（可选）",
     "died": "因此死亡",
     "survived": "未死亡",
@@ -203,13 +205,14 @@
   },
   "timeline": {
     "title": "事件日志",
-    "empty": "暂无事件",
+    "empty": "未记录事件",
     "delete": "删除",
     "edit": "编辑",
     "save": "保存",
     "cancel": "取消",
     "undo": "撤销",
     "deleted": "事件已删除",
+    "noExecutionSuggestion": "本白天尚未登记处决",
     "deleteConfirm": "确定删除这条事件？",
     "event": {
       "phaseToFirstNight": "入夜（首夜）",

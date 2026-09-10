@@ -22,27 +22,29 @@ const game: Game = {
 };
 
 const events: GameEvent[] = [
-  { id: 'e1', gameId: 'g1', type: 'night_action', round: 0, phase: 'firstNight', seatNumbers: [1], payload: { roleId: 'monk' }, createdAt: 1 },
-  { id: 'e2', gameId: 'g1', type: 'nomination', round: 1, phase: 'day', seatNumbers: [], payload: { nominatorSeat: 1, nominatedSeat: 2 }, createdAt: 2 },
-  { id: 'e3', gameId: 'g1', type: 'game_end', round: 2, phase: 'ended', seatNumbers: [], payload: { winningTeam: 'good' }, createdAt: 3 },
+  { id: 'e1', gameId: 'g1', type: 'phase_change', round: 0, phase: 'firstNight', seatNumbers: [], payload: { from: 'setup', to: 'firstNight' }, createdAt: 1 },
+  { id: 'e2', gameId: 'g1', type: 'night_action', round: 0, phase: 'firstNight', seatNumbers: [1], payload: { roleId: 'monk' }, createdAt: 2 },
+  { id: 'e3', gameId: 'g1', type: 'nomination', round: 1, phase: 'day', seatNumbers: [], payload: { nominatorSeat: 1, nominatedSeat: 2 }, createdAt: 3 },
+  { id: 'e4', gameId: 'g1', type: 'game_end', round: 2, phase: 'ended', seatNumbers: [], payload: { winningTeam: 'good' }, createdAt: 4 },
   // 别的对局的事件不应混入
-  { id: 'e4', gameId: 'other', type: 'note', round: 0, phase: 'setup', seatNumbers: [], payload: { text: 'x' }, createdAt: 4 },
+  { id: 'e5', gameId: 'other', type: 'note', round: 0, phase: 'setup', seatNumbers: [], payload: { text: 'x' }, createdAt: 5 },
 ];
 
 describe('generateRecap', () => {
-  it('只包含本对局事件，按 round:phase 分组', () => {
+  it('只包含本对局事件、过滤 phase_change，按 round:phase 分组', () => {
     const recap = generateRecap(game, events);
     expect(recap.timeline).toHaveLength(3);
-    expect(recap.timeline.flatMap((t) => t.events).map((e) => e.id)).toEqual(['e1', 'e2', 'e3']);
+    expect(recap.timeline.flatMap((t) => t.events).map((e) => e.id)).toEqual(['e2', 'e3', 'e4']);
   });
 });
 
 describe('recapToMarkdown', () => {
-  it('生成含座位表与结局的 Markdown', () => {
+  it('生成含座位表与结局的 Markdown；phase_change 不进复盘', () => {
     const md = recapToMarkdown(generateRecap(game, events), (id) => ({ monk: '僧侣', imp: '小恶魔' })[id] ?? id);
     expect(md).toContain('# 血染钟楼复盘 — 暗流涌动');
     expect(md).toContain('**1 号**（小明）: 僧侣');
     expect(md).toContain('首夜');
     expect(md).toContain('**善良阵营获胜** — 恶魔被处决');
+    expect(md).not.toContain('phase_change');
   });
 });

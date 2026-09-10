@@ -59,12 +59,29 @@ describe('RecapExport（战报导出）', () => {
     expect(screen.getByRole('button', { name: '已复制' })).toBeTruthy();
   });
 
-  it('复制失败时不抛错', async () => {
+  it('navigator.clipboard 不可用时降级到 execCommand 复制', async () => {
     const user = userEvent.setup();
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
       configurable: true,
     });
+    const execCommand = vi.fn().mockReturnValue(true);
+    Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true });
+
+    render(<RecapExport />);
+    await user.click(screen.getByRole('button', { name: '复制 Markdown' }));
+
+    expect(execCommand).toHaveBeenCalledWith('copy');
+    expect(screen.getByRole('button', { name: '已复制' })).toBeTruthy();
+  });
+
+  it('复制失败（clipboard 与 execCommand 都失败）时不抛错', async () => {
+    const user = userEvent.setup();
+    Object.defineProperty(navigator, 'clipboard', {
+      value: { writeText: vi.fn().mockRejectedValue(new Error('denied')) },
+      configurable: true,
+    });
+    Object.defineProperty(document, 'execCommand', { value: vi.fn().mockReturnValue(false), configurable: true });
 
     render(<RecapExport />);
     await user.click(screen.getByRole('button', { name: '复制 Markdown' }));

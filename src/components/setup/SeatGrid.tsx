@@ -303,8 +303,8 @@ function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
   return (
     <button
       type="button"
-      className={`seat-face${menuOpen ? ' has-menu' : ''}`}
-      aria-label={`${t('seats.seatNumberLabel')} ${String(seat.seatNumber)}`}
+      className={`seat-face${menuOpen ? ' has-menu' : ''}${!seat.alive ? ' is-dead' : ''}`}
+      aria-label={`${t('seats.seatNumberLabel')} ${String(seat.seatNumber)}${!seat.alive ? ` · ${t('seats.deadLabel')}` : ''}`}
       aria-haspopup="dialog"
       aria-expanded={menuOpen}
       onClick={onFaceClick}
@@ -337,6 +337,11 @@ function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
                   </text>
                 )}
               </svg>
+              {!seat.alive && (
+                <span className="token-ring__shroud" aria-hidden="true" title={t('seats.deadLabel')}>
+                  ☠️
+                </span>
+              )}
             </span>
           </span>
           {seat.playerName ? <span className="seat-face__name">{seat.playerName}</span> : null}

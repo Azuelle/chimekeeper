@@ -379,6 +379,39 @@ describe('gameStore 白天流程（F-05 / F-06c）', () => {
     expect(useEventStore.getState().events.some((e) => e.type === 'revival')).toBe(true);
   });
 
+  it('reconcileLifeState 依剩余事件流回写生死；非生死事件 no-op', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    const death = useEventStore.getState().events.find((e) => e.type === 'death')!;
+
+    // 事件仍在 → 保持死亡
+    store().reconcileLifeState(death);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+
+    // 删除该死亡事件后 → 恢复存活
+    useEventStore.getState().remove(death.id);
+    store().reconcileLifeState(death);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(true);
+
+    // 非生死事件不改动
+    store().registerDeath(2, 'other');
+    const note = createEvent(store().game!, 'note', { payload: { text: 'x' } });
+    store().reconcileLifeState(note);
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.alive).toBe(false);
+  });
+
+  it('setSeatAlive 只改生死、不动投票权', () => {
+    store().createGame(script, 5);
+    store().registerDeath(2, 'night');
+    store().toggleVoteToken(2); // 死亡玩家用掉唯一一票
+    expect(store().game?.seats.find((s) => s.seatNumber === 2)?.hasVoteToken).toBe(false);
+
+    store().setSeatAlive(2, true);
+    const seat = store().game?.seats.find((s) => s.seatNumber === 2);
+    expect(seat?.alive).toBe(true);
+    expect(seat?.hasVoteToken).toBe(false); // 不因撤销死亡而重置投票权
+  });
+
   it('toggleVoteToken 手动切换投票权', () => {
     store().createGame(script, 5);
     store().registerDeath(2);

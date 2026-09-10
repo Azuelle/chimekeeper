@@ -9,6 +9,9 @@ import { systemStepKind } from './nightOrder';
 import type { EventType, GameEvent } from '../types/events';
 import type { Game } from '../types/game';
 
+/** 时间线/复盘中作为进度元事件折叠的事件类型（阶段标题已表达） */
+export const HIDDEN_EVENT_TYPES: ReadonlySet<EventType> = new Set(['phase_change']);
+
 export interface CreateEventOptions {
   /** 涉及座位编号（默认空） */
   seatNumbers?: number[];
@@ -36,6 +39,20 @@ export function createEvent(
     payload: options.payload ?? {},
     createdAt: Date.now(),
   };
+}
+
+/**
+ * 从事件流推导某座位当前的生死状态（数组末位的死亡/复活事件即最新，数组为追加序/渲染序）。
+ * 用于生死事件删除/撤销后回写 Game 状态；无任何生死事件时视为存活（默认状态）。
+ */
+export function resolveSeatAlive(events: GameEvent[], seatNumber: number): boolean {
+  let latest: GameEvent | undefined;
+  for (const e of events) {
+    if ((e.type === 'death' || e.type === 'revival') && e.seatNumbers.includes(seatNumber)) {
+      latest = e;
+    }
+  }
+  return latest === undefined || latest.type === 'revival';
 }
 
 /** `night_action` 的原始 `payload.roleId`（含 `system:*` 伪 id）；其他事件或缺失 → undefined */

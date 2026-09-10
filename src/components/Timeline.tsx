@@ -1,40 +1,50 @@
 /**
  * 时间线 / 事件日志（F-06b + F-06c + F-06d）：按 round + phase 分组渲染事件流。
  * - note 全文可编辑；night_action 的 info 自由文本可编辑（F-06d，STATUS M2 已知边界）
- * - 可删除 = 不改写 Game 状态的事件（note/nomination/vote/execution）：
- *   death/revival 会双写 seat 状态，删除会导致日志与状态失同步（DATA-MODEL 双写一致性），
- *   说书人纠错走白天面板的登记死亡/复活反向动作；night_action/phase_change/seat 事件/game_end 不开放删除
+ * - 可删除/撤销 = note/nomination/vote/execution + death/revival；
+ *   death/revival 双写 seat 状态，删除或撤销后调 gameStore.reconcileLifeState 回写；
+ *   phase_change 折叠、night_action/seat/game_end 不开放删除
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import { createEvent, nightActionRoleId, realRoleId } from '../lib/events';
+import { HIDDEN_EVENT_TYPES, nightActionRoleId, realRoleId } from '../lib/events';
 import { systemStepKind } from '../lib/nightOrder';
 import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
-import { newId } from '../lib/id';
 import { RoleIcon } from '../ui/RoleIcon';
 import type { GameEvent } from '../types/events';
 
 interface Section {
   key: string;
   label: string;
+  phase: GameEvent['phase'];
   events: GameEvent[];
 }
 
-/** 删除/撤销仅限不触碰 Game 状态的事件；状态变更事件删了会造成双写失同步 */
-const DELETABLE_TYPES = new Set<GameEvent['type']>(['note', 'nomination', 'vote', 'execution']);
+/** 可删除/撤销的事件；note/nomination/vote/execution 直接删，death/revival 需回写座位状态 */
+const DELETABLE_TYPES = new Set<GameEvent['type']>([
+  'note',
+  'nomination',
+  'vote',
+  'execution',
+  'death',
+  'revival',
+]);
 
 export function Timeline() {
   const { t } = useTranslation();
   const game = useGameStore((s) => s.game);
+  const reconcileLifeState = useGameStore((s) => s.reconcileLifeState);
   const events = useEventStore((s) => s.events);
   const remove = useEventStore((s) => s.remove);
-  const append = useEventStore((s) => s.append);
+  const restore = useEventStore((s) => s.restore);
+  const update = useEventStore((s) => s.update);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
-  const [lastDeleted, setLastDeleted] = useState<GameEvent | null>(null);
+  /** 最近删除的事件 + 其原位置，供撤销原位插回 */
+  const [lastDeleted, setLastDeleted] = useState<{ event: GameEvent; index: number } | null>(null);
 
   const roleNameById = useMemo(
     () => buildRoleNameMap(game?.scriptSnapshot.roles ?? []),
@@ -51,7 +61,7 @@ export function Timeline() {
       const key = `${String(e.round)}:${e.phase}`;
       let section = out.at(-1);
       if (!section || section.key !== key) {
-        section = { key, label: sectionLabel(e, t), events: [] };
+        section = { key, label: sectionLabel(e, t), phase: e.phase, events: [] };
         out.push(section);
       }
       section.events.push(e);
@@ -61,16 +71,19 @@ export function Timeline() {
 
   const handleDelete = (e: GameEvent) => {
     if (!window.confirm(t('timeline.deleteConfirm'))) return;
+    const index = events.findIndex((x) => x.id === e.id);
     remove(e.id);
-    setLastDeleted(e);
+    reconcileLifeState(e);
+    setLastDeleted({ event: e, index });
     window.setTimeout(() => {
-      setLastDeleted((cur) => (cur?.id === e.id ? null : cur));
+      setLastDeleted((cur) => (cur?.event.id === e.id ? null : cur));
     }, 5000);
   };
 
   const handleUndo = () => {
     if (!lastDeleted) return;
-    append({ ...lastDeleted, id: newId(), createdAt: Date.now() });
+    restore(lastDeleted.event, lastDeleted.index);
+    reconcileLifeState(lastDeleted.event);
     setLastDeleted(null);
   };
 
@@ -92,21 +105,16 @@ export function Timeline() {
     const old = events.find((e) => e.id === editingId);
     if (!old) return;
     const text = editText.trim();
-    const base = { id: old.gameId, round: old.round, phase: old.phase };
 
     if (old.type === 'note') {
       if (!text) return; // 空备注不保存，保持编辑态
-      remove(editingId);
-      append(createEvent(base, 'note', { payload: { text } }));
+      update(editingId, { text });
     } else if (old.type === 'night_action') {
       // F-06d：只改 info 自由文本，保留 stepKey/roleId/座位（清空 = 移除 info）
       const payload = { ...old.payload };
       if (text) payload.info = text;
       else delete payload.info;
-      remove(editingId);
-      append(
-        createEvent(base, 'night_action', { seatNumbers: old.seatNumbers, payload }),
-      );
+      update(editingId, payload);
     }
 
     setEditingId(null);
@@ -131,50 +139,62 @@ export function Timeline() {
           </button>
         </div>
       )}
-      {sections.map((section) => (
-        <div key={section.key} className="timeline__section">
-          <h3>{section.label}</h3>
-          <ul>
-            {section.events.map((e) => {
-              const roleId = realRoleId(e);
-              return (
-                <li key={e.id} className="timeline__event">
-                  {editingId === e.id ? (
-                    <div className="timeline__edit">
-                      <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
-                      <div className="btn-row">
-                        <button type="button" className="btn btn--small" onClick={saveEdit}>
-                          {t('timeline.save')}
-                        </button>
-                        <button type="button" className="btn btn--small" onClick={cancelEdit}>
-                          {t('timeline.cancel')}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      {roleId && <RoleIcon roleId={roleId} team={roleById.get(roleId)?.team} size="1rem" />}
-                      <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
-                      <span className="timeline__actions">
-                        {(e.type === 'note' || e.type === 'night_action') && (
-                          <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
-                            {t('timeline.edit')}
-                          </button>
-                        )}
-                        {DELETABLE_TYPES.has(e.type) && (
-                          <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
-                            {t('timeline.delete')}
-                          </button>
-                        )}
-                      </span>
-                    </>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
+      {sections.map((section) => {
+        const visible = section.events.filter((e) => !HIDDEN_EVENT_TYPES.has(e.type));
+        const isDay = section.phase === 'day';
+        const hasExecution = visible.some((e) => e.type === 'execution');
+        return (
+          <div key={section.key} className="timeline__section">
+            <h3>{section.label}</h3>
+            {visible.length === 0 ? (
+              <p className="timeline__hint">{t('timeline.empty')}</p>
+            ) : (
+              <ul>
+                {visible.map((e) => {
+                  const roleId = realRoleId(e);
+                  return (
+                    <li key={e.id} className="timeline__event">
+                      {editingId === e.id ? (
+                        <div className="timeline__edit">
+                          <textarea value={editText} onChange={(ev) => setEditText(ev.target.value)} rows={2} />
+                          <div className="btn-row">
+                            <button type="button" className="btn btn--small" onClick={saveEdit}>
+                              {t('timeline.save')}
+                            </button>
+                            <button type="button" className="btn btn--small" onClick={cancelEdit}>
+                              {t('timeline.cancel')}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          {roleId && <RoleIcon roleId={roleId} team={roleById.get(roleId)?.team} size="1rem" />}
+                          <span className="timeline__text">{eventText(e, roleNameById, t)}</span>
+                          <span className="timeline__actions">
+                            {(e.type === 'note' || e.type === 'night_action') && (
+                              <button type="button" className="btn btn--small" onClick={() => startEdit(e)}>
+                                {t('timeline.edit')}
+                              </button>
+                            )}
+                            {DELETABLE_TYPES.has(e.type) && (
+                              <button type="button" className="btn btn--small" onClick={() => handleDelete(e)}>
+                                {t('timeline.delete')}
+                              </button>
+                            )}
+                          </span>
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            {isDay && !hasExecution && (
+              <p className="timeline__hint">{t('timeline.noExecutionSuggestion')}</p>
+            )}
+          </div>
+        );
+      })}
     </section>
   );
 }
@@ -202,13 +222,6 @@ function eventText(
       const seats = e.seatNumbers.length > 0 ? `（${t('nightPanel.seatsLabel', { seats: e.seatNumbers.join('、') })}）` : '';
       const info = typeof e.payload.info === 'string' && e.payload.info ? `：${e.payload.info}` : '';
       return `${name}${seats}${info}`;
-    }
-    case 'phase_change': {
-      const to = e.payload.to;
-      if (to === 'firstNight') return t('timeline.event.phaseToFirstNight');
-      if (to === 'day') return t('timeline.event.phaseToDay');
-      if (to === 'night') return t('timeline.event.phaseToNight');
-      return t('timeline.event.unknown', { type: e.type });
     }
     case 'seat_add':
       return t('timeline.event.seatAdd', { seat: String(e.payload.seatNumber ?? '') });

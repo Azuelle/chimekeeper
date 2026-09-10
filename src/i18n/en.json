@@ -76,6 +76,7 @@
     "seatNumberLabel": "Seat number",
     "cardMenuLabel": "Actions for seat {{seat}}",
     "nicknamePlaceholder": "Nickname (optional)",
+    "deadLabel": "Dead",
     "reminderPlaceholder": "Tap to add a reminder",
     "menu": {
       "swapSeats": "Swap seats",
@@ -183,6 +184,7 @@
     "endGame": "End game",
     "nominator": "Nominator",
     "nominated": "Nominated",
+    "targetSeat": "Target seat",
     "votesFor": "Votes for (optional)",
     "died": "Died",
     "survived": "Survived",
@@ -203,13 +205,14 @@
   },
   "timeline": {
     "title": "Event log",
-    "empty": "No events yet",
+    "empty": "No events recorded",
     "delete": "Delete",
     "edit": "Edit",
     "save": "Save",
     "cancel": "Cancel",
     "undo": "Undo",
     "deleted": "Event deleted",
+    "noExecutionSuggestion": "No execution recorded today",
     "deleteConfirm": "Delete this event?",
     "event": {
       "phaseToFirstNight": "Night falls (first night)",

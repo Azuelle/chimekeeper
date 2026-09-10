@@ -34,13 +34,32 @@ export function RecapExport() {
   };
   const markdown = recapToMarkdown(recap, roleName);
 
+  const flashCopied = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(markdown);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      flashCopied();
+      return;
+    } catch {
+      // 非 HTTPS / 无权限时降级到 execCommand
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = markdown;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    try {
+      textarea.select();
+      if (document.execCommand('copy')) flashCopied();
     } catch {
       // ignore
+    } finally {
+      document.body.removeChild(textarea);
     }
   };
 

@@ -343,6 +343,23 @@ button:focus-visible {
   box-shadow: 0 0 0 2px var(--ring);
 }
 
+.seat-face.is-dead .seat-face__name {
+  opacity: 0.6;
+}
+
+/* 死亡遮罩：保留 token 阵营色，叠加黑色半透明 + ☠️ */
+.token-ring__shroud {
+  position: absolute;
+  inset: -0.32rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
 .seat-face__number {
   position: absolute;
   top: 0.28rem;

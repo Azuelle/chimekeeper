@@ -227,7 +227,7 @@ export function DayPanel() {
           {mode === 'death' && (
             <div className="day-form">
               <label>
-                {t('dayPanel.nominated')}
+                {t('dayPanel.targetSeat')}
                 <select value={targetSeat} onChange={(e) => setTargetSeat(Number(e.target.value) || '')}>
                   <option value="">--</option>
                   {allOptions.map((s) => (
@@ -260,7 +260,7 @@ export function DayPanel() {
           {mode === 'revive' && (
             <div className="day-form">
               <label>
-                {t('dayPanel.nominated')}
+                {t('dayPanel.targetSeat')}
                 <select value={targetSeat} onChange={(e) => setTargetSeat(Number(e.target.value) || '')}>
                   <option value="">--</option>
                   {allOptions.map((s) => (
@@ -284,7 +284,7 @@ export function DayPanel() {
           {mode === 'voteToken' && (
             <div className="day-form">
               <label>
-                {t('dayPanel.nominated')}
+                {t('dayPanel.targetSeat')}
                 <select value={targetSeat} onChange={(e) => setTargetSeat(Number(e.target.value) || '')}>
                   <option value="">--</option>
                   {allOptions.map((s) => (

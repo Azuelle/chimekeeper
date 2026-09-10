@@ -1,12 +1,13 @@
 /**
  * 复盘生成（F-08）：事件流 → GameRecap → Markdown
  */
+import { HIDDEN_EVENT_TYPES } from './events';
 import type { GameEvent, GameRecap } from '../types/events';
 import type { Game } from '../types/game';
 
 export function generateRecap(game: Game, events: GameEvent[]): GameRecap {
   const gameEvents = events
-    .filter((e) => e.gameId === game.id)
+    .filter((e) => e.gameId === game.id && !HIDDEN_EVENT_TYPES.has(e.type))
     .sort((a, b) => a.createdAt - b.createdAt);
 
   const roundKeys = [...new Set(gameEvents.map((e) => `${e.round}:${e.phase}`))];
