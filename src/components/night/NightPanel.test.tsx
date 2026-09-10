@@ -5,11 +5,9 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import '../../i18n';
 import { NightPanel } from './NightPanel';
-import { DayPlaceholder } from '../DayPlaceholder';
 import { useScriptStore } from '../../stores/script';
 import { useGameStore } from '../../stores/game';
 import { useEventStore } from '../../stores/events';
-import { createEvent } from '../../lib/events';
 
 const fixture = (name: string) => readFileSync(join(__dirname, '../../../fixtures', name), 'utf-8');
 
@@ -122,42 +120,5 @@ describe('NightPanel（F-04 夜单，ADR-006/017）', () => {
     expect(heading.textContent).toContain('第 2 夜');
     expect(screen.queryByText('爪牙信息')).toBeNull();
     expect(screen.queryByText('恶魔信息')).toBeNull();
-  });
-});
-
-describe('DayPlaceholder（M3 前占位）', () => {
-  it('显示第 1 个白天；入夜进入第 2 夜（round 不变）', async () => {
-    const user = userEvent.setup();
-    useGameStore.getState().finishNight();
-    render(<DayPlaceholder />);
-    expect(screen.getByRole('heading', { level: 2, name: '第 1 个白天' })).toBeTruthy();
-
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    await user.click(screen.getByRole('button', { name: '入夜' }));
-    const g = game();
-    expect(g.phase).toBe('night');
-    expect(g.round).toBe(1);
-    expect(g.nightProgress).toEqual({ round: 1, checked: [] });
-  });
-
-  it('返回上一阶段按钮：day→上一夜，并恢复夜单进度', async () => {
-    const user = userEvent.setup();
-    useGameStore.getState().finishNight();      // day 1
-    useGameStore.getState().enterNextNight();   // night 1
-    useGameStore.getState().setNightStepChecked('role:poisoner', true);
-    useEventStore.getState().append(
-      createEvent(useGameStore.getState().game!, 'night_action', {
-        seatNumbers: [3],
-        payload: { stepKey: 'role:poisoner', roleId: 'poisoner' },
-      }),
-    );
-    useGameStore.getState().finishNight();      // day 2
-    render(<DayPlaceholder />);
-
-    await user.click(screen.getByRole('button', { name: /返回/ }));
-    const g = game();
-    expect(g.phase).toBe('night');
-    expect(g.round).toBe(1);
-    expect(g.nightProgress?.checked).toContain('role:poisoner');
   });
 });
