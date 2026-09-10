@@ -8,6 +8,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
 import { assignRoles, baseComposition, goodRolesNotInPlay, recommendDemonBluffs, setupRoleHints } from '../../lib/setup';
+import { roleById as buildRoleById } from '../../lib/roleMap';
+import { RoleIcon } from '../../ui/RoleIcon';
 import type { TeamComposition } from '../../types/game';
 import type { Role } from '../../types/script';
 
@@ -34,6 +36,7 @@ export function Drawing({ onBack }: { onBack: () => void }) {
   const roles = useMemo(() => game?.scriptSnapshot.roles ?? [], [game]);
   const bagRoles = useMemo(() => roles.filter((r) => BAG_TEAMS.includes(r.team as BagTeam)), [roles]);
   const hints = useMemo(() => setupRoleHints(roles), [roles]);
+  const roleById = useMemo(() => buildRoleById(roles), [roles]);
 
   const seats = useMemo(
     () => (game ? [...game.seats].sort((a, b) => a.displayOrder - b.displayOrder) : []),
@@ -166,6 +169,12 @@ export function Drawing({ onBack }: { onBack: () => void }) {
                   {seat.seatNumber}
                   {seat.playerName ? ` · ${seat.playerName}` : ''}
                 </span>
+                <RoleIcon
+                  roleId={seat.roleId}
+                  alignment={seat.alignment}
+                  team={seat.roleId ? roleById.get(seat.roleId)?.team : undefined}
+                  size="1.3rem"
+                />
                 <select
                   className="drawing-result__role"
                   value={seat.roleId ?? ''}

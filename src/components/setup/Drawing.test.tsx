@@ -8,6 +8,7 @@ import { Drawing } from './Drawing';
 import { useScriptStore } from '../../stores/script';
 import { useGameStore } from '../../stores/game';
 import { useEventStore } from '../../stores/events';
+import { roleById } from '../../lib/roleMap';
 
 const fixture = (name: string) => readFileSync(join(__dirname, '../../../fixtures', name), 'utf-8');
 
@@ -52,7 +53,7 @@ describe('Drawing（F-03 抽袋，ADR-008）', () => {
     expect(g.seats.every((s) => s.roleId !== undefined && s.alignment !== undefined)).toBe(true);
     expect(g.composition).toEqual({ townsfolk: 4, outsider: 1, minion: 1, demon: 1 });
     expect(g.demonBluffs).toHaveLength(3);
-    const rolesById = new Map(g.scriptSnapshot.roles.map((r) => [r.id, r]));
+    const rolesById = roleById(g.scriptSnapshot.roles);
     const bluffTeams = g.demonBluffs.map((id) => rolesById.get(id)?.team);
     expect(bluffTeams.filter((t) => t === 'townsfolk')).toHaveLength(2);
     expect(bluffTeams.filter((t) => t === 'outsider')).toHaveLength(1);

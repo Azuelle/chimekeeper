@@ -41,7 +41,7 @@ src/
 │   └── game.ts            # 对局 + 座位 CRUD，全走 lib/seats 原语（F-02）
 ├── components/
 │   └── setup/             # M1：ScriptImport / ScriptPreview / SeatSetup / SeatGrid（玩家卡+菜单）
-├── ui/                    # 视觉皮肤单点（tokenSkin.ts：阵营圆环配色，素材红线出口）
+├── ui/                    # 视觉皮肤单点（tokenSkin.ts：圆环/剪影着色；roleIcons.ts：图标外链；RoleIcon.tsx；素材红线出口，ADR-018）
 ├── i18n/          # index.ts 初始化（zh-CN 默认）+ zh-CN.json / en.json
 ├── styles/        # app.css（移动优先；ADR-005 圆桌环座位样式）
 ├── persistence/   # db.ts（Dexie schema v1；M2 接线双写）

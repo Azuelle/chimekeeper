@@ -8,8 +8,9 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../../stores/game';
 import { useEventStore } from '../../stores/events';
-import { buildNightOrder, stepKey, systemStepOverrideHints } from '../../lib/nightOrder';
+import { buildNightOrder, stepKey, systemRoleId, systemStepOverrideHints } from '../../lib/nightOrder';
 import { roleById as buildRoleById } from '../../lib/roleMap';
+import { RoleIcon } from '../../ui/RoleIcon';
 import { createEvent } from '../../lib/events';
 import type { Role } from '../../types/script';
 import type { Game, Seat } from '../../types/game';
@@ -88,12 +89,7 @@ export function NightPanel() {
       return;
     }
 
-    const roleId =
-      step.kind === 'role'
-        ? step.roleId
-        : step.system === 'minion_info'
-          ? 'system:minion_info'
-          : 'system:demon_info';
+    const roleId = step.kind === 'role' ? step.roleId : systemRoleId(step.system);
     const info = (infoDrafts[key] ?? '').trim();
     appendEvent(
       createEvent(game, 'night_action', {
@@ -142,7 +138,12 @@ export function NightPanel() {
                   checked={isChecked}
                   onChange={(e) => handleToggle(step, e.target.checked)}
                 />
-                <span className="night-step__name">{name}</span>
+                <span className="night-step__name">
+                  {step.kind === 'role' && (
+                    <RoleIcon roleId={step.roleId} team={roleById.get(step.roleId)?.team} size="1.1rem" />
+                  )}
+                  {name}
+                </span>
                 {seatNumbers.length > 0 && (
                   <span className="night-step__seats">
                     {t('nightPanel.seatsLabel', { seats: seatNumbers.join('、') })}
