@@ -3,8 +3,10 @@ import {
   NEUTRAL_TINT,
   TEAM_RING_COLOR,
   TEAM_TINT_COLOR,
+  TOKEN_ARC_PATH,
   resolveTint,
   tokenIconStyle,
+  tokenLabel,
 } from './tokenSkin';
 import { hasRoleIcon, roleIconUrl } from './roleIcons';
 
@@ -57,5 +59,27 @@ describe('tokenIconStyle（mask + 赋色）', () => {
 
   it('无图标可渲染时返回 null', () => {
     expect(tokenIconStyle(undefined, undefined, undefined)).toBeNull();
+  });
+});
+
+describe('tokenLabel（ADR-018 #4：全大写 + 动态字号）', () => {
+  it('短名全大写、字号封顶 15', () => {
+    expect(tokenLabel('Imp')).toEqual({ text: 'IMP', fontSize: 15 });
+  });
+
+  it('长名按 120/长度 缩字号，下限 9', () => {
+    expect(tokenLabel('Poisoner')!.fontSize).toBeCloseTo(120 / 8);
+    expect(tokenLabel('a'.repeat(13))!.fontSize).toBeCloseTo(120 / 13);
+    expect(tokenLabel('a'.repeat(20))!.fontSize).toBe(9);
+  });
+
+  it('无名（null/undefined/空串）不渲染', () => {
+    expect(tokenLabel(null)).toBeNull();
+    expect(tokenLabel(undefined)).toBeNull();
+    expect(tokenLabel('')).toBeNull();
+  });
+
+  it('弧线路径非空', () => {
+    expect(TOKEN_ARC_PATH.length).toBeGreaterThan(0);
   });
 });

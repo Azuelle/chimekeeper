@@ -15,15 +15,14 @@ interface RoleIconProps {
   size?: string;
   /** 有值时作为图片暴露给辅助技术（默认纯装饰） */
   title?: string;
-  className?: string;
 }
 
-export function RoleIcon({ roleId, alignment, team, size = '1em', title, className }: RoleIconProps) {
+export function RoleIcon({ roleId, alignment, team, size = '1em', title }: RoleIconProps) {
   const style = tokenIconStyle(roleId, alignment, team);
   if (!style) return null;
   return (
     <span
-      className={className ? `role-icon ${className}` : 'role-icon'}
+      className="role-icon"
       style={{ ...style, width: size, height: size }}
       role={title ? 'img' : undefined}
       aria-label={title}

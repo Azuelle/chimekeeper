@@ -9,7 +9,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useGameStore } from '../stores/game';
 import { useEventStore } from '../stores/events';
-import { createEvent } from '../lib/events';
+import { createEvent, realRoleId } from '../lib/events';
+import { SYSTEM_ROLE_PREFIX } from '../lib/nightOrder';
 import { roleById as buildRoleById, roleNameById as buildRoleNameMap } from '../lib/roleMap';
 import { newId } from '../lib/id';
 import { RoleIcon } from '../ui/RoleIcon';
@@ -135,12 +136,7 @@ export function Timeline() {
           <h3>{section.label}</h3>
           <ul>
             {section.events.map((e) => {
-              const roleId =
-                e.type === 'night_action' &&
-                typeof e.payload.roleId === 'string' &&
-                !e.payload.roleId.startsWith('system:')
-                  ? e.payload.roleId
-                  : null;
+              const roleId = realRoleId(e);
               return (
                 <li key={e.id} className="timeline__event">
                   {editingId === e.id ? (
@@ -199,8 +195,8 @@ function eventText(
   switch (e.type) {
     case 'night_action': {
       const roleId = typeof e.payload.roleId === 'string' ? e.payload.roleId : '';
-      const name = roleId.startsWith('system:')
-        ? t(`nightPanel.system.${roleId.slice('system:'.length)}`)
+      const name = roleId.startsWith(SYSTEM_ROLE_PREFIX)
+        ? t(`nightPanel.system.${roleId.slice(SYSTEM_ROLE_PREFIX.length)}`)
         : (roleNameById.get(roleId) ?? roleId);
       const seats = e.seatNumbers.length > 0 ? `（${t('nightPanel.seatsLabel', { seats: e.seatNumbers.join('、') })}）` : '';
       const info = typeof e.payload.info === 'string' && e.payload.info ? `：${e.payload.info}` : '';

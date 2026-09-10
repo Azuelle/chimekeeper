@@ -11,6 +11,9 @@ import { normalizeRoleId } from './roleDb';
 /** 系统锚点步骤 */
 export type SystemStepKind = 'dusk' | 'minion_info' | 'demon_info' | 'dawn';
 
+/** 系统步骤在 night_action payload.roleId / stepKey 中的伪 id 前缀（ADR-017） */
+export const SYSTEM_ROLE_PREFIX = 'system:';
+
 export type NightStep =
   | { kind: 'system'; system: SystemStepKind }
   | { kind: 'role'; roleId: string; roleName: string; reminder: string; order: number };
@@ -68,7 +71,7 @@ export function buildNightOrder(
 
 /** 步骤唯一 key（ADR-017 夜单进度持久化）：system→system:${kind}，role→role:${roleId} */
 export function stepKey(step: NightStep): string {
-  return step.kind === 'system' ? `system:${step.system}` : `role:${step.roleId}`;
+  return step.kind === 'system' ? `${SYSTEM_ROLE_PREFIX}${step.system}` : `role:${step.roleId}`;
 }
 
 /** 返回在场角色触发的系统步骤改写提示（i18n keys），供面板顶部展示 */

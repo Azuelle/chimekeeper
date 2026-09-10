@@ -75,6 +75,22 @@ export function tokenIconStyle(
   };
 }
 
+/**
+ * 座位 token 角色名的底部弧线路径（ADR-018 #4）：沿下半环、逆时针走向让字正立，
+ * 与 `.token-ring__arc` 的 `viewBox="0 0 100 100"` 对应。
+ */
+export const TOKEN_ARC_PATH = 'M 15.36 30 A 40 40 0 1 0 84.64 30';
+
+/**
+ * 弧形角色名（ADR-018 #4）：全大写 + 按字符数动态缩字号，避免长名绕成半圆。
+ * 无名返回 `null`，调用方不渲染 `<text>`。
+ */
+export function tokenLabel(name?: string | null): { text: string; fontSize: number } | null {
+  if (!name) return null;
+  const text = name.toUpperCase();
+  return { text, fontSize: Math.min(15, Math.max(9, 120 / text.length)) };
+}
+
 export interface RingSkin {
   borderColor?: string;
   boxShadow?: string;

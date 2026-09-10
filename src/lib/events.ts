@@ -5,6 +5,7 @@
  * store 层只负责补上下文后写通持久化，不在此拼接字段。
  */
 import { newId } from './id';
+import { SYSTEM_ROLE_PREFIX } from './nightOrder';
 import type { EventType, GameEvent } from '../types/events';
 import type { Game } from '../types/game';
 
@@ -35,4 +36,15 @@ export function createEvent(
     payload: options.payload ?? {},
     createdAt: Date.now(),
   };
+}
+
+/**
+ * 从事件取"真实角色 id"（ADR-018 / F-06）：`night_action` 的 `payload.roleId`
+ * 可能是 `system:*` 系统锚点伪 id，不映射任何角色，此时返回 `undefined`。
+ * 统一渲染层（Timeline）与文本层的判断，避免各自解析 payload 结构。
+ */
+export function realRoleId(event: GameEvent): string | undefined {
+  if (event.type !== 'night_action') return undefined;
+  const id = event.payload.roleId;
+  return typeof id === 'string' && !id.startsWith(SYSTEM_ROLE_PREFIX) ? id : undefined;
 }

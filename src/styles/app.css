@@ -410,11 +410,12 @@ button:focus-visible {
 }
 
 .token-ring__label {
-  font-weight: 500;
+  fill: var(--text);
+  font-weight: 400;
   letter-spacing: 0.06em;
   paint-order: stroke;
   stroke: rgba(0, 0, 0, 0.6);
-  stroke-width: 2.5px;
+  stroke-width: 1px;
 }
 
 .seat-face__name {

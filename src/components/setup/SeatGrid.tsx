@@ -18,7 +18,7 @@ import { roleById as buildRoleById } from '../../lib/roleMap';
 import { useGameStore } from '../../stores/game';
 import type { Seat } from '../../types/game';
 import type { Role } from '../../types/script';
-import { ringSkinFor, tokenIconStyle } from '../../ui/tokenSkin';
+import { TOKEN_ARC_PATH, ringSkinFor, tokenIconStyle, tokenLabel } from '../../ui/tokenSkin';
 import { SeatGlyph, type SeatGlyphName } from '../../ui/icons';
 
 interface SeatGridProps {
@@ -295,9 +295,8 @@ function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
   const ringSkin = ringSkinFor(seat.alignment);
   const iconStyle = tokenIconStyle(seat.roleId, seat.alignment, role?.team);
   const roleName = role?.name ?? null;
-  // 沿底部弧线的名字：长名自动缩字号，避免绕成半圆（弧长约 168 用户单位）
-  const label = roleName ? roleName.toUpperCase() : null;
-  const labelFontSize = label ? Math.min(15, Math.max(9, 120 / label.length)) : 15;
+  // 弧形角色名（全大写 + 动态字号）由 ui/tokenSkin 决定，组件只消费（ADR-005/#4）
+  const label = tokenLabel(roleName);
   // SVG textPath 的 path id 需全局唯一（同页多张卡）
   const arcId = useId().replace(/:/g, '');
 
@@ -328,12 +327,12 @@ function SeatCard({ seat, role, menuOpen, onFaceClick }: SeatCardProps) {
               <svg className="token-ring__arc" viewBox="0 0 100 100" aria-hidden="true">
                 <defs>
                   {/* 沿下半环（官方 token 规范：名字在底部），逆时针走向让字正立 */}
-                  <path id={arcId} d="M 15.36 30 A 40 40 0 1 0 84.64 30" fill="none" />
+                  <path id={arcId} d={TOKEN_ARC_PATH} fill="none" />
                 </defs>
                 {label && (
-                  <text className="token-ring__label" style={{ fontSize: labelFontSize }}>
+                  <text className="token-ring__label" style={{ fontSize: label.fontSize }}>
                     <textPath href={`#${arcId}`} startOffset="50%" textAnchor="middle">
-                      {label}
+                      {label.text}
                     </textPath>
                   </text>
                 )}
